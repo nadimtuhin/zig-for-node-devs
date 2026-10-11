@@ -10,7 +10,7 @@ const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
   </a>
   
   <nav class="header-nav-scroll" aria-label="Primary Navigation">
-    <a href="/" class={`tab-toggle ${pathname === '' || pathname === '/' ? 'active' : ''}`}>⚡ Studio</a>
+    <a href="/" class={`tab-toggle ${pathname === '' || pathname === '/' || pathname.startsWith('/chapter') ? 'active' : ''}`}>⚡ Studio</a>
     <a href="/roadmap" class={`tab-toggle ${pathname === '/roadmap' ? 'active' : ''}`}>🗺️ Roadmap</a>
     <a href="/comptime" class={`tab-toggle ${pathname === '/comptime' ? 'active' : ''}`}>⚡ comptime</a>
     <a href="/memory" class={`tab-toggle ${pathname === '/memory' ? 'active' : ''}`}>🧠 Allocators</a>

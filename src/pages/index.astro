@@ -60,7 +60,7 @@ const initialChapter = chaptersData[initialKey];
       const area = document.getElementById('codeArea');
       if (area && window.CodeMirror) {
         editor = CodeMirror.fromTextArea(area, {
-          mode: 'rust',
+          mode: 'text/x-csrc',
           theme: 'dracula',
           lineNumbers: true,
           indentUnit: 4,

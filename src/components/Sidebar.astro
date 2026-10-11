@@ -6,8 +6,8 @@ interface Props {
   chapterKey?: string;
   activeKey?: string;
 }
-const { chapterKey = 'basic_vars', activeKey = 'basic_vars' } = Astro.props;
-const currentKey = chapterKey || activeKey;
+const { chapterKey, activeKey } = Astro.props;
+const currentKey = chapterKey || activeKey || 'basic_vars';
 
 const chaptersList = Object.entries(chaptersData);
 

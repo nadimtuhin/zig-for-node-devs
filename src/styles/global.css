@@ -1,8 +1,8 @@
 /* ==========================================================================
-   OFFICIAL GOLANG BRAND THEME & ACCESSIBILITY SYSTEM
+   ZIG FOR NODE DEVS BRAND THEME & ACCESSIBILITY SYSTEM
    ========================================================================== */
 :root {
-  /* OFFICIAL GOLANG BRAND PALETTE */
+  /* ZIG BRAND PALETTE */
   --zig-amber: #00add8;             /* Official Go Blue (Primary Brand Cyan/Blue) */
   --zig-dark-amber: #007d9c;        /* Go Dark Cyan (WCAG AA compliant text on white: 4.8:1) */
   --zig-dark-amber-hover: #00627a;  /* AAA contrast hover cyan (6.5:1) */

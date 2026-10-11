@@ -75,7 +75,7 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
       const area = document.getElementById('codeArea');
       if (area && window.CodeMirror) {
         editor = CodeMirror.fromTextArea(area, {
-          mode: 'rust',
+          mode: 'text/x-csrc',
           theme: 'dracula',
           lineNumbers: true,
           indentUnit: 4,
