@@ -3,10 +3,10 @@
    ========================================================================== */
 :root {
   /* OFFICIAL GOLANG BRAND PALETTE */
-  --go-blue: #00add8;             /* Official Go Blue (Primary Brand Cyan/Blue) */
-  --go-dark-cyan: #007d9c;        /* Go Dark Cyan (WCAG AA compliant text on white: 4.8:1) */
-  --go-dark-cyan-hover: #00627a;  /* AAA contrast hover cyan (6.5:1) */
-  --go-cyan-light: #e0f2fe;       /* Soft cyan tinted background */
+  --zig-amber: #00add8;             /* Official Go Blue (Primary Brand Cyan/Blue) */
+  --zig-dark-amber: #007d9c;        /* Go Dark Cyan (WCAG AA compliant text on white: 4.8:1) */
+  --zig-dark-amber-hover: #00627a;  /* AAA contrast hover cyan (6.5:1) */
+  --zig-light-amber: #e0f2fe;       /* Soft cyan tinted background */
   --go-gopher-turquoise: #29beb0; /* Go Gopher turquoise accent */
   --go-navy: #0b2545;             /* Go Accent Navy (deep brand contrast) */
   --go-dark: #0f172a;             /* Slate-900 developer dark aesthetics */
@@ -47,8 +47,8 @@
   --console-muted: #cbd5e1;       /* High-contrast secondary terminal info (8.5:1) */
 
   /* COMPATIBILITY ALIASES */
-  --go-cyan: #007d9c;
-  --go-cyan-hover: #00627a;
+  --zig-orange: #007d9c;
+  --zig-orange-hover: #00627a;
   --node-green: #059669;
   --node-green-bg: #ecfdf5;
   --accent-yellow: #d97706;
@@ -112,7 +112,7 @@ select:focus-visible,
 .skip-to-content:focus,
 .skip-to-content:focus-visible {
   top: 1rem;
-  outline: 3px solid var(--go-blue);
+  outline: 3px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -236,7 +236,7 @@ header {
   text-decoration: none;
 }
 .brand:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -284,14 +284,14 @@ header {
   color: var(--text);
 }
 .tab-toggle.active {
-  background: var(--go-dark-cyan);
+  background: var(--zig-dark-amber);
   color: #ffffff;
-  border-color: var(--go-dark-cyan);
+  border-color: var(--zig-dark-amber);
   box-shadow: 0 1px 3px rgba(0, 125, 156, 0.25);
   font-weight: 700;
 }
 .tab-toggle:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -317,8 +317,8 @@ header {
 .dropdown-trigger:hover,
 .nav-dropdown-wrapper.is-open .dropdown-trigger {
   background: #f1f5f9;
-  color: var(--go-dark-cyan);
-  border-color: var(--go-blue);
+  color: var(--zig-dark-amber);
+  border-color: var(--zig-amber);
 }
 
 .dropdown-chevron {
@@ -357,7 +357,7 @@ header {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 800;
-  color: var(--go-dark-cyan);
+  color: var(--zig-dark-amber);
   padding: 0.25rem 0.5rem 0.5rem;
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 0.4rem;
@@ -385,13 +385,13 @@ header {
 .dropdown-item:hover,
 .dropdown-item:focus-visible {
   background: #f1f5f9;
-  color: var(--go-dark-cyan);
+  color: var(--zig-dark-amber);
   outline: none;
 }
 
 .dropdown-item.active-dropdown-item {
   background: #e0f2fe;
-  color: var(--go-dark-cyan);
+  color: var(--zig-dark-amber);
   font-weight: 700;
 }
 
@@ -427,7 +427,7 @@ header {
   border-color: var(--go-navy);
 }
 .github-link-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -725,7 +725,7 @@ header {
 .sidebar-expand-btn {
   background: #ffffff;
   border: 1px solid #bae6fd;
-  color: var(--go-dark-cyan);
+  color: var(--zig-dark-amber);
   cursor: pointer;
   padding: 0.15rem 0.45rem;
   font-size: 0.72rem;
@@ -737,8 +737,8 @@ header {
   transition: all 0.15s ease;
 }
 .sidebar-expand-btn:hover {
-  background: var(--go-cyan-light);
-  border-color: var(--go-blue);
+  background: var(--zig-light-amber);
+  border-color: var(--zig-amber);
 }
 .sidebar-appendices-footer {
   margin-top: auto;
@@ -754,7 +754,7 @@ header {
   align-items: center;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--go-dark-cyan);
+  color: var(--zig-dark-amber);
   text-decoration: none;
   padding: 0.4rem 0.6rem;
   border-radius: 4px;
@@ -763,8 +763,8 @@ header {
   transition: all 0.15s ease;
 }
 .sidebar-appendices-link:hover {
-  background: var(--go-cyan-light);
-  border-color: var(--go-blue);
+  background: var(--zig-light-amber);
+  border-color: var(--zig-amber);
   color: #0369a1;
 }
 .sidebar-title {
@@ -802,7 +802,7 @@ header {
 }
 .sidebar-search-box input:focus {
   background: #ffffff;
-  border-color: var(--go-blue);
+  border-color: var(--zig-amber);
   box-shadow: 0 0 0 2px rgba(0, 173, 216, 0.25);
 }
 .clear-search-btn {
@@ -819,7 +819,7 @@ header {
   color: var(--text);
 }
 .clear-search-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 1px;
 }
 
@@ -853,12 +853,12 @@ header {
 }
 .chapter-nav-item.active {
   background: #f0f9ff;
-  color: var(--go-dark-cyan);
-  border-left-color: var(--go-blue);
+  color: var(--zig-dark-amber);
+  border-left-color: var(--zig-amber);
   font-weight: 700;
 }
 .chapter-nav-item:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: -2px;
 }
 
@@ -874,7 +874,7 @@ header {
   text-align: center;
 }
 .chapter-nav-item.active .chapter-num {
-  background: var(--go-dark-cyan);
+  background: var(--zig-dark-amber);
   color: #ffffff;
 }
 
@@ -911,8 +911,8 @@ header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--go-dark-cyan);
-  background: var(--go-cyan-light);
+  color: var(--zig-dark-amber);
+  background: var(--zig-light-amber);
   border: 1px solid #bae6fd;
   padding: 0.2rem 0.55rem;
   border-radius: var(--radius-sm);
@@ -971,7 +971,7 @@ header {
   border-color: #94a3b8;
 }
 .copy-snippet-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -996,7 +996,7 @@ header {
 }
 
 .node-code:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1031,11 +1031,11 @@ header {
   border-radius: 4px;
 }
 
-.go-why-box {
+.zig-why-box {
   background: var(--emerald-bg);
   border: 1px solid var(--emerald-border);
 }
-.go-why-title {
+.zig-why-title {
   font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -1046,7 +1046,7 @@ header {
   align-items: center;
   gap: 0.35rem;
 }
-.go-why-desc {
+.zig-why-desc {
   font-size: 0.88rem;
   color: #064e3b;
   line-height: 1.55;
@@ -1078,16 +1078,16 @@ header {
   border-color: #94a3b8;
 }
 .nav-lesson-btn.primary {
-  background: var(--go-dark-cyan);
+  background: var(--zig-dark-amber);
   color: #ffffff;
-  border-color: var(--go-dark-cyan);
+  border-color: var(--zig-dark-amber);
 }
 .nav-lesson-btn.primary:hover {
-  background: var(--go-dark-cyan-hover);
-  border-color: var(--go-dark-cyan-hover);
+  background: var(--zig-dark-amber-hover);
+  border-color: var(--zig-dark-amber-hover);
 }
 .nav-lesson-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1131,7 +1131,7 @@ header {
 .editor-tab {
   background: #ffffff;
   border: 1px solid var(--border);
-  border-bottom: 2px solid var(--go-blue);
+  border-bottom: 2px solid var(--zig-amber);
   padding: 0.25rem 0.65rem;
   border-radius: 4px 4px 0 0;
   font-size: 0.8rem;
@@ -1166,7 +1166,7 @@ header {
   border-color: #94a3b8;
 }
 .tool-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1194,7 +1194,7 @@ header {
   transform: translateY(0);
 }
 .btn-run:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1249,7 +1249,7 @@ header {
   border-color: #475569;
 }
 .console-header .copy-snippet-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1347,8 +1347,8 @@ header {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background: var(--go-cyan-light);
-  color: var(--go-dark-cyan);
+  background: var(--zig-light-amber);
+  color: var(--zig-dark-amber);
   border: 1px solid #bae6fd;
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-sm);
@@ -1426,7 +1426,7 @@ header {
 
 /* ACTION BUTTONS */
 .action-btn {
-  background: var(--go-cyan-light);
+  background: var(--zig-light-amber);
   color: #00627a;
   border: 1px solid #7dd3fc;
   font-size: 0.8rem;
@@ -1441,13 +1441,13 @@ header {
   text-decoration: none;
 }
 .action-btn:hover {
-  background: var(--go-dark-cyan);
+  background: var(--zig-dark-amber);
   color: #ffffff;
-  border-color: var(--go-dark-cyan);
+  border-color: var(--zig-dark-amber);
   transform: translateY(-1px);
 }
 .action-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1519,7 +1519,7 @@ header {
   background: #f8fafc;
 }
 .qa-header:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: -2px;
 }
 .qa-badge {
@@ -1541,7 +1541,7 @@ header {
   border: 1px solid var(--amber-border);
 }
 .qa-badge.concept {
-  background: var(--go-cyan-light);
+  background: var(--zig-light-amber);
   color: #00627a;
   border: 1px solid #bae6fd;
 }
@@ -1564,7 +1564,7 @@ header {
 }
 .qa-pro-tip {
   background: #f0f9ff;
-  border-left: 4px solid var(--go-dark-cyan);
+  border-left: 4px solid var(--zig-dark-amber);
   padding: 0.75rem 1rem;
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   margin-top: 1rem;
@@ -1660,7 +1660,7 @@ header {
 }
 
 .code-col-header.go-head {
-  background: var(--go-cyan-light);
+  background: var(--zig-light-amber);
   color: #005f73;
 }
 
@@ -1705,7 +1705,7 @@ header {
 }
 
 .go-badge {
-  background: var(--go-cyan-light);
+  background: var(--zig-light-amber);
   color: #007d9c;
   border: 1px solid #bae6fd;
   padding: 0.18rem 0.55rem;
@@ -1739,18 +1739,18 @@ header {
 }
 
 .quiz-option-btn:hover {
-  border-color: var(--go-dark-cyan);
+  border-color: var(--zig-dark-amber);
   background: #f0fdfa;
 }
 
 .quiz-option-btn.selected {
-  border-color: var(--go-cyan);
+  border-color: var(--zig-orange);
   background: #e0f2fe;
   box-shadow: 0 0 0 2px rgba(0, 125, 156, 0.2);
 }
 
 .quiz-option-btn:focus-visible {
-  outline: 2px solid var(--go-blue);
+  outline: 2px solid var(--zig-amber);
   outline-offset: 2px;
 }
 
@@ -1784,7 +1784,7 @@ header {
 }
 
 .nav-jump-pill:hover {
-  background: var(--go-cyan-light);
+  background: var(--zig-light-amber);
   color: #005f73;
   border-color: #bae6fd;
   transform: translateY(-1px);
@@ -1841,7 +1841,7 @@ header {
 }
 
 .copy-code-btn:focus-visible {
-  outline: 2px solid var(--go-cyan);
+  outline: 2px solid var(--zig-orange);
   outline-offset: 1px;
 }
 

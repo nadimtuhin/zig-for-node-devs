@@ -3,10 +3,10 @@ window.chaptersData = {
     "num": "01",
     "title": "Variables, Mutability & Types",
     "part": "Part 1: The Core Mental Model & Syntax Jump",
-    "desc": "Why `const` by default, primitive sizing (`u8`, `i32`, `usize`), no type coercion, and explicit undefined `undefined`.",
+    "desc": "Why const by default, primitive sizing (u8, i32, usize), safe widening vs no lossy truncation, and explicit undefined.",
     "nodeCode": "// JavaScript / TypeScript:\nconst port: number = 8080;\nlet userCount = 0;\nuserCount += 1;\n\nlet uninitializedValue: any;\nconsole.log(port, userCount, uninitializedValue); // 8080, 1, undefined",
     "code": "const std = @import(\"std\");\n\npub fn main() void {\n    // In Zig, const is immutable, var is mutable\n    const port: u16 = 8080;\n    var user_count: usize = 0;\n    user_count += 1;\n\n    // Explicitly uninitialized memory requires '= undefined'\n    var uninitialized_buffer: [4]u8 = undefined;\n    uninitialized_buffer[0] = 'Z';\n\n    std.debug.print(\"Port: {}, Users: {}, First byte: {c}\\n\", .{\n        port, user_count, uninitialized_buffer[0]\n    });\n}",
-    "why": "In JavaScript, all numbers are 64-bit IEEE-754 floats. In Zig, integers have precise bit-widths (`u8`, `i32`, `u64`, `usize`, `isize`). Variables are `const` by default to avoid unintended state mutations."
+    "why": "In JavaScript, all numbers are 64-bit IEEE-754 floats, causing precision loss bugs. In Zig, integers have precise bit-widths (u8, i32, u64, usize). Zig allows safe lossless widening (u8 -> u32), but strictly rejects implicit lossy truncation or float-to-int conversion."
   },
   "functions_params": {
     "num": "02",
@@ -24,7 +24,7 @@ window.chaptersData = {
     "desc": "Fixed-length arrays `[N]T` vs fat-pointer slices `[]T` (`ptr + len`). Eliminating bounds check bugs.",
     "nodeCode": "// JavaScript / TypeScript:\nconst numbers = [10, 20, 30, 40, 50]; // Dynamic heap array\nconst sub = numbers.slice(1, 4);      // Allocates a brand new array!\nconsole.log(sub); // [20, 30, 40]",
     "code": "const std = @import(\"std\");\n\npub fn main() void {\n    // Fixed array allocated on the stack\n    const numbers = [_]i32{ 10, 20, 30, 40, 50 };\n\n    // Slices in Zig are zero-cost views: a pointer + a length!\n    // NO HEAP ALLOCATION HAPPENS HERE!\n    const sub_slice: []const i32 = numbers[1..4];\n\n    std.debug.print(\"Array len: {}, Slice len: {}\\n\", .{ numbers.len, sub_slice.len });\n    for (sub_slice, 0..) |val, idx| {\n        std.debug.print(\"sub_slice[{}] = {}\\n\", .{ idx, val });\n    }\n}",
-    "why": "JS `Array.prototype.slice()` copies elements and allocates fresh memory on the V8 heap. In Zig, a slice `[]T` is simply a 16-byte struct `{ ptr: [*]T, len: usize }` referencing existing memory without any allocation."
+    "why": "JS Array.prototype.slice() copies elements and allocates fresh memory on the V8 heap. In Zig, a slice []T is a fat-pointer struct containing a pointer and a length (16 bytes on 64-bit systems: ptr + len) referencing existing memory without any allocation."
   },
   "strings_and_bytes": {
     "num": "04",
@@ -275,7 +275,7 @@ window.chaptersData = {
     "part": "Part 8: Interoperability with C & Node.js Native Addons",
     "desc": "Zig is a full C compiler! Directly include `.h` files without wrapper code, bindings generators, or CMake.",
     "nodeCode": "// JavaScript / TypeScript:\n// Calling C in Node.js requires node-gyp, C++ addon boilerplate, or node:ffi-napi",
-    "code": "const std = @import(\"std\");\n\n// Zig includes a built-in Clang C frontend!\n// Directly import standard C libraries or third-party C headers\nconst c = @cImport({\n    @cInclude(\"stdlib.h\");\n    @cInclude(\"string.h\");\n});\n\npub fn main() void {\n    const message = \"Hello from C stdlib!\";\n    const length = c.strlen(message);\n    std.debug.print(\"C strlen: {}\\n\", .{length});\n\n    // Call C abs()\n    const diff = c.abs(-42);\n    std.debug.print(\"C abs: {}\\n\", .{diff});\n}",
+    "code": "const std = @import(\"std\");\n\n// Zig includes a built-in Clang C frontend!\n// Directly import standard C libraries or third-party C headers\n// (Compile locally via: zig run main.zig -lc)\nconst c = @cImport({\n    @cInclude(\"stdlib.h\");\n    @cInclude(\"string.h\");\n});\n\npub fn main() void {\n    const message = \"Hello from C stdlib!\";\n    const length = c.strlen(message);\n    std.debug.print(\"C strlen: {}\\n\", .{length});\n\n    // Call C abs()\n    const diff = c.abs(-42);\n    std.debug.print(\"C abs: {}\\n\", .{diff});\n}",
     "why": "In Node.js, calling C/C++ requires compiling complex N-API addons with `node-gyp` and Python. Zig is a drop-in C compiler: you can `@cImport` any C header and call functions directly with zero overhead."
   },
   "napi_addons": {

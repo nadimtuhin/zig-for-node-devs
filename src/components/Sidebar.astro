@@ -18,14 +18,14 @@ const groupedParts = chaptersList.reduce((acc, [key, ch]) => {
   return acc;
 }, {} as Record<string, any[]>);
 ---
-<nav class="chapters-sidebar" id="chaptersList">
+<nav class="chapters-sidebar" id="sidebar">
   <div class="sidebar-header-box">
     <div class="sidebar-title-row">
       <div style="display: flex; align-items: center; gap: 0.4rem;">
         <span class="sidebar-title">📖 Table of Contents</span>
         <span class="sidebar-badge-count" id="sidebarCountBadge">56 Chapters</span>
       </div>
-      <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="toggleSidebar()" aria-label="Collapse Table of Contents sidebar" title="Collapse sidebar">◀</button>
+      <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="window.toggleSidebar()" aria-label="Collapse Table of Contents sidebar" title="Collapse sidebar">◀</button>
     </div>
     <div class="sidebar-search-box" role="search">
       <input type="search" id="lessonSearchInput" aria-label="Search lessons by title or keyword" placeholder="Filter 56 chapters... (⌘+K)" oninput="filterLessons(this.value)">

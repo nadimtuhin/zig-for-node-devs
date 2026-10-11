@@ -358,8 +358,21 @@ Tip: You can verify your Zig code locally via:
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        const input = document.getElementById('lessonSearchInput');
-        if (input) input.focus();
+        const searchInput = document.getElementById('lessonSearchInput');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
+
+      // Alt + Left/Right Arrow for Chapter Navigation
+      if ((e.altKey || e.metaKey) && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateLesson(-1);
+      }
+      if ((e.altKey || e.metaKey) && e.key === 'ArrowRight') {
+        e.preventDefault();
+        navigateLesson(1);
       }
     });
 
