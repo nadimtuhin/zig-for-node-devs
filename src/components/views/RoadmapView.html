@@ -1,0 +1,142 @@
+<div class="appendix-container" style="max-width: 1000px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+  <!-- Hero Section -->
+  <div style="text-align: center; margin-bottom: 3.5rem;">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 1rem;">
+      <span>🗺️ Inspired by roadmap.sh</span>
+      <span>•</span>
+      <span>Community Developer Journey</span>
+    </div>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0 0 1rem; color: #0f172a; letter-spacing: -0.02em;">
+      Zig Developer Roadmap 2026
+    </h1>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto; line-height: 1.6;">
+      A comprehensive, structured step-by-step visual learning path for JavaScript, TypeScript, and Node.js engineers transitioning to bare-metal systems programming in Zig.
+    </p>
+  </div>
+
+  <!-- Interactive Path Legend -->
+  <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; color: #0f172a;">
+      <span style="display: inline-block; width: 14px; height: 14px; background: #f59e0b; border-radius: 3px;"></span>
+      <span>Core Milestone (Must Learn)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; color: #0f172a;">
+      <span style="display: inline-block; width: 14px; height: 14px; background: #10b981; border-radius: 3px;"></span>
+      <span>Recommended Systems Skill</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; color: #0f172a;">
+      <span style="display: inline-block; width: 14px; height: 14px; background: #6366f1; border-radius: 3px;"></span>
+      <span>Production & Advanced</span>
+    </div>
+  </div>
+
+  <!-- Roadmap Flow Nodes -->
+  <div style="display: flex; flex-direction: column; gap: 2.5rem; position: relative;">
+    
+    <!-- Stage 1 -->
+    <div style="background: #ffffff; border: 2px solid #fef3c7; border-left: 6px solid #f59e0b; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #b45309; letter-spacing: 0.05em;">Step 1 • Foundation</span>
+        <span style="background: #fef3c7; color: #92400e; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">Chapters 01–06</span>
+      </div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Syntax, Memory Views & Mental Model Jump</h3>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Unlearn dynamic V8 JavaScript assumptions. Learn why integers have explicit bit-widths (<code>u8</code>, <code>i32</code>, <code>usize</code>), variables are <code>const</code> by default, and how fixed arrays differ from fat-pointer slices (<code>[]T</code>).
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <a href="/chapter/basic_vars" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">01. Variables & Types →</a>
+        <a href="/chapter/functions_params" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">02. Immutable Params →</a>
+        <a href="/chapter/arrays_and_slices" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">03. Arrays & Slices →</a>
+        <a href="/chapter/strings_and_bytes" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">04. UTF-8 Byte Slices →</a>
+      </div>
+    </div>
+
+    <!-- Stage 2 -->
+    <div style="background: #ffffff; border: 2px solid #e0e7ff; border-left: 6px solid #6366f1; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #4338ca; letter-spacing: 0.05em;">Step 2 • Resilience</span>
+        <span style="background: #e0e7ff; color: #3730a3; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">Chapters 07–10</span>
+      </div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Errors as Values Without Exceptions</h3>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Say goodbye to <code>try/catch/throw</code> exceptions that escape control flow. Master Zig error sets (<code>error{...}</code>), the <code>try</code> propagation operator, and deterministic RAII cleanup with <code>defer</code> and <code>errdefer</code>.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <a href="/chapter/errors_as_values" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">07. Error Sets →</a>
+        <a href="/chapter/try_and_catch" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">08. try & catch →</a>
+        <a href="/chapter/defer_and_errdefer" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">09. defer & errdefer →</a>
+      </div>
+    </div>
+
+    <!-- Stage 3 -->
+    <div style="background: #ffffff; border: 2px solid #d1fae5; border-left: 6px solid #10b981; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #047857; letter-spacing: 0.05em;">Step 3 • Systems Memory</span>
+        <span style="background: #d1fae5; color: #065f46; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">Chapters 11–18</span>
+      </div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Optionals, Pointers & The Allocator Philosophy</h3>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Zero hidden heap allocation. Learn how optional pointers (<code>?*T</code>) use zero-overhead pointer tagging, how structs map directly to cache lines, and how to choose between GPA, Arena, and FixedBuffer allocators.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <a href="/memory" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">🧠 Allocators Deep Dive →</a>
+        <a href="/chapter/optionals_null" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">11. Optionals (?T) →</a>
+        <a href="/chapter/allocators_philosophy" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">15. No Hidden Heap →</a>
+        <a href="/chapter/arena_allocator" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">16. Arena Allocator →</a>
+      </div>
+    </div>
+
+    <!-- Stage 4 -->
+    <div style="background: #ffffff; border: 2px solid #fed7aa; border-left: 6px solid #f97316; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #c2410c; letter-spacing: 0.05em;">Step 4 • Superpower</span>
+        <span style="background: #ffedd5; color: #9a3412; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">Chapters 19–24</span>
+      </div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Comptime Metaprogramming & Type Generation</h3>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Run arbitrary Zig code at compile time. Write generic data structures with plain functions, inspect structs via <code>@typeInfo</code>, and fail builds with <code>@compileError</code> assertions.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <a href="/comptime" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">⚡ comptime Deep Dive →</a>
+        <a href="/chapter/comptime_intro" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">19. Comptime Intro →</a>
+        <a href="/chapter/comptime_reflection" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">20. @typeInfo Reflection →</a>
+      </div>
+    </div>
+
+    <!-- Stage 5 -->
+    <div style="background: #ffffff; border: 2px solid #e2e8f0; border-left: 6px solid #0284c7; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #0369a1; letter-spacing: 0.05em;">Step 5 • Ecosystem & Node-API</span>
+        <span style="background: #e0f2fe; color: #075985; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">Chapters 31–38</span>
+      </div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">C Interop, Node Addons & The Build System</h3>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Leverage Zig as a drop-in C compiler. Compile native Node-API addons in seconds without <code>node-gyp</code>, cross-compile across operating systems, and write build pipelines in pure <code>build.zig</code>.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <a href="/c-interop" style="background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">🔌 C & Node-API Guide →</a>
+        <a href="/build-system" style="background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">📦 build.zig vs npm →</a>
+        <a href="/chapter/napi_addons" style="background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">32. Node-API Addons →</a>
+      </div>
+    </div>
+
+    <!-- Stage 6 -->
+    <div style="background: #ffffff; border: 2px solid #e2e8f0; border-left: 6px solid #475569; border-radius: 12px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #334155; letter-spacing: 0.05em;">Step 6 • Production</span>
+        <span style="background: #f1f5f9; color: #1e293b; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">Chapters 39–56</span>
+      </div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Microservices, Docker Containers & Senior Interview Mastery</h3>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+        Build sub-millisecond HTTP microservices, package 4MB scratch containers with zero CVE vulnerabilities, avoid common systems footguns, and master senior engineering interview questions.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <a href="/microservice" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">📂 Microservice Architecture →</a>
+        <a href="/docker" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">🐳 Production Docker →</a>
+        <a href="/interviews" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">🎯 Senior Interview Q&A →</a>
+        <a href="/cheatsheet" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">📖 Rosetta Cheatsheet →</a>
+      </div>
+    </div>
+
+  </div>
+</div>

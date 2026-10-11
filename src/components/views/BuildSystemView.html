@@ -1,39 +1,138 @@
-<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+<div class="appendix-container" style="max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif); line-height: 1.6;">
   <div style="text-align: center; margin-bottom: 2.5rem;">
-    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 04 • Build Tooling</span>
-    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">`build.zig` vs `package.json`</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Type-safe build graphs in Zig instead of Makefiles, CMake, or npm scripts.</p>
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 04 • Build Tooling</span>
+    <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">`build.zig` vs `package.json`</h1>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Type-safe build graphs in pure Zig instead of fragile bash scripts, CMake, Makefiles, or bloated npm pipelines.</p>
   </div>
 
-  <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; border: 1px solid #e2e8f0;">
-    <thead>
-      <tr style="background: #f1f5f9; text-align: left;">
-        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Feature</th>
-        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Node.js / npm</th>
-        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Build Script Language</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">JSON + bash scripts + Webpack / Vite</td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Pure Zig (<code>build.zig</code>)</td>
-      </tr>
-      <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Dependency Spec</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>package.json</code></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>build.zig.zon</code></td>
-      </tr>
-      <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Storage</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>node_modules/</code> (hundreds of MBs per project)</td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Global content-addressed cache (<code>~/.cache/zig</code>)</td>
-      </tr>
-      <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Security</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">npm post-install scripts execute arbitrary shell commands</td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Strict cryptographic SHA-256 hashes, zero post-install hooks</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- COMPARISON TABLE -->
+  <div style="margin-bottom: 2.5rem; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; font-size: 0.92rem;">
+      <thead>
+        <tr style="background: #f1f5f9; text-align: left;">
+          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">Dimension</th>
+          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">Node.js Ecosystem</th>
+          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">Zig Build System</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Build Script Language</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">JSON + Shell + Webpack/Rollup/Vite/esbuild</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600; color: #0284c7;">Pure Zig (<code>build.zig</code>)</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Dependency Manifest</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;"><code>package.json</code> + <code>package-lock.json</code></td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600; color: #0284c7;"><code>build.zig.zon</code> (Zig Object Notation)</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Artifact Storage</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;"><code>node_modules/</code> (gigabytes replicated per project)</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600; color: #0284c7;">Global content-addressed cache (deduplicated)</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Supply Chain Security</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; color: #dc2626;">npm <code>postinstall</code> scripts run arbitrary shell commands</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; color: #059669; font-weight: 700;">Zero lifecycle hooks; strict SHA-256 package hashes</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BUILD.ZIG EXAMPLE -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">1. Production `build.zig` Architecture</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">In Zig, your build script is compiled and executed as a standard Zig program that constructs a directed acyclic graph (DAG) of build steps:</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (Idiomatic 0.13+ Build Graph)</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+
+pub fn build(b: *std.Build) void {
+    // 1. Standard cross-compilation target and optimization options (-Dtarget, -Doptimize)
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+
+    // 2. Custom command-line build flag: e.g. zig build -Denable-telemetry=true
+    const enable_telemetry = b.option(bool, "enable-telemetry", "Embed telemetry hooks") orelse false;
+
+    // 3. Define the main executable artifact
+    const exe = b.addExecutable(.{
+        .name = "server",
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    // 4. Pass build-time configuration constants to the executable
+    const build_options = b.addOptions();
+    build_options.addOption(bool, "telemetry_enabled", enable_telemetry);
+    exe.root_module.addOptions("build_config", build_options);
+
+    // 5. Output binary to zig-out/bin/server
+    b.installArtifact(exe);
+
+    // 6. Define "run" step: `zig build run`
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_cmd.addArgs(args);
+    }
+    const run_step = b.step("run", "Run the microservice application");
+    run_step.dependOn(&run_cmd.step);
+
+    // 7. Define "test" step: `zig build test`
+    const unit_tests = b.addTest(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    const run_unit_tests = b.addRunArtifact(unit_tests);
+    const test_step = b.step("test", "Run unit tests with leak detection");
+    test_step.dependOn(&run_unit_tests.step);
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- BUILD.ZIG.ZON EXAMPLE -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">2. Dependency Management with `build.zig.zon`</h2>
+    <p style="color: #475569; margin-bottom: 1rem;"><code>build.zig.zon</code> replaces <code>package.json</code>. Packages are locked to strict cryptographic hashes:</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig.zon (Package Manifest)</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">Zig ZON</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>.{
+    .name = "user-microservice",
+    .version = "1.0.0",
+    .minimum_zig_version = "0.13.0",
+    .dependencies = .{
+        // Add external dependencies via URL + SHA-256 hash
+        // Install automatically via: zig fetch --save <tarball-url>
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "README.md",
+    },
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- CLI COMMAND CHEATSHEET -->
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+    <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">⚡ Essential Build CLI Commands</h3>
+    <ul style="color: #475569; padding-left: 1.25rem; margin-bottom: 0; line-height: 1.8;">
+      <li><code>zig build</code> — Compiles with Debug mode (fast builds, full safety checks and debug symbols).</li>
+      <li><code>zig build -Doptimize=ReleaseFast</code> — Maximum CPU speed with compiler vectorization.</li>
+      <li><code>zig build -Doptimize=ReleaseSmall</code> — Maximum binary size minimization for Docker scratch images.</li>
+      <li><code>zig build -Dtarget=x86_64-linux-musl</code> — Cross-compiles a static Linux binary directly from macOS or Windows!</li>
+      <li><code>zig fetch --save &lt;url&gt;</code> — Equivalent to <code>npm install &lt;package&gt;</code>; downloads and writes hash to <code>build.zig.zon</code>.</li>
+    </ul>
+  </div>
 </div>

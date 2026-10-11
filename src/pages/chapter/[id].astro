@@ -21,8 +21,14 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
 ---
 
 <Layout 
-  title="Zig for Node.js Devs | Interactive GitBook & Live Compiler"
-  description="Master systems programming in Zig tailored for Node.js & TypeScript engineers. 56 interactive lessons, side-by-side JS comparisons, and live in-browser compiler."
+  title={`${chapter.title} | Zig for Node Devs (#${chapter.num})`}
+  description={`${chapter.desc} Learn Zig systems programming tailored for JavaScript and Node.js developers.`}
+  canonicalPath={`/chapter/${chapterKey}`}
+  breadcrumbs={[
+    { name: "Home", item: "https://zig-for-node-devs.vercel.app" },
+    { name: "Curriculum", item: "https://zig-for-node-devs.vercel.app/chapters" },
+    { name: chapter.title, item: `https://zig-for-node-devs.vercel.app/chapter/${chapterKey}` }
+  ]}
 >
   <Header />
 

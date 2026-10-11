@@ -13,6 +13,7 @@ const groupedParts = chaptersList.reduce((acc, [key, ch]) => {
 }, {} as Record<string, any[]>);
 
 const architectureGuides = [
+  { href: '/roadmap', icon: '🗺️', title: 'Zig Developer Roadmap (roadmap.sh style)', desc: 'Step-by-step visual learning path and milestones for Node.js developers learning Zig.' },
   { href: '/comptime', icon: '⚡', title: 'comptime Metaprogramming', desc: 'Type generics without templates, reflection with @typeInfo, and compile-time code execution.' },
   { href: '/memory', icon: '🧠', title: 'Memory & Allocator Architecture', desc: 'GeneralPurposeAllocator, ArenaAllocator, FixedBufferAllocator, and eliminating V8 GC pauses.' },
   { href: '/c-interop', icon: '🔌', title: 'C Interop & Node-API Addons', desc: 'Direct C header imports with @cImport, and native Node.js addons without node-gyp.' },
@@ -59,8 +60,8 @@ const architectureGuides = [
               <span class="stat-label">Core Parts</span>
             </div>
             <div class="stat-card">
-              <span class="stat-number">12</span>
-              <span class="stat-label">Systems Guides</span>
+              <span class="stat-number">13</span>
+              <span class="stat-label">Guides & Roadmap</span>
             </div>
             <div class="stat-card">
               <span class="stat-number">0</span>
@@ -75,7 +76,7 @@ const architectureGuides = [
             <h2 class="section-title" id="guidesSectionTitle">
               <span aria-hidden="true">🏛️</span> Systems Architecture & Production Appendices
             </h2>
-            <span class="section-count">12 In-Depth Guides</span>
+            <span class="section-count">13 In-Depth Guides & Roadmaps</span>
           </div>
 
           <div class="guides-card-grid">

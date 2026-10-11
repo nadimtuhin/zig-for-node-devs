@@ -11,10 +11,11 @@ const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
   
   <nav class="header-nav-scroll" aria-label="Primary Navigation">
     <a href="/" class={`tab-toggle ${pathname === '' || pathname === '/' ? 'active' : ''}`}>⚡ Studio</a>
+    <a href="/roadmap" class={`tab-toggle ${pathname === '/roadmap' ? 'active' : ''}`}>🗺️ Roadmap</a>
     <a href="/comptime" class={`tab-toggle ${pathname === '/comptime' ? 'active' : ''}`}>⚡ comptime</a>
     <a href="/memory" class={`tab-toggle ${pathname === '/memory' ? 'active' : ''}`}>🧠 Allocators</a>
     <a href="/c-interop" class={`tab-toggle ${pathname === '/c-interop' ? 'active' : ''}`}>🔌 C & Node-API</a>
-    <a href="/build-system" class={`tab-toggle ${pathname === '/build-system' ? 'active' : ''}`}>📦 build.zig vs npm</a>
+    <a href="/build-system" class={`tab-toggle ${pathname === '/build-system' ? 'active' : ''}`}>📦 build.zig</a>
     <a href="/microservice" class={`tab-toggle ${pathname === '/microservice' ? 'active' : ''}`}>📂 Microservice</a>
     <a href="/docker" class={`tab-toggle ${pathname === '/docker' ? 'active' : ''}`}>🐳 Docker</a>
     <a href="/leetcode" class={`tab-toggle ${pathname === '/leetcode' ? 'active' : ''}`}>🧩 LeetCode</a>

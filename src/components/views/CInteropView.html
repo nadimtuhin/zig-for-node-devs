@@ -1,38 +1,136 @@
-<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+<div class="appendix-container" style="max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif); line-height: 1.6;">
   <div style="text-align: center; margin-bottom: 2.5rem;">
-    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 03 • Native Integration</span>
-    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">C Interop & Node-API Addons</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Replacing node-gyp, Python scripts, and complex C++ binding glue with pure Zig.</p>
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 03 • Native Integration</span>
+    <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">C Interop & True Node-API Addons</h1>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Replacing `node-gyp`, Python dependencies, and complex C++ binding boilerplate with pure Zig and zero external build tools.</p>
   </div>
 
-  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-    <h3 style="color: #0f172a; margin-top: 0;">🔌 Zig is a Full C Compiler</h3>
-    <p>Zig ships with Clang built directly into its binary. You do not need GCC, CMake, or Make installed on your system. You can include C header files directly in your Zig source code using <code>@cImport</code>.</p>
+  <!-- HIGHLIGHT CALLOUT -->
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
+    <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">🔌 Zig is a First-Class C Compiler</h3>
+    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">Building native C++ addons for Node.js typically requires Python, CMake/Make, Visual Studio C++ build tools, and <code>node-gyp</code>. A single OS mismatch breaks npm installs.</p>
+    <p style="color: #475569; font-size: 0.95rem; margin: 0;">Zig embeds a full Clang C/C++ compiler and can directly parse C headers via <code>@cImport</code> without generating wrapper code or running pre-build steps.</p>
   </div>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">Building a Native Node.js Addon in Zig</h2>
-  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>// addon.zig
-const std = @import("std");
+  <!-- SECTION 1: DIRECT C INTEROP -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">1. Direct C Header Ingestion with `@cImport`</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">Import C headers directly into Zig. Zig handles C types, pointers, and struct layouts seamlessly:</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">c_interop.zig</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
 
-// Export C ABI symbols
-export fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
-
-export fn fastMultiply(a: f64, b: f64) f64 {
-    return a * b;
-}</code></pre>
-
-  <p>Compile to a shared dynamic library with one terminal command:</p>
-  <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px;"><code>zig build-lib addon.zig -dynamic -O ReleaseFast</code></pre>
-
-  <p>Call it from Node.js using <code>node:ffi-napi</code> or <code>process.dlopen</code>:</p>
-  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>import ffi from 'ffi-napi';
-
-const lib = ffi.Library('./libaddon.dylib', {
-  'add': ['int', ['int', 'int']],
-  'fastMultiply': ['double', ['double', 'double']]
+// Import standard C headers directly
+const c = @cImport({
+    @cInclude("stdio.h");
+    @cInclude("math.h");
 });
 
-console.log(lib.add(40, 2)); // 42</code></pre>
+pub fn main() void {
+    // 1. Call standard C math functions
+    const result = c.sqrt(144.0);
+    std.debug.print("Square root from C math.h: {d}\n", .{result}); // 12.0
+
+    // 2. Interacting with C strings: converting [*:0]const u8 to Zig slice []const u8
+    const c_str: [*:0]const u8 = "Hello from C string";
+    const zig_slice: []const u8 = std.mem.span(c_str);
+    std.debug.print("Zig slice length: {d}, content: {s}\n", .{ zig_slice.len, zig_slice });
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 2: TRUE NODE-API ADDON -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">2. Building a True Native Node-API (.node) Addon</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">You can build a native <code>.node</code> binary that works with <code>require('./addon.node')</code> in Node.js using Node-API C bindings:</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">addon.zig (Native Node-API Addon)</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+
+// Import Node-API C declarations
+const napi = @cImport({
+    @cInclude("node_api.h");
+});
+
+// Implementation of the exported function: fastMultiply(a, b)
+fn fastMultiply(env: napi.napi_env, info: napi.napi_callback_info) callconv(.C) napi.napi_value {
+    var argc: usize = 2;
+    var argv: [2]napi.napi_value = undefined;
+    _ = napi.napi_get_cb_info(env, info, &argc, &argv, null, null);
+
+    var a: f64 = 0;
+    var b: f64 = 0;
+    _ = napi.napi_get_value_double(env, argv[0], &a);
+    _ = napi.napi_get_value_double(env, argv[1], &b);
+
+    var result: napi.napi_value = undefined;
+    _ = napi.napi_create_double(env, a * b, &result);
+    return result;
+}
+
+// Module initialization callback
+export fn napi_register_module_v1(env: napi.napi_env, exports: napi.napi_value) napi.napi_value {
+    var fn_val: napi.napi_value = undefined;
+    _ = napi.napi_create_function(
+        env,
+        "fastMultiply",
+        napi.NAPI_AUTO_LENGTH,
+        fastMultiply,
+        null,
+        &fn_val,
+    );
+    _ = napi.napi_set_named_property(env, exports, "fastMultiply", fn_val);
+    return exports;
+}</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 3: COMPILATION & CONSUMPTION -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">3. Compile & Require in Node.js</h2>
+    <p style="color: #475569; margin-bottom: 0.75rem;">Compile the shared library using Zig with Node.js include headers, then load directly:</p>
+    
+    <div style="background: #020617; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;">
+      <code># Single command build for native Node addon (zero node-gyp needed!)
+zig build-lib addon.zig -dynamic -lc \
+  -I $(node -p "path.dirname(process.execPath)")/include/node \
+  -O ReleaseFast -femit-bin=addon.node</code>
+    </div>
+
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">index.js (Consuming in Node.js)</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">JavaScript</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+// Load the compiled Zig native addon directly
+const addon = require('./addon.node');
+
+console.log(addon.fastMultiply(6.5, 4.0)); // 26.0 (running at bare-metal native CPU speed!)</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 4: BUN / NODE FFI -->
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+    <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">⚡ Alternative: Zero-Header Bun FFI</h3>
+    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">If using Bun, you don't even need Node-API headers. Export a raw C-ABI function from Zig and consume it via <code>bun:ffi</code>:</p>
+    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code>import { dlopen, FFIType } from "bun:ffi";
+
+const { symbols: { fastMultiply } } = dlopen("./libaddon.so", {
+  fastMultiply: {
+    args: [FFIType.f64, FFIType.f64],
+    returns: FFIType.f64,
+  },
+});
+
+console.log(fastMultiply(10.5, 2.0)); // 21.0</code></pre>
+  </div>
 </div>
