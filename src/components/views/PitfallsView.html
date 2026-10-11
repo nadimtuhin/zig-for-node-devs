@@ -2,6 +2,28 @@
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <span style="background: #fee2e2; color: #b91c1c; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 09 • Guardrails</span>
     <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Top 8 Known Pitfalls & Footguns</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Where Node.js intuition fails in Zig systems programming.</p>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Where JavaScript and Node.js intuition leads to bugs in systems programming.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h3 style="color: #991b1b; margin-top: 0;">1. Returning a Slice of a Local Stack Array</h3>
+      <p style="color: #475569;">In Node.js, returning an array from a function safely retains it in heap memory via garbage collection. In Zig, returning <code>&stack_buf</code> results in a dangling pointer once the stack frame unwinds. Always allocate slices from a caller-passed allocator when returning dynamically sized data.</p>
+    </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h3 style="color: #991b1b; margin-top: 0;">2. Reading `undefined` Memory</h3>
+      <p style="color: #475569;">In JS, <code>undefined</code> is a concrete value of type undefined. In Zig, <code>var x: i32 = undefined;</code> means the variable contains whatever garbage bytes were previously at that memory location. Reading it before writing is illegal and triggers panics in Debug mode.</p>
+    </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h3 style="color: #991b1b; margin-top: 0;">3. Forgetting `defer allocator.free(slice)`</h3>
+      <p style="color: #475569;">Because there is no garbage collector, every heap allocation through an allocator that is not an Arena will leak if not paired with a corresponding <code>free</code> or <code>deinit</code>. Use <code>std.testing.allocator</code> to automatically detect memory leaks during testing.</p>
+    </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h3 style="color: #991b1b; margin-top: 0;">4. Modifying Function Parameters Directly</h3>
+      <p style="color: #475569;">All function parameters in Zig are strictly immutable <code>const</code> values. Writing <code>param = new_value;</code> fails at compile time. Make an explicit local copy <code>var local = param;</code> or pass a mutable pointer <code>*T</code>.</p>
+    </div>
   </div>
 </div>

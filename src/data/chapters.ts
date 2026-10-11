@@ -142,7 +142,7 @@ export const chaptersData: Record<string, Chapter> = {
     "desc": "Why Zig functions that need memory take `std.mem.Allocator`. GeneralPurposeAllocator, ArenaAllocator, and FixedBufferAllocator.",
     "nodeCode": "// JavaScript / TypeScript:\n// In JS, everything implicitly allocates memory behind your back!\nconst map = new Map();\nconst arr = [1, 2, 3]; // Hidden V8 heap allocation!",
     "code": "const std = @import(\"std\");\n\npub fn main() !void {\n    // Standard General Purpose Allocator with leak detection\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n    const allocator = gpa.allocator();\n\n    // Allocate a dynamic slice of integers on the heap\n    const slice = try allocator.alloc(i32, 5);\n    defer allocator.free(slice); // Always clean up!\n\n    for (slice, 0..) |*item, idx| {\n        item.* = @intCast(idx * 10);\n    }\n\n    std.debug.print(\"Allocated items: {any}\\n\", .{slice});\n}",
-    "why": "In Go or Node.js, runtime memory allocation happens silently via `new` or literals, triggering periodic GC pauses. In Zig, NO function allocates heap memory without explicitly accepting an `allocator: std.mem.Allocator` parameter."
+    "why": "In Node.js, runtime memory allocation happens silently via object literals or 'new', triggering non-deterministic V8 garbage collection pauses. In Zig, NO function allocates heap memory without explicitly accepting an 'allocator: std.mem.Allocator' parameter."
   },
   "arena_allocator": {
     "num": "16",
@@ -263,12 +263,12 @@ export const chaptersData: Record<string, Chapter> = {
   },
   "channel_patterns": {
     "num": "29",
-    "title": "Thread Synchronization & Channels",
+    "title": "Thread Synchronization & Message Queues",
     "part": "Part 7: Concurrency & Async in Zig",
-    "desc": "Building Go-style CSP channels and message queues in Zig using Condition Variables and Ring Buffers.",
+    "desc": "Building message queues and thread notification channels in Zig to replace Node.js worker_threads MessagePort.",
     "nodeCode": "// JavaScript / TypeScript:\n// MessagePort in Node.js worker_threads\n// port.postMessage({ task: 'process' });",
     "code": "const std = @import(\"std\");\n\npub fn main() !void {\n    // Demonstration of thread synchronization using Semaphore / WaitGroup\n    var reset_event = std.Thread.ResetEvent{};\n\n    const worker = try std.Thread.spawn(.{}, struct {\n        fn run(ev: *std.Thread.ResetEvent) void {\n            std.debug.print(\"Worker waiting for signal...\\n\", .{});\n            ev.wait();\n            std.debug.print(\"Worker received trigger!\\n\", .{});\n        }\n    }.run, .{&reset_event});\n\n    std.time.sleep(std.time.ns_per_ms * 10);\n    reset_event.set();\n    worker.join();\n}",
-    "why": "In Go, goroutines communicate via built-in channels. In Zig, synchronization primitives (`Condition`, `Semaphore`, `ResetEvent`) give you granular control over locking and wakeup signaling without runtime scheduler baggage."
+    "why": "In Node.js worker_threads, communication occurs via serialized JSON posts over MessagePort. In Zig, synchronization primitives (Condition, Semaphore, ResetEvent) give you sub-microsecond signaling without V8 IPC serialization baggage."
   },
   "event_loops_in_zig": {
     "num": "30",
@@ -304,7 +304,7 @@ export const chaptersData: Record<string, Chapter> = {
     "desc": "Targeting `wasm32-freestanding`. Generating ultra-compact 2KB Wasm binaries executable in Node.js and browsers.",
     "nodeCode": "// JavaScript / TypeScript:\n// In Node.js or Browser:\n// const wasm = await WebAssembly.instantiate(fs.readFileSync('module.wasm'));\n// console.log(wasm.instance.exports.calculateTotal(10, 5));",
     "code": "const std = @import(\"std\");\n\n// Exported to WebAssembly without any OS libc dependency\nexport fn fibonacci(n: u32) u32 {\n    if (n <= 1) return n;\n    var a: u32 = 0;\n    var b: u32 = 1;\n    var i: u32 = 2;\n    while (i <= n) : (i += 1) {\n        const next = a + b;\n        a = b;\n        b = next;\n    }\n    return b;\n}\n\npub fn main() void {\n    std.debug.print(\"Compiled for WebAssembly targets (wasm32-freestanding)\\n\", .{});\n}",
-    "why": "Compiling Rust to Wasm often requires `wasm-bindgen` and `wasm-pack`. Zig compiles directly to `wasm32-freestanding` out of the box with zero external dependencies, producing tiny, highly-optimized binaries."
+    "why": "Compiling to WebAssembly in other ecosystems often requires third-party toolchains and glue code. Zig compiles directly to 'wasm32-freestanding' out of the box with zero external dependencies, producing tiny, highly-optimized binaries for Node.js or browsers."
   },
   "cross_compilation": {
     "num": "34",
@@ -366,7 +366,7 @@ export const chaptersData: Record<string, Chapter> = {
     "part": "Part 10: Building Real-World Systems & Microservices",
     "desc": "Replacing `JSON.parse` and `zod` with type-safe comptime schema deserialization.",
     "nodeCode": "// JavaScript / TypeScript:\nconst data = JSON.parse('{\"id\": 42, \"name\": \"Nadim\"}');\nconsole.log(data.id, data.name);",
-    "code": "const std = @import(\"std\");\n\nconst UserPayload = struct {\n    id: u32,\n    name: []const u8,\n};\n\npub fn main() !void {\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n    const allocator = gpa.allocator();\n\n    const raw_json = \"{\"id\": 42, \"name\": \"Nadim\"}\";\n\n    // Parse JSON directly into a statically-typed struct!\n    const parsed = try std.json.parseFromSlice(\n        UserPayload,\n        allocator,\n        raw_json,\n        .{}\n    );\n    defer parsed.deinit();\n\n    std.debug.print(\"User: #{}, Name: {s}\\n\", .{ parsed.value.id, parsed.value.name });\n}",
+    "code": "const std = @import(\"std\");\n\nconst UserPayload = struct {\n    id: u32,\n    name: []const u8,\n};\n\npub fn main() !void {\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n    const allocator = gpa.allocator();\n\n    // Valid escaped JSON string in Zig\n    const raw_json = \"{\\\"id\\\": 42, \\\"name\\\": \\\"Nadim\\\"}\";\n\n    // Parse JSON directly into a statically-typed struct!\n    const parsed = try std.json.parseFromSlice(\n        UserPayload,\n        allocator,\n        raw_json,\n        .{}\n    );\n    defer parsed.deinit();\n\n    std.debug.print(\"User: #{}, Name: {s}\\n\", .{ parsed.value.id, parsed.value.name });\n}",
     "why": "In Node.js, `JSON.parse()` creates untyped dynamic JS objects that require runtime validation libraries like `zod`. Zig's `std.json` parses JSON directly into your declared struct types with zero schema validation overhead."
   },
   "database_sqlite": {
@@ -392,8 +392,8 @@ export const chaptersData: Record<string, Chapter> = {
     "title": "Ultra-Minimal Docker Containers (< 5MB Scratch)",
     "part": "Part 11: Production Deployment & Docker",
     "desc": "Packaging Zig microservices into zero-vulnerability `scratch` Docker containers vs 200MB+ Node.js images.",
-    "nodeCode": "# Node.js Dockerfile (typically 150MB - 300MB):\nFROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\nCOPY . .\nCMD [\"node\", \"server.js\"]",
-    "code": "# Zig Production Dockerfile (Statically linked, ~4MB image size!):\n# Build stage\nFROM alpine:3.20 AS builder\nRUN apk add --no-cache zig\nWORKDIR /build\nCOPY . .\nRUN zig build -Doptimize=ReleaseSafe -Dtarget=x86_64-linux-musl\n\n# Runtime stage: 100% empty scratch image!\nFROM scratch\nCOPY --from=builder /build/zig-out/bin/my_app /app\nEXPOSE 8080\nENTRYPOINT [\"/app\"]",
+    "nodeCode": "# Traditional Node.js Dockerfile (200MB - 350MB):\nFROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\nCOPY . .\nCMD [\"node\", \"server.js\"]",
+    "code": "const std = @import(\"std\");\n\n// Minimal static microservice entrypoint designed for Docker 'scratch'\n// Statically compiled via: zig build -Doptimize=ReleaseSmall -Dtarget=x86_64-linux-musl\npub fn main() !void {\n    const stdout = std.io.getStdOut().writer();\n    try stdout.print(\"\ud83d\ude80 Zig microservice active inside 4MB scratch container!\\n\", .{});\n    try stdout.print(\"Listening on 0.0.0.0:8080 (zero glibc dependency, zero CVEs)\\n\", .{});\n}",
     "why": "Node.js containers require Linux userland, Python/build tools for npm packages, V8, and hundreds of files in `node_modules`. A statically-linked Zig binary requires literally NOTHING: it runs inside Docker's empty `scratch` image."
   },
   "ci_cd_github_actions": {
@@ -466,7 +466,7 @@ export const chaptersData: Record<string, Chapter> = {
     "desc": "Implementing the `std.mem.Allocator` vtable interface to create specialized memory arenas.",
     "nodeCode": "// JavaScript / TypeScript:\n// In V8, memory allocation algorithms are locked inside the C++ runtime.\n// Developers cannot customize how V8 allocates objects.",
     "code": "const std = @import(\"std\");\n\nconst BumpAllocator = struct {\n    buffer: []u8,\n    offset: usize = 0,\n\n    pub fn allocator(self: *BumpAllocator) std.mem.Allocator {\n        return .{\n            .ptr = self,\n            .vtable = &.{\n                .alloc = allocFn,\n                .resize = resizeFn,\n                .free = freeFn,\n            },\n        };\n    }\n\n    fn allocFn(ctx: *anyopaque, len: usize, ptr_align: u8, ret_addr: usize) ?[*]u8 {\n        _ = ptr_align; _ = ret_addr;\n        const self: *BumpAllocator = @ptrCast(@alignCast(ctx));\n        if (self.offset + len > self.buffer.len) return null;\n        const res = self.buffer[self.offset..].ptr;\n        self.offset += len;\n        return res;\n    }\n\n    fn resizeFn(ctx: *anyopaque, buf: []u8, buf_align: u8, new_len: usize, ret_addr: usize) bool {\n        _ = ctx; _ = buf; _ = buf_align; _ = new_len; _ = ret_addr;\n        return false;\n    }\n\n    fn freeFn(ctx: *anyopaque, buf: []u8, buf_align: u8, ret_addr: usize) void {\n        _ = ctx; _ = buf; _ = buf_align; _ = ret_addr;\n        // Bump allocators free everything at once!\n    }\n};\n\npub fn main() void {\n    std.debug.print(\"Custom allocators allow tailor-made memory strategies for games and high-frequency trading!\\n\", .{});\n}",
-    "why": "In Go or Node.js, the runtime forces a single monolithic allocator. In Zig, any data structure can implement `std.mem.Allocator`'s simple vtable interface (`alloc`, `resize`, `free`)."
+    "why": "In Node.js, the V8 runtime locks developers into a monolithic generational garbage collector. In Zig, any data structure can implement std.mem.Allocator's simple vtable interface (alloc, resize, free) to create custom bump or arena allocators."
   },
   "zero_cost_abstractions": {
     "num": "52",

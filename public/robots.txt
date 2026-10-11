@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rust-for-node-devs.vercel.app/sitemap.xml
+Sitemap: https://zig-for-node-devs.vercel.app/sitemap.xml

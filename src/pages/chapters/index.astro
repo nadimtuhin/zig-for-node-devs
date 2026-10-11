@@ -4,140 +4,133 @@ import Header from '../../components/Header.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import { chaptersData } from '../../data/chapters';
 
-// Group chapters by part
-const groupedChapters: Record<string, { key: string; num: string; title: string; desc: string }[]> = {};
+const chaptersList = Object.entries(chaptersData);
 
-for (const [key, ch] of Object.entries(chaptersData)) {
-  if (!groupedChapters[ch.part]) {
-    groupedChapters[ch.part] = [];
-  }
-  groupedChapters[ch.part].push({
-    key,
-    num: ch.num,
-    title: ch.title,
-    desc: ch.desc
-  });
-}
+const groupedParts = chaptersList.reduce((acc, [key, ch]) => {
+  if (!acc[ch.part]) acc[ch.part] = [];
+  acc[ch.part].push({ key, ...ch });
+  return acc;
+}, {} as Record<string, any[]>);
 
 const architectureGuides = [
-  { href: '/testing', icon: '🧪', title: 'Unit & Integration Testing', desc: 'Table-driven tests, Testcontainers (Postgres/Redis), miniredis, and httptest.' },
-  { href: '/ai', icon: '🤖', title: 'Zig in the AI Era', desc: 'High-throughput LLM gateways, Ollama serving, Weaviate vector DBs, and SSE streaming.' },
-  { href: '/ai-agents', icon: '🦾', title: 'AI Agents & LangChainGo', desc: 'Autonomous ReAct agents, parallel tool calling with errgroup, and pure Zig MCP servers.' },
-  { href: '/go-vs-rust', icon: '🦀', title: 'Zig vs Zig Systems Guide', desc: '11-dimension comparison, memory models (GC vs comptime Metaprogramming), and interactive decision engine.' },
-  { href: '/docker', icon: '🐳', title: 'Production Docker Containerization', desc: 'Multi-stage builds, Distroless and scratch images, and zero-CVE containers under 15MB.' },
-  { href: '/interviews', icon: '🎯', title: 'Senior Zig Interview Questions', desc: '20 senior backend questions on GMP scheduler, tricolor GC, escape analysis, and channel state.' },
-  { href: '/go-mod-vs-npm', icon: '📦', title: 'go.mod vs package.json', desc: 'Minimal Version Selection (MVS), Merkle tree go.sum, /v2 semantic imports, and flat vendoring.' },
-  { href: '/troubleshooting', icon: '🛠️', title: 'Compilation & Air Hot Reload', desc: '5-stage SSA compilation pipeline, compiler power flags, and sub-500ms Air live reloading.' },
-  { href: '/microservice', icon: '📂', title: 'Fullstack Microservice Architecture', desc: 'Express vs Zig Fiber, MongoDB connection singletons, and clean repository patterns.' },
-  { href: '/philosophy', icon: '🧠', title: 'Genesis, History & The Zen of Go', desc: 'Rob Pike and Ken Thompson 45-min build catalyst, Google-scale design, and Zig Proverbs.' },
-  { href: '/pitfalls', icon: '⚠️', title: 'Common Zig Pitfalls & Footguns', desc: 'Loop variable closures, nil interface traps, goroutine leaks, and slice mutations.' },
-  { href: '/leetcode', icon: '🧩', title: 'LeetCode in Zig (JS vs Go)', desc: 'Idiomatic Zig solutions for top LeetCode Easy problems with time/space complexity analysis.' },
-  { href: '/cheatsheet', icon: '📖', title: 'Rosetta Code Syntax Cheatsheet', desc: 'Comprehensive side-by-side syntax mapping from JavaScript/TypeScript to Go.' }
+  { href: '/comptime', icon: '⚡', title: 'comptime Metaprogramming', desc: 'Type generics without templates, reflection with @typeInfo, and compile-time code execution.' },
+  { href: '/memory', icon: '🧠', title: 'Memory & Allocator Architecture', desc: 'GeneralPurposeAllocator, ArenaAllocator, FixedBufferAllocator, and eliminating V8 GC pauses.' },
+  { href: '/c-interop', icon: '🔌', title: 'C Interop & Node-API Addons', desc: 'Direct C header imports with @cImport, and native Node.js addons without node-gyp.' },
+  { href: '/build-system', icon: '📦', title: 'build.zig vs package.json', desc: 'Type-safe build pipelines in pure Zig, build.zig.zon, and why Zig has no node_modules.' },
+  { href: '/microservice', icon: '📂', title: 'Production Microservice Architecture', desc: 'Sub-millisecond HTTP servers, embedded SQLite, and clean signal handling in Zig.' },
+  { href: '/docker', icon: '🐳', title: 'Production Docker Recipes (< 5MB)', desc: 'Zero-vulnerability scratch Docker containers, multi-stage compilation, and static binaries.' },
+  { href: '/leetcode', icon: '🧩', title: 'LeetCode in Zig', desc: 'Solving classic algorithms with zero-allocation stack arrays and contiguous cache lines.' },
+  { href: '/philosophy', icon: '🧘', title: 'The Zen of Zig', desc: 'Why Zig deliberately left out operator overloading, exceptions, and hidden control flow.' },
+  { href: '/pitfalls', icon: '⚠️', title: 'Top 8 Pitfalls & Footguns', desc: 'Where JavaScript and Node.js intuition fails: undefined memory, slice lifetimes, and allocators.' },
+  { href: '/troubleshooting', icon: '🛠️', title: 'Diagnostics & Debugging Playbook', desc: 'Memory leak detection with GPA, LLDB native breakpoints, and DWARF debug symbol analysis.' },
+  { href: '/interviews', icon: '🎯', title: 'Senior Systems Interview Q&A', desc: 'High-frequency systems questions on memory layout, comptime execution, and allocator lifecycles.' },
+  { href: '/cheatsheet', icon: '📖', title: 'Rosetta Stone Cheatsheet', desc: 'Direct syntax and error-handling mapping from JavaScript / TypeScript to idiomatic Zig.' },
 ];
 ---
 
 <Layout 
-  title="Complete Curriculum & Chapters Directory | Go"
-  description="Explore all 60 interactive Zig lessons and 13 production architecture guides organized into structured chapters."
+  title="Complete Curriculum & Chapters Directory | Zig for Node Devs"
+  description="Comprehensive curriculum directory covering all 56 interactive Zig lessons, side-by-side Node.js comparisons, and 12 architecture guides."
 >
   <Header />
 
-  <!-- GitBook Book Reader Shell -->
-  <div id="viewStudio" class="studio-container gitbook-container">
-    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()" aria-hidden="true"></div>
-    <Sidebar />
-    <main id="main-content" class="curriculum-main-scroll gitbook-main-scroll" role="main" aria-label="Curriculum and Chapters Directory">
+  <div class="studio-layout sidebar-collapsed" id="viewStudio">
+    <Sidebar activeKey="" />
+
+    <main class="curriculum-main-scroll" role="main" id="main-content">
       <div class="curriculum-container">
-      <!-- Hero Header -->
-    <section class="curriculum-hero" aria-labelledby="curriculum-heading">
-      <div style="display: flex; justify-content: center; gap: 0.6rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
-        <span class="hero-badge" style="margin-bottom: 0;">📖 The Interactive Book</span>
-        <button id="chaptersMobileTocBtn" class="sidebar-expand-btn chapters-mobile-toc-btn" onclick="toggleSidebar()" aria-label="Toggle Table of Contents drawer" title="Toggle Table of Contents">☰ Table of Contents</button>
-      </div>
-      <h1 id="curriculum-heading" class="curriculum-title">Zig for Node.js Developers — All Chapters</h1>
-      <p class="curriculum-subtitle">
-        A hands-on, chapter-by-chapter programming book for JavaScript and TypeScript developers learning Go. Features 60 interactive chapters runnable directly in your browser, paired with 13 comprehensive production architecture guides.
-      </p>
+        
+        <!-- Hero Header -->
+        <header class="curriculum-hero">
+          <span class="hero-badge">Comprehensive Course Directory</span>
+          <h1 class="curriculum-title">Zig for Node.js Developers Curriculum</h1>
+          <p class="curriculum-subtitle">
+            An exhaustive curriculum tailored specifically for JavaScript and TypeScript developers learning Zig.
+            Features 56 interactive chapters, side-by-side JS/TS comparisons, and 12 systems architecture deep-dives.
+          </p>
 
-      <div class="curriculum-stats-bar">
-        <div class="stat-card">
-          <span class="stat-number">60</span>
-          <span class="stat-label">Coding Lessons</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number">13</span>
-          <span class="stat-label">Architecture Guides</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number">100%</span>
-          <span class="stat-label">Browser Runnable</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number">0</span>
-          <span class="stat-label">Host Dependencies</span>
-        </div>
-      </div>
-    </section>
+          <div class="curriculum-stats-bar">
+            <div class="stat-card">
+              <span class="stat-number">56</span>
+              <span class="stat-label">Coding Lessons</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">13</span>
+              <span class="stat-label">Core Parts</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">12</span>
+              <span class="stat-label">Systems Guides</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">0</span>
+              <span class="stat-label">Hidden Allocations</span>
+            </div>
+          </div>
+        </header>
 
-    <!-- Interactive Chapters Grouped By Part -->
-    <section class="curriculum-section" aria-labelledby="lessons-heading">
-      <div class="section-header">
-        <h2 id="lessons-heading" class="section-title">
-          <span class="section-icon">📖</span> Book Table of Contents (60 Interactive Chapters)
-        </h2>
-        <span class="section-count">60 Chapters</span>
-      </div>
-
-      {Object.entries(groupedChapters).map(([partName, lessons]) => (
-        <div class="curriculum-part-group">
-          <div class="part-header-bar">
-            <h3 class="part-title">{partName}</h3>
-            <span class="part-count-badge">{lessons.length} Chapters</span>
+        <!-- Specialized Architecture Guides Section -->
+        <section class="curriculum-section" aria-labelledby="guidesSectionTitle">
+          <div class="section-header">
+            <h2 class="section-title" id="guidesSectionTitle">
+              <span aria-hidden="true">🏛️</span> Systems Architecture & Production Appendices
+            </h2>
+            <span class="section-count">12 In-Depth Guides</span>
           </div>
 
-          <div class="lessons-grid">
-            {lessons.map(lesson => (
-              <a href={`/chapter/${lesson.key}`} class="lesson-link-card">
-                <div class="lesson-badge-row">
-                  <span class="lesson-num-pill">{lesson.num}</span>
-                  <span class="lesson-try-tag">🚀 Run Code</span>
+          <div class="guides-card-grid">
+            {architectureGuides.map((guide) => (
+              <a href={guide.href} class="guide-nav-card">
+                <span class="guide-card-icon" aria-hidden="true">{guide.icon}</span>
+                <div class="guide-card-content">
+                  <h3 class="guide-card-title">{guide.title}</h3>
+                  <p class="guide-card-desc">{guide.desc}</p>
                 </div>
-                <h4 class="lesson-card-title">{lesson.title}</h4>
-                <p class="lesson-card-desc">{lesson.desc}</p>
+                <span class="guide-card-arrow" aria-hidden="true">→</span>
               </a>
             ))}
           </div>
-        </div>
-      ))}
-    </section>
+        </section>
 
-    <!-- Architecture Guides & Appendices Section -->
-    <section class="curriculum-section" aria-labelledby="guides-heading">
-      <div class="section-header">
-        <h2 id="guides-heading" class="section-title">
-          <span class="section-icon">📑</span> Appendices & Production Architecture Guides
-        </h2>
-        <span class="section-count">13 Appendices</span>
-      </div>
+        <!-- Chapter by Part Listing -->
+        <section class="curriculum-section" aria-labelledby="tocSectionTitle">
+          <div class="section-header">
+            <h2 class="section-title" id="tocSectionTitle">
+              <span aria-hidden="true">📖</span> Complete Curriculum (56 Interactive Chapters)
+            </h2>
+            <button class="tool-btn chapters-mobile-toc-btn" onclick="toggleSidebar()" aria-label="Open Sidebar Navigation">
+              ☰ Open Sidebar TOC
+            </button>
+          </div>
 
-      <div class="guides-card-grid">
-        {architectureGuides.map(guide => (
-          <a href={guide.href} class="guide-nav-card">
-            <div class="guide-card-icon">{guide.icon}</div>
-            <div class="guide-card-content">
-              <h3 class="guide-card-title">{guide.title}</h3>
-              <p class="guide-card-desc">{guide.desc}</p>
+          {Object.entries(groupedParts).map(([partName, items]) => (
+            <div class="curriculum-part-group">
+              <div class="part-header-bar">
+                <h3 class="part-title">{partName}</h3>
+                <span class="part-count-badge">{items.length} Lessons</span>
+              </div>
+
+              <div class="lessons-grid">
+                {items.map((item) => (
+                  <a href={`/chapter/${item.key}`} class="lesson-link-card" aria-label={`Lesson ${item.num}: ${item.title}`}>
+                    <div class="lesson-badge-row">
+                      <span class="lesson-num-pill">#{item.num}</span>
+                      <span class="lesson-try-tag">Interactive ▶</span>
+                    </div>
+                    <h4 class="lesson-card-title">{item.title}</h4>
+                    <p class="lesson-card-desc">{item.desc}</p>
+                  </a>
+                ))}
+              </div>
             </div>
-            <span class="guide-card-arrow" aria-hidden="true">→</span>
-          </a>
-        ))}
+          ))}
+        </section>
+
       </div>
-    </section>
-    </div>
-  </main>
+    </main>
   </div>
 
-  <script>
+  <script is:inline>
     function toggleSidebar() {
       const studio = document.getElementById('viewStudio');
       if (studio) {
@@ -226,9 +219,9 @@ const architectureGuides = [
   .hero-badge {
     display: inline-block;
     padding: 0.35rem 0.85rem;
-    background: #e0f2fe;
-    color: #d97706;
-    border: 1px solid #bae6fd;
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
     border-radius: 2rem;
     font-size: 0.85rem;
     font-weight: 700;
@@ -310,8 +303,8 @@ const architectureGuides = [
   .section-count {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #d97706;
-    background: #e0f2fe;
+    color: #b45309;
+    background: #fef3c7;
     padding: 0.25rem 0.75rem;
     border-radius: 1rem;
   }
@@ -336,9 +329,9 @@ const architectureGuides = [
   }
 
   .guide-nav-card:hover {
-    border-color: #d97706;
+    border-color: #f7a41d;
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px -4px rgba(0, 173, 216, 0.15);
+    box-shadow: 0 8px 16px -4px rgba(247, 164, 29, 0.2);
   }
 
   .guide-card-icon {
@@ -389,7 +382,7 @@ const architectureGuides = [
     padding: 0.75rem 1.25rem;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
-    border-left: 4px solid #d97706;
+    border-left: 4px solid #f7a41d;
   }
 
   .part-title {
@@ -427,9 +420,9 @@ const architectureGuides = [
   }
 
   .lesson-link-card:hover {
-    border-color: #d97706;
+    border-color: #f7a41d;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 173, 216, 0.12);
+    box-shadow: 0 4px 12px rgba(247, 164, 29, 0.15);
   }
 
   .lesson-badge-row {
@@ -442,8 +435,8 @@ const architectureGuides = [
   .lesson-num-pill {
     font-size: 0.75rem;
     font-weight: 800;
-    color: #d97706;
-    background: #e0f2fe;
+    color: #b45309;
+    background: #fef3c7;
     padding: 0.2rem 0.5rem;
     border-radius: 0.25rem;
     font-family: var(--font-mono, monospace);

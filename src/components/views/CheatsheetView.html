@@ -1,7 +1,54 @@
 <div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
   <div style="text-align: center; margin-bottom: 2.5rem;">
-    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 12 • Reference</span>
-    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Rosetta Stone Cheatsheet</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Instant lookup mapping JavaScript/TypeScript constructs directly to idiomatic Zig equivalents.</p>
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 12 • Quick Reference</span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">JavaScript to Zig Rosetta Stone Cheatsheet</h1>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Direct mapping between familiar JavaScript / TypeScript patterns and their idiomatic Zig equivalents.</p>
   </div>
+
+  <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+    <thead>
+      <tr style="background: #f1f5f9; text-align: left;">
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">JavaScript / TypeScript</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig Equivalent</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Key Difference</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>const x = 10;</code> / <code>let y = 20;</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>const x: i32 = 10;</code> / <code>var y: i32 = 20;</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Explicit integer bit widths (<code>u8</code>, <code>i32</code>, <code>usize</code>).</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>throw new Error("msg")</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>return error.InvalidInput;</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Errors are typed enum values, not exceptions.</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>try { ... } catch (e) { ... }</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>val catch |err| fallback;</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Inline fallback expression without stack disruption.</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>val ?? defaultValue</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>maybe_val orelse defaultValue</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Unwraps optional <code>?T</code> safely.</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>new Map()</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>std.StringHashMap(V).init(allocator)</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Explicit allocator, continuous cache locality.</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>list.push(item)</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>try array_list.append(item);</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">May return <code>error.OutOfMemory</code>.</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>finally { cleanup(); }</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>defer cleanup();</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Declared directly next to resource acquisition.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

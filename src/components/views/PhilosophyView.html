@@ -1,7 +1,34 @@
 <div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
   <div style="text-align: center; margin-bottom: 2.5rem;">
-    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 08 • Philosophy</span>
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 08 • Philosophy & Principles</span>
     <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">The Zen of Zig</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">What Zig deliberately left out — and why reading Zig code feels effortless.</p>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Created by Andrew Kelley, Zig is engineered around mechanical sympathy, predictability, and readability.</p>
+  </div>
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+    <h3 style="color: #0f172a; margin-top: 0;">What Zig Deliberately Left Out (and WHY)</h3>
+    <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
+      <li><strong>NO Operator Overloading:</strong> In C++ or Python, <code>a + b</code> might invoke an arbitrary 500-line method or network call. In Zig, <code>+</code> is always simple hardware integer or float addition.</li>
+      <li><strong>NO Hidden Control Flow:</strong> There are no exceptions, no <code>setjmp/longjmp</code>, and no hidden property getters. A function call looks like <code>f()</code>, and an error return looks like <code>try</code> or <code>catch</code>.</li>
+      <li><strong>NO Hidden Memory Allocation:</strong> If a function does not take an allocator parameter, it cannot allocate heap memory. Period.</li>
+      <li><strong>NO Preprocessor Macros:</strong> C preprocessor macros make code difficult to debug. Zig replaces all macro use cases with type-safe <code>comptime</code>.</li>
+    </ul>
+  </div>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">The 18 Tenets of `zig zen`</h2>
+  <div style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 12px; font-family: var(--font-mono, monospace); line-height: 1.8;">
+    1. Communicate intent precisely.<br/>
+    2. Edge cases matter.<br/>
+    3. Favor reading code over writing code.<br/>
+    4. Only one obvious way to do things.<br/>
+    5. Runtime crashes are better than runtime bugs.<br/>
+    6. Compile errors are better than runtime crashes.<br/>
+    7. Incremental improvement.<br/>
+    8. Avoid local maximums.<br/>
+    9. Reduce the amount one must remember.<br/>
+    10. Focus on code rather than style.<br/>
+    11. Resource allocation may fail; resource deallocation must succeed.<br/>
+    12. Memory is a resource.<br/>
+    13. Together we serve the users.
   </div>
 </div>

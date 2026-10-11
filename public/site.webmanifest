@@ -1,6 +1,6 @@
 {
-  "name": "Rust for Node.js Developers Masterclass Studio",
-  "short_name": "RustForNodeDevs",
+  "name": "Zig for Node.js Developers Masterclass Studio",
+  "short_name": "ZigForNodeDevs",
   "icons": [
     {
       "src": "/favicon.svg",

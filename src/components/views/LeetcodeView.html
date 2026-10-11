@@ -1,7 +1,53 @@
 <div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
   <div style="text-align: center; margin-bottom: 2.5rem;">
-    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 07 • Algorithms</span>
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 07 • Classic Algorithms</span>
     <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">LeetCode in Idiomatic Zig</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Solving classic interview data structures with cache-friendly contiguous arrays and explicit memory tracking.</p>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Classic algorithmic patterns solved with zero-allocation stack buffers and cache-friendly data structures.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 2rem;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+      <h3 style="color: #0f172a; margin-top: 0;">1. Two Sum — O(N) Hash Table Lookup</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Node.js uses <code>new Map()</code> which allocates individual bucket nodes on the V8 heap. Zig's <code>AutoHashMap</code> uses a flat Robin Hood / Swiss-table layout with contiguous memory.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>const std = @import("std");
+
+fn twoSum(allocator: std.mem.Allocator, nums: []const i32, target: i32) !?[2]usize {
+    var map = std.AutoHashMap(i32, usize).init(allocator);
+    defer map.deinit();
+
+    for (nums, 0..) |num, idx| {
+        const complement = target - num;
+        if (map.get(complement)) |prev_idx| {
+            return [2]usize{ prev_idx, idx };
+        }
+        try map.put(num, idx);
+    }
+    return null;
+}</code></pre>
+    </div>
+
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+      <h3 style="color: #0f172a; margin-top: 0;">2. Valid Parentheses — Zero-Allocation Fixed Stack</h3>
+      <p style="color: #64748b; font-size: 0.95rem;">Rather than allocating dynamic arrays, Zig solves parsing problems with a pre-sized stack buffer and single-pass byte matching.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>fn isValid(s: []const u8) bool {
+    var stack: [256]u8 = undefined;
+    var top: usize = 0;
+
+    for (s) |char| {
+        switch (char) {
+            '(', '{', '[' => {
+                if (top >= stack.len) return false;
+                stack[top] = char;
+                top += 1;
+            },
+            ')' => { if (top == 0 or stack[top - 1] != '(') return false; top -= 1; },
+            '}' => { if (top == 0 or stack[top - 1] != '{') return false; top -= 1; },
+            ']' => { if (top == 0 or stack[top - 1] != '[') return false; top -= 1; },
+            else => {},
+        }
+    }
+    return top == 0;
+}</code></pre>
+    </div>
   </div>
 </div>
