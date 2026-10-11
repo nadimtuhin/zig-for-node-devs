@@ -1,0 +1,55 @@
+<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 01 • Metaprogramming Paradigm</span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Mastering Zig `comptime`</h1>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Why Zig eliminates C preprocessor macros, C++ template errors, and JavaScript runtime reflection in favor of ordinary Zig code executed at compile time.</p>
+  </div>
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-top: 0; color: #0f172a;">⚡ What is `comptime`?</h3>
+    <p>In JavaScript, generics are stripped by TypeScript, and dynamic reflection requires runtime inspection (<code>Object.keys</code>, <code>Reflect.get</code>, <code>eval()</code>). In C++, templates create cryptic error messages and bloated compile times.</p>
+    <p>In Zig, <strong>types are first-class values at compile time</strong>. You write regular Zig syntax (loops, branches, function calls), and if a parameter is marked <code>comptime</code>, the Zig compiler executes that code inside the compiler VM during compilation.</p>
+  </div>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2rem;">1. Type Generics without New Syntax</h2>
+  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>// Zig generics are just functions returning a struct type!
+fn Point(comptime T: type) type {
+    return struct {
+        x: T,
+        y: T,
+        
+        pub fn distance(self: @This()) f64 {
+            const dx = @as(f64, @floatFromInt(self.x));
+            const dy = @as(f64, @floatFromInt(self.y));
+            return @sqrt(dx * dx + dy * dy);
+        }
+    };
+}
+
+pub fn main() void {
+    const PointI32 = Point(i32);
+    const pt = PointI32{ .x = 3, .y = 4 };
+    _ = pt;
+}</code></pre>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2rem;">2. Comptime Reflection with `@typeInfo`</h2>
+  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>// Inspect struct fields at compile time to build zero-allocation serializers!
+fn printFields(comptime T: type) void {
+    const info = @typeInfo(T);
+    switch (info) {
+        .@"struct" => |s| {
+            inline for (s.fields) |field| {
+                std.debug.print("Field: {s} (type: {s})\n", .{
+                    field.name, @typeName(field.type)
+                });
+            }
+        },
+        else => @compileError("T must be a struct!"),
+    }
+}</code></pre>
+
+  <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1rem 1.25rem; margin-top: 2rem; border-radius: 0 8px 8px 0;">
+    <strong style="color: #b45309;">Pro Tip for Node.js Devs:</strong>
+    <p style="margin: 0.5rem 0 0 0; color: #92400e;">Notice <code>inline for</code>! A regular <code>for</code> loop iterates at runtime. An <code>inline for</code> instructs the compiler to unroll the loop completely at compile time, creating bespoke, branchless machine code for every field.</p>
+  </div>
+</div>

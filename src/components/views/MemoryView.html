@@ -1,0 +1,46 @@
+<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 02 • Systems Memory</span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">The Allocator Architecture</h1>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">No hidden malloc, no stop-the-world V8 GC pauses, and zero mysterious memory leaks.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
+      <h3 style="color: #0f172a; margin-top: 0;">🟢 Node.js V8 Model</h3>
+      <p style="font-size: 0.95rem; color: #475569;">Every <code>new Object()</code> or string allocates memory silently on the V8 heap. Garbage collection runs periodically, interrupting CPU execution to sweep dead objects.</p>
+    </div>
+    <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 12px; padding: 1.5rem;">
+      <h3 style="color: #854d0e; margin-top: 0;">🦎 Zig Explicit Allocator Model</h3>
+      <p style="font-size: 0.95rem; color: #713f12;">NO function can allocate heap memory without being handed an explicit <code>allocator: std.mem.Allocator</code>. You choose the exact memory strategy (GPA, Arena, FixedBuffer).</p>
+    </div>
+  </div>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2rem;">The Big Three Allocators in Zig</h2>
+  <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+    <thead>
+      <tr style="background: #f1f5f9; text-align: left;">
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Allocator</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Best Used For</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Cleanup Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>GeneralPurposeAllocator (GPA)</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Application-wide root allocator. Catches double-free and memory leaks in debug mode.</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Individual <code>allocator.free(slice)</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>ArenaAllocator</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">HTTP request lifecycles, CLI commands, parsing passes.</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Batch free via <code>arena.deinit()</code> in one single call.</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>FixedBufferAllocator</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Stack buffers, zero OS syscalls, real-time audio, embedded systems.</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zero OS freeing; automatically reclaimed on stack frame exit.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

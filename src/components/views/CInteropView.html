@@ -1,0 +1,38 @@
+<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 03 • Native Integration</span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">C Interop & Node-API Addons</h1>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Replacing node-gyp, Python scripts, and complex C++ binding glue with pure Zig.</p>
+  </div>
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+    <h3 style="color: #0f172a; margin-top: 0;">🔌 Zig is a Full C Compiler</h3>
+    <p>Zig ships with Clang built directly into its binary. You do not need GCC, CMake, or Make installed on your system. You can include C header files directly in your Zig source code using <code>@cImport</code>.</p>
+  </div>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">Building a Native Node.js Addon in Zig</h2>
+  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>// addon.zig
+const std = @import("std");
+
+// Export C ABI symbols
+export fn add(a: i32, b: i32) i32 {
+    return a + b;
+}
+
+export fn fastMultiply(a: f64, b: f64) f64 {
+    return a * b;
+}</code></pre>
+
+  <p>Compile to a shared dynamic library with one terminal command:</p>
+  <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px;"><code>zig build-lib addon.zig -dynamic -O ReleaseFast</code></pre>
+
+  <p>Call it from Node.js using <code>node:ffi-napi</code> or <code>process.dlopen</code>:</p>
+  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code>import ffi from 'ffi-napi';
+
+const lib = ffi.Library('./libaddon.dylib', {
+  'add': ['int', ['int', 'int']],
+  'fastMultiply': ['double', ['double', 'double']]
+});
+
+console.log(lib.add(40, 2)); // 42</code></pre>
+</div>

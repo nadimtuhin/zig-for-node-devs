@@ -1,0 +1,16 @@
+<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 05 • Production Architecture</span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Real-World Microservice in Zig</h1>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Express.js re-architected in native Zig: sub-millisecond latencies, embedded SQLite, and structured telemetry.</p>
+  </div>
+
+  <div style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+    <h3 style="color: #38bdf8; margin-top: 0;">Microservice Blueprint: User Service API</h3>
+    <pre><code>// 1. Initialize GeneralPurposeAllocator + Arena for request scope
+// 2. Open embedded SQLite database handle
+// 3. Bind TCP listener on 0.0.0.0:8080
+// 4. Route GET /health and POST /api/v1/users
+// 5. Serialize JSON responses with std.json without dynamic heap overhead</code></pre>
+  </div>
+</div>

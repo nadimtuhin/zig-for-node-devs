@@ -1,0 +1,55 @@
+---
+// Interactive Zig Playground & Compiler Explorer Component
+interface Props {
+  chapterKey?: string;
+}
+const { chapterKey = 'basic_vars' } = Astro.props;
+import { chaptersData } from '../data/chapters';
+const chapter = chaptersData[chapterKey] || chaptersData['basic_vars'];
+---
+<div class="playground-column gitbook-sandbox" id="playgroundSection" role="region" aria-label="Interactive Zig Code Playground">
+  <div class="gitbook-sandbox-header">
+    <div class="gitbook-sandbox-title">
+      <span>⚡ Interactive Zig Playground & Compiler</span>
+      <span class="gitbook-sandbox-hint">Godbolt Compiler Explorer API (zig 0.13+ release)</span>
+    </div>
+  </div>
+
+  <div class="editor-toolbar" role="toolbar" aria-label="Code Editor Toolbar">
+    <div class="editor-tab-group">
+      <div class="macos-dots" aria-hidden="true">
+        <span class="macos-dot dot-red"></span>
+        <span class="macos-dot dot-yellow"></span>
+        <span class="macos-dot dot-green"></span>
+      </div>
+      <div class="editor-tab" id="editorCurrentFile" aria-label={`Active file: main.zig — ${chapter.title}`}>📄 main.zig — {chapter.title}</div>
+    </div>
+    <div class="editor-actions">
+      <button id="copyBtn" class="tool-btn" onclick="copyEditorCode()" aria-label="Copy Zig code to clipboard">📋 Copy</button>
+      <button id="resetBtn" class="tool-btn" onclick="resetEditorCode()" aria-label="Reset Zig code to chapter default">↺ Reset</button>
+      <button id="runBtn" class="btn-run" onclick="executeZigCode()" aria-label="Compile and inspect Zig code (Keyboard shortcut: Command + Enter)">
+        <span aria-hidden="true">⚡</span>
+        <span>Compile & Run</span>
+        <span style="font-size:0.7rem; opacity:0.85; font-weight:normal;" aria-hidden="true">(⌘+⏎)</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="editor-container" aria-label="CodeMirror Zig Editor">
+    <textarea id="codeArea" aria-label="Zig Source Code Editor">{chapter.code}</textarea>
+  </div>
+
+  <div class="console-panel" role="region" aria-label="Terminal Execution Output">
+    <div class="console-header">
+      <span>Terminal / Assembly Output (Compiler Explorer)</span>
+      <div class="console-status-group">
+        <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+        <span id="statusLatency" style="font-size:0.7rem; color:var(--console-muted); font-family:var(--font-mono, monospace);" aria-label="Execution time"></span>
+        <span id="statusTag" class="status-pill ready" role="status" aria-label="Execution status">Ready</span>
+        <button class="copy-snippet-btn" onclick="clearConsole()" aria-label="Clear terminal output">✕ Clear</button>
+        <button class="copy-snippet-btn" onclick="copyConsoleOutput()" aria-label="Copy terminal output to clipboard">📋 Copy</button>
+      </div>
+    </div>
+    <div id="consoleArea" class="console-body" role="status" aria-live="polite" aria-atomic="true">// Hit "Compile & Run" (or ⌘+Enter) to compile via Zig Compiler Explorer!</div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 04 • Build Tooling</span>
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">`build.zig` vs `package.json`</h1>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Type-safe build graphs in Zig instead of Makefiles, CMake, or npm scripts.</p>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; border: 1px solid #e2e8f0;">
+    <thead>
+      <tr style="background: #f1f5f9; text-align: left;">
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Feature</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Node.js / npm</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Build Script Language</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">JSON + bash scripts + Webpack / Vite</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Pure Zig (<code>build.zig</code>)</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Dependency Spec</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>package.json</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>build.zig.zon</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Storage</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>node_modules/</code> (hundreds of MBs per project)</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Global content-addressed cache (<code>~/.cache/zig</code>)</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Security</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">npm post-install scripts execute arbitrary shell commands</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Strict cryptographic SHA-256 hashes, zero post-install hooks</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

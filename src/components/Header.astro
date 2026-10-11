@@ -1,0 +1,31 @@
+---
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<header>
+  <a href="/" class="brand" aria-label="Zig for Node.js Devs Studio Home">
+    <span aria-hidden="true">⚡ ➔ 🦎</span>
+    <span>Zig for Node Devs</span>
+    <span class="badge">56 Lessons & Demos</span>
+  </a>
+  
+  <nav class="header-nav-scroll" aria-label="Primary Navigation">
+    <a href="/" class={`tab-toggle ${pathname === '' || pathname === '/' ? 'active' : ''}`}>⚡ Studio</a>
+    <a href="/comptime" class={`tab-toggle ${pathname === '/comptime' ? 'active' : ''}`}>⚡ comptime</a>
+    <a href="/memory" class={`tab-toggle ${pathname === '/memory' ? 'active' : ''}`}>🧠 Allocators</a>
+    <a href="/c-interop" class={`tab-toggle ${pathname === '/c-interop' ? 'active' : ''}`}>🔌 C & Node-API</a>
+    <a href="/build-system" class={`tab-toggle ${pathname === '/build-system' ? 'active' : ''}`}>📦 build.zig vs npm</a>
+    <a href="/microservice" class={`tab-toggle ${pathname === '/microservice' ? 'active' : ''}`}>📂 Microservice</a>
+    <a href="/docker" class={`tab-toggle ${pathname === '/docker' ? 'active' : ''}`}>🐳 Docker</a>
+    <a href="/leetcode" class={`tab-toggle ${pathname === '/leetcode' ? 'active' : ''}`}>🧩 LeetCode</a>
+    <a href="/philosophy" class={`tab-toggle ${pathname === '/philosophy' ? 'active' : ''}`}>🧘 Philosophy</a>
+    <a href="/pitfalls" class={`tab-toggle ${pathname === '/pitfalls' ? 'active' : ''}`}>⚠️ Pitfalls</a>
+    <a href="/troubleshooting" class={`tab-toggle ${pathname === '/troubleshooting' ? 'active' : ''}`}>🛠️ Diagnostics</a>
+    <a href="/interviews" class={`tab-toggle ${pathname === '/interviews' ? 'active' : ''}`}>🎯 Interviews</a>
+    <a href="/cheatsheet" class={`tab-toggle ${pathname === '/cheatsheet' ? 'active' : ''}`}>📖 Rosetta</a>
+  </nav>
+
+  <a href="https://github.com/nadimtuhin/zig-for-node-devs" target="_blank" rel="noopener noreferrer" class="github-link-btn" aria-label="GitHub Repository">
+    <span>GitHub ★</span>
+  </a>
+</header>

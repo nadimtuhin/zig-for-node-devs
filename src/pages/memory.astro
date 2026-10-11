@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ViewComponent from '../components/views/MemoryView.astro';
+---
+
+<Layout title="Memory & Allocator Architecture | Zig for Node Devs" description="In-depth guide to manual memory management, GPA, ArenaAllocator, and avoiding leaks without a garbage collector.">
+  <Header />
+  <main id="main-content" role="main" style="min-height: calc(100vh - 54px); overflow-y: auto;">
+    <ViewComponent />
+  </main>
+</Layout>

@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ViewComponent from '../components/views/TroubleshootingView.astro';
+---
+
+<Layout title="Diagnostics & Debugging Playbook | Zig for Node Devs" description="Debugging memory leaks, LLDB breakpoints, stack trace symbolication, and core dump analysis.">
+  <Header />
+  <main id="main-content" role="main" style="min-height: calc(100vh - 54px); overflow-y: auto;">
+    <ViewComponent />
+  </main>
+</Layout>
