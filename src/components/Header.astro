@@ -3,11 +3,21 @@ const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
 <header>
-  <a href="/" class="brand" aria-label="Zig for Node.js Devs Studio Home">
-    <span aria-hidden="true">⚡ ➔ 🦎</span>
-    <span>Zig for Node Devs</span>
-    <span class="badge">56 Lessons & Demos</span>
-  </a>
+  <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <button 
+      class="mobile-menu-btn" 
+      onclick="window.toggleSidebar && window.toggleSidebar()" 
+      aria-label="Toggle Table of Contents Sidebar"
+      style="display: none; background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.55rem; font-size: 1rem; cursor: pointer; color: var(--text-body);"
+    >
+      ☰
+    </button>
+    <a href="/" class="brand" aria-label="Zig for Node.js Devs Studio Home">
+      <span aria-hidden="true">⚡ ➔ 🦎</span>
+      <span>Zig for Node Devs</span>
+      <span class="badge">56 Lessons & Demos</span>
+    </a>
+  </div>
   
   <nav class="header-nav-scroll" aria-label="Primary Navigation">
     <a href="/" class={`tab-toggle ${pathname === '' || pathname === '/' || pathname.startsWith('/chapter/') ? 'active' : ''}`}>⚡ Studio</a>

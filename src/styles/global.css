@@ -1634,7 +1634,7 @@ header {
 }
 
 /* ==========================================================================
-   GO VS RUST COMPARISON STYLES
+   NODE.JS VS ZIG COMPARISON STYLES
    ========================================================================== */
 .code-tri-grid {
   display: grid;
@@ -2033,6 +2033,14 @@ main#main-content:not(.playground-column) {
     flex-wrap: wrap;
     gap: 0.4rem;
     padding: 0.4rem 0.75rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mobile-menu-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
   }
 }
 
