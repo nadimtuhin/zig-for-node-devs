@@ -45,6 +45,7 @@ const groupedParts = chaptersList.reduce((acc, [key, ch]) => {
           aria-label={`Select lesson ${item.title}`} 
           data-id={item.key} 
           onclick={`selectChapter('${item.key}')`}
+          onkeydown={`if(event.key==='Enter'||event.key===' '){event.preventDefault();selectChapter('${item.key}')}`}
         >
           <span class="chapter-num">{item.num}</span>
           <span>{item.title}</span>
