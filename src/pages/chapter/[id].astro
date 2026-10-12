@@ -32,15 +32,27 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
 >
   <Header />
 
-  <main class="studio-main-3col" id="main-content" role="main">
-    <div id="sidebarOverlay" class="sidebar-backdrop" onclick="toggleSidebar(false)" aria-hidden="true"></div>
-
+  <!-- GitBook Book Reader Layout -->
+  <div id="viewStudio" class="studio-container gitbook-container">
+    <div class="sidebar-backdrop" id="sidebarOverlay" onclick="toggleSidebar(false)" aria-hidden="true"></div>
     <Sidebar activeKey={initialKey} />
-
-    <LessonDetail chapterKey={initialKey} />
-
-    <Playground chapterKey={initialKey} />
-  </main>
+    <main id="main-content" class="gitbook-main-scroll" role="main" aria-label="Chapter Reading and Interactive Playground">
+      <div class="gitbook-article-wrap">
+        <LessonDetail chapterKey={initialKey} />
+        <Playground chapterKey={initialKey} />
+        <div class="lesson-nav-footer gitbook-pager" role="navigation" aria-label="Chapter Step Navigation">
+          <button id="btnPrevLesson" class="gitbook-pager-card prev" onclick="navigateLesson(-1)" aria-label="Navigate to previous lesson">
+            <span class="pager-direction">← Previous</span>
+            <span class="pager-label">Previous Chapter</span>
+          </button>
+          <button id="btnNextLesson" class="gitbook-pager-card next" onclick="navigateLesson(1)" aria-label="Navigate to next lesson">
+            <span class="pager-direction">Next →</span>
+            <span class="pager-label">Next Chapter</span>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
 
   <script is:inline src="/chapters-data.js"></script>
   <script is:inline src="/chapter-insights.js"></script>
@@ -164,6 +176,27 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
             nextBtn.removeAttribute('title');
           }
         }
+
+        // Bottom navigation buttons
+        const prevCard = document.getElementById('btnPrevLesson');
+        if (prevCard) {
+          prevCard.disabled = !hasPrev;
+          prevCard.classList.toggle('disabled', !hasPrev);
+          const prevLabel = prevCard.querySelector('.pager-label');
+          if (prevLabel) {
+            prevLabel.textContent = hasPrev ? window.chaptersData[keys[currIdx - 1]].title : 'Previous Chapter';
+          }
+        }
+
+        const nextCard = document.getElementById('btnNextLesson');
+        if (nextCard) {
+          nextCard.disabled = !hasNext;
+          nextCard.classList.toggle('disabled', !hasNext);
+          const nextLabel = nextCard.querySelector('.pager-label');
+          if (nextLabel) {
+            nextLabel.textContent = hasNext ? window.chaptersData[keys[currIdx + 1]].title : 'Next Chapter';
+          }
+        }
       }
 
       updateStatus('Ready', 'ready');
@@ -183,6 +216,19 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
       }
     }
 
+    function scrollToTop() {
+      const mainContent = document.getElementById('main-content');
+      if (mainContent) {
+        mainContent.scrollTop = 0;
+        if (typeof mainContent.scrollTo === 'function') {
+          mainContent.scrollTo(0, 0);
+        }
+      }
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+
     function navigateLesson(direction) {
       if (!window.chaptersData) return;
       const keys = Object.keys(window.chaptersData);
@@ -192,6 +238,7 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
       const nextIndex = currentIndex + direction;
       if (nextIndex >= 0 && nextIndex < keys.length) {
         selectChapter(keys[nextIndex]);
+        scrollToTop();
       }
     }
 

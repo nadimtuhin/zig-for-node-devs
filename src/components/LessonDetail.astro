@@ -19,7 +19,7 @@ const hasNext = currentIndex !== -1 && currentIndex < keys.length - 1;
 const prevTitle = hasPrev ? chaptersData[keys[currentIndex - 1]].title : '';
 const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
 ---
-<article class="lesson-detail-panel" id="detailPanel" aria-labelledby="detailTitle">
+<article class="lesson-detail-panel gitbook-article-intro" id="detailPanel" aria-labelledby="detailTitle">
   <div class="detail-badge-row gitbook-breadcrumb">
     <div style="display: flex; align-items: center; gap: 0.6rem;">
       <button id="sidebarExpandBtn" class="sidebar-expand-btn" onclick="toggleSidebar()" aria-label="Toggle Table of Contents sidebar" title="Toggle Table of Contents">☰ TOC</button>
