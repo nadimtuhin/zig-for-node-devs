@@ -110,14 +110,11 @@ const initialChapter = chaptersData[initialKey];
       const whyEl = document.getElementById('detailZigWhy');
       if (whyEl) whyEl.innerText = data.why;
 
-      const proTipEl = document.getElementById('detailInsightProTip');
-      if (proTipEl) proTipEl.innerText = insight.proTip || '';
+      const mentalModelEl = document.getElementById('detailInsightMentalModel') || document.getElementById('detailInsightProTip');
+      if (mentalModelEl) mentalModelEl.innerText = insight.mentalModel || insight.proTip || '';
 
       const footgunEl = document.getElementById('detailInsightFootgun');
       if (footgunEl) footgunEl.innerText = insight.footgun || '';
-
-      const archNoteEl = document.getElementById('detailInsightArchNote');
-      if (archNoteEl) archNoteEl.innerText = insight.archNote || '';
 
       const fileTab = document.getElementById('editorCurrentFile');
       if (fileTab) fileTab.innerText = `📄 main.zig — ${data.title}`;

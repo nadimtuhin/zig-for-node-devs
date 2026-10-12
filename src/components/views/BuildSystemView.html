@@ -1,6 +1,6 @@
 <div class="appendix-container" style="max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif); line-height: 1.6;">
   <div style="text-align: center; margin-bottom: 2.5rem;">
-    <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 04 • Build Tooling</span>
+    <span style="background: #fef3c7; color: #92400e; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 04 • Build Tooling</span>
     <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">`build.zig` vs `package.json`</h1>
     <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Type-safe build graphs in pure Zig instead of fragile bash scripts, CMake, Makefiles, or bloated npm pipelines.</p>
   </div>
@@ -10,31 +10,31 @@
     <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; font-size: 0.92rem;">
       <thead>
         <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">Dimension</th>
-          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">Node.js Ecosystem</th>
-          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">Zig Build System</th>
+          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Dimension</th>
+          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Node.js Ecosystem</th>
+          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Build System</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Build Script Language</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">JSON + Shell + Webpack/Rollup/Vite/esbuild</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600; color: #0284c7;">Pure Zig (<code>build.zig</code>)</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Build Script Language</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">JSON + Shell + Webpack/Rollup/Vite/esbuild</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;">Pure Zig (<code>build.zig</code>)</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Dependency Manifest</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;"><code>package.json</code> + <code>package-lock.json</code></td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600; color: #0284c7;"><code>build.zig.zon</code> (Zig Object Notation)</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Dependency Manifest</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>package.json</code> + <code>package-lock.json</code></td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;"><code>build.zig.zon</code> (Zig Object Notation)</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Artifact Storage</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;"><code>node_modules/</code> (gigabytes replicated per project)</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600; color: #0284c7;">Global content-addressed cache (deduplicated)</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Artifact Storage</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>node_modules/</code> (gigabytes replicated per project)</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;">Global content-addressed cache (deduplicated)</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; font-weight: 600;">Supply Chain Security</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; color: #dc2626;">npm <code>postinstall</code> scripts run arbitrary shell commands</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; color: #059669; font-weight: 700;">Zero lifecycle hooks; strict SHA-256 package hashes</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Supply Chain Security</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; color: #dc2626;">npm <code>postinstall</code> scripts run arbitrary shell commands</td>
+          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; color: #047857; font-weight: 700;">Zero lifecycle hooks; strict SHA-256 package hashes</td>
         </tr>
       </tbody>
     </table>

@@ -80,14 +80,11 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
     <div class="insight-card">
       <h2 class="insight-heading">🦎 Zig Systems Deep Dive</h2>
       <dl class="insight-definition-list">
-        <dt class="insight-term" style="color: #0369a1;">Pro Tip</dt>
-        <dd class="insight-desc" id="detailInsightProTip">{insight.proTip}</dd>
+        <dt class="insight-term" style="color: #0369a1;">Mental Model</dt>
+        <dd class="insight-desc" id="detailInsightMentalModel">{insight.mentalModel || insight.proTip}</dd>
         
         <dt class="insight-term" style="color: #dc2626;">Footgun</dt>
         <dd class="insight-desc" id="detailInsightFootgun">{insight.footgun}</dd>
-
-        <dt class="insight-term" style="color: #b7410e;">Arch Note</dt>
-        <dd class="insight-desc" id="detailInsightArchNote">{insight.archNote}</dd>
       </dl>
     </div>
   </section>
