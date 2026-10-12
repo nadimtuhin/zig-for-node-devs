@@ -25,5 +25,25 @@
       <h2 style="color: #991b1b; margin-top: 0;">4. Modifying Function Parameters Directly</h2>
       <p style="color: #475569;">All function parameters in Zig are strictly immutable <code>const</code> values. Writing <code>param = new_value;</code> fails at compile time. Make an explicit local copy <code>var local = param;</code> or pass a mutable pointer <code>*T</code>.</p>
     </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h2 style="color: #991b1b; margin-top: 0;">5. Assuming Slices Outlive Short-Lived Allocators</h2>
+      <p style="color: #475569;">When using <code>std.heap.ArenaAllocator</code> or temporary buffers, slices referencing that memory become invalid the instant <code>arena.deinit()</code> runs. If a response or long-lived cache needs the data, explicitly dupe the bytes into the persistent allocator before tearing down the arena.</p>
+    </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h2 style="color: #991b1b; margin-top: 0;">6. Discarding Error Unions with `_ =`</h2>
+      <p style="color: #475569;">In JavaScript, unhandled errors crash the process or trigger <code>unhandledRejection</code>. In Zig, assigning an error-returning function to <code>_ = doWork();</code> causes a compile error. You must explicitly handle errors via <code>try</code>, <code>catch</code>, or deliberate error pattern matching.</p>
+    </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h2 style="color: #991b1b; margin-top: 0;">7. Confusing UTF-8 Byte Length with String Character Count</h2>
+      <p style="color: #475569;">In JavaScript, <code>"⚡".length</code> is 1 (UTF-16 code unit). In Zig, <code>"⚡".len</code> is 3 (raw UTF-8 bytes). Never use slice byte indexing to slice multicharacter Unicode text without a proper UTF-8 iterator like <code>std.unicode.Utf8Iterator</code>.</p>
+    </div>
+
+    <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <h2 style="color: #991b1b; margin-top: 0;">8. Integer Overflow in Production (ReleaseFast vs ReleaseSafe)</h2>
+      <p style="color: #475569;">In Debug and ReleaseSafe, integer arithmetic like <code>a + b</code> safely panics on overflow. In ReleaseFast, overflow triggers undefined behavior and machine wrapping. If wrapping arithmetic is intentional, always use explicit wrapping operators: <code>+%</code>, <code>-%</code>, and <code>*%</code>.</p>
+    </div>
   </div>
 </div>

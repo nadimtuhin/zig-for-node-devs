@@ -18,7 +18,7 @@ fn twoSum(allocator: std.mem.Allocator, nums: []const i32, target: i32) !?[2]usi
     for (nums, 0..) |num, idx| {
         const complement = target - num;
         if (map.get(complement)) |prev_idx| {
-            return [2]usize{ prev_idx, idx };
+            return .{ prev_idx, idx };
         }
         try map.put(num, idx);
     }
