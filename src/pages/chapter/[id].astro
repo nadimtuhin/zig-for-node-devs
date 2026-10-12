@@ -125,8 +125,8 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
       const whyEl = document.getElementById('detailZigWhy');
       if (whyEl) whyEl.innerText = data.why;
 
-      const mentalModelEl = document.getElementById('detailInsightMentalModel') || document.getElementById('detailInsightProTip');
-      if (mentalModelEl) mentalModelEl.innerText = insight.mentalModel || insight.proTip || '';
+      const mentalModelEl = document.getElementById('detailInsightMentalModel');
+      if (mentalModelEl) mentalModelEl.innerText = insight.mentalModel || '';
 
       const footgunEl = document.getElementById('detailInsightFootgun');
       if (footgunEl) footgunEl.innerText = insight.footgun || '';

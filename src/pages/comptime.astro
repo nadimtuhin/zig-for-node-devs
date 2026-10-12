@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import ViewComponent from '../components/views/ComptimeView.astro';
 ---
 
@@ -8,5 +9,6 @@ import ViewComponent from '../components/views/ComptimeView.astro';
   <Header />
   <main id="main-content" role="main" style="min-height: calc(100vh - 54px); overflow-y: auto;">
     <ViewComponent />
+    <Footer />
   </main>
 </Layout>
