@@ -99,6 +99,45 @@ const structuredData = {
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script is:inline src="/highlight.js"></script>
+    <script is:inline>
+      (function() {
+        function initZigMode() {
+          if (typeof CodeMirror === 'undefined') return;
+          function words(str) {
+            var obj = {}, w = str.split(' ');
+            for (var i = 0; i < w.length; ++i) obj[w[i]] = true;
+            return obj;
+          }
+
+          var zigKeywords = "const var fn pub comptime defer errdefer return if else switch try catch orelse while for break continue test unreachable usingnamespace struct enum union error inline noinline resume suspend nosuspend async await threadlocal export extern align and or anytype";
+          var zigTypes = "i8 u8 i16 u16 i32 u32 i64 u64 i128 u128 isize usize f16 f32 f64 f128 c_char c_short c_ushort c_int c_uint c_long c_ulong c_longlong c_ulonglong c_longdouble bool void anyopaque type anyerror noreturn";
+          var zigBuiltins = words("@import @as @intCast @floatCast @ptrCast @truncate @typeInfo @TypeOf @alignOf @sizeOf @embedFile @compileError @panic @hasDecl @field @memcpy @memset @tagName @atomicLoad @atomicStore @bitCast @floatFromInt @intFromFloat @intFromPtr @ptrFromInt @setEvalBranchQuota @This @typeName");
+
+          var zigConfig = {
+            name: "clike",
+            keywords: words(zigKeywords),
+            types: words(zigTypes),
+            builtin: zigBuiltins,
+            atoms: words("true false null undefined"),
+            hooks: {
+              "@": function(stream) {
+                stream.eatWhile(/[\w]/);
+                return "builtin";
+              }
+            }
+          };
+
+          CodeMirror.defineMIME("text/x-csrc", zigConfig);
+          CodeMirror.defineMIME("text/x-zig", zigConfig);
+        }
+
+        initZigMode();
+        if (typeof window !== 'undefined') {
+          window.addEventListener('DOMContentLoaded', initZigMode);
+        }
+      })();
+    </script>
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />

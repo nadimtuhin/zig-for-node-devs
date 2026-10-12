@@ -22,7 +22,7 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
 <article class="lesson-detail-panel gitbook-article-intro" id="detailPanel" aria-labelledby="detailTitle">
   <div class="detail-badge-row gitbook-breadcrumb">
     <div style="display: flex; align-items: center; gap: 0.6rem;">
-      <button id="sidebarExpandBtn" class="sidebar-expand-btn" onclick="toggleSidebar()" aria-label="Toggle Table of Contents sidebar" title="Toggle Table of Contents">☰ TOC</button>
+      <button id="sidebarExpandBtn" class="sidebar-expand-btn" onclick="toggleSidebar()" aria-label="Toggle Table of Contents sidebar" title="Toggle Table of Contents">☰ Menu</button>
       <span class="part-tag" id="detailPartTag">{chapter.part}</span>
     </div>
     <div class="gitbook-top-nav-group">
@@ -60,16 +60,16 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
   <div class="card-box node-box gitbook-comparison-box" role="region" aria-label="Node.js Code Comparison">
     <div class="node-header-row">
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <span class="node-tag">🟢 Node.js / TS Equivalent</span>
-        <span class="node-file-tag">📄 index.js</span>
+        <span class="node-tag">Node.js / TS Equivalent</span>
+        <span class="node-file-tag">index.ts</span>
       </div>
-      <button id="copyNodeBtn" class="copy-snippet-btn" onclick="copyNodeSnippet()" aria-label="Copy Node.js snippet to clipboard">📋 Copy</button>
+      <button id="copyNodeBtn" class="copy-snippet-btn" onclick="copyNodeSnippet()" aria-label="Copy Node.js snippet to clipboard">Copy</button>
     </div>
     <div class="node-code" id="detailNodeCode" tabindex="0" role="textbox" aria-readonly="true" aria-label="Node.js code example"><code set:html={highlightedNodeCode}></code></div>
   </div>
 
-  <div class="card-box zig-why-box gitbook-callout-box" role="region" aria-label="Zig Mental Model Rationale" style="border-left-color: #b7410e;">
-    <div class="zig-why-title" style="color: #b7410e;"><span aria-hidden="true">🦎</span> The Zig Mental Model</div>
+  <div class="card-box zig-why-box gitbook-callout-box" role="region" aria-label="Zig Mental Model Rationale">
+    <div class="zig-why-title"><span aria-hidden="true">⚡</span> The Zig Mental Model</div>
     <p class="zig-why-desc" id="detailZigWhy">
       {chapter.why}
     </p>
@@ -78,12 +78,12 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
   <!-- Deep Architecture Breakdown -->
   <section class="chapter-insight-section" aria-label="Architectural Paradigm Comparison">
     <div class="insight-card">
-      <h2 class="insight-heading">🦎 Zig Systems Deep Dive</h2>
+      <h2 class="insight-heading">⚡ Zig Systems Architecture Insight</h2>
       <dl class="insight-definition-list">
-        <dt class="insight-term" style="color: #0369a1;">Mental Model</dt>
+        <dt class="insight-term insight-term-model">Mental Model</dt>
         <dd class="insight-desc" id="detailInsightMentalModel">{insight.mentalModel}</dd>
         
-        <dt class="insight-term" style="color: #dc2626;">Footgun</dt>
+        <dt class="insight-term insight-term-footgun">Footgun</dt>
         <dd class="insight-desc" id="detailInsightFootgun">{insight.footgun}</dd>
       </dl>
     </div>
@@ -92,29 +92,29 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
 
 <style>
   .chapter-insight-section {
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
   }
 
   .insight-card {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-radius: var(--radius-md);
+    padding: 1.35rem 1.6rem;
+    box-shadow: var(--shadow-sm);
   }
 
   .insight-heading {
-    font-size: 1.125rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 1rem;
-    letter-spacing: -0.01em;
+    color: var(--text);
+    margin: 0 0 1.1rem;
+    letter-spacing: -0.015em;
   }
 
   .insight-definition-list {
     display: grid;
     grid-template-columns: 140px 1fr;
-    gap: 0.75rem 1rem;
+    gap: 0.85rem 1.25rem;
     margin: 0;
     align-items: baseline;
   }
@@ -122,21 +122,29 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
   @media (max-width: 640px) {
     .insight-definition-list {
       grid-template-columns: 1fr;
-      gap: 0.25rem;
+      gap: 0.35rem;
     }
   }
 
   .insight-term {
-    font-size: 0.8125rem;
-    font-weight: 700;
+    font-size: 0.78rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+
+  .insight-term-model {
+    color: #0284c7;
+  }
+
+  .insight-term-footgun {
+    color: #dc2626;
   }
 
   .insight-desc {
     margin: 0;
     font-size: 0.9375rem;
-    line-height: 1.55;
-    color: #334155;
+    line-height: 1.65;
+    color: var(--text-body);
   }
 </style>

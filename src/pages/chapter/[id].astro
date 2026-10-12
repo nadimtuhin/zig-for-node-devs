@@ -1,6 +1,5 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Header from '../../components/Header.astro';
 import Sidebar from '../../components/Sidebar.astro';
 import LessonDetail from '../../components/LessonDetail.astro';
 import Playground from '../../components/Playground.astro';
@@ -30,7 +29,6 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
     { name: chapter.title, item: `https://zig-for-node-devs.vercel.app/chapter/${chapterKey}` }
   ]}
 >
-  <Header />
 
   <!-- GitBook Book Reader Layout -->
   <div id="viewStudio" class="studio-container gitbook-container">
@@ -54,6 +52,7 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
     </main>
   </div>
 
+  <script is:inline src="/highlight.js"></script>
   <script is:inline src="/chapters-data.js"></script>
   <script is:inline src="/chapter-insights.js"></script>
 
@@ -129,7 +128,7 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
 
       const nodeCodeEl = document.getElementById('detailNodeCode');
       if (nodeCodeEl) {
-        nodeCodeEl.innerHTML = `<code>${data.nodeCode.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+        nodeCodeEl.innerHTML = `<code>${highlightJS(data.nodeCode)}</code>`;
       }
 
       const whyEl = document.getElementById('detailZigWhy');

@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
 import Sidebar from '../components/Sidebar.astro';
 import LessonDetail from '../components/LessonDetail.astro';
 import Playground from '../components/Playground.astro';
@@ -15,7 +14,6 @@ const initialChapter = chaptersData[initialKey];
   title="Zig for Node.js Devs | Interactive GitBook & Live Compiler"
   description="Master systems programming in Zig tailored for Node.js & TypeScript engineers. 56 interactive lessons, side-by-side JS comparisons, and live in-browser compiler."
 >
-  <Header />
 
   <!-- GitBook Book Reader Layout -->
   <div id="viewStudio" class="studio-container gitbook-container">
@@ -39,6 +37,7 @@ const initialChapter = chaptersData[initialKey];
     </main>
   </div>
 
+  <script is:inline src="/highlight.js"></script>
   <script is:inline src="/chapters-data.js"></script>
   <script is:inline src="/chapter-insights.js"></script>
 
@@ -114,7 +113,7 @@ const initialChapter = chaptersData[initialKey];
 
       const nodeCodeEl = document.getElementById('detailNodeCode');
       if (nodeCodeEl) {
-        nodeCodeEl.innerHTML = `<code>${data.nodeCode.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+        nodeCodeEl.innerHTML = `<code>${highlightJS(data.nodeCode)}</code>`;
       }
 
       const whyEl = document.getElementById('detailZigWhy');

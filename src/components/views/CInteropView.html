@@ -21,23 +21,23 @@
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">c_interop.zig</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-// Import standard C headers directly
-const c = @cImport({
-    @cInclude("stdio.h");
-    @cInclude("math.h");
+<span class="tok-comment">// Import standard C headers directly</span>
+<span class="tok-keyword">const</span> c = <span class="tok-builtin">@cImport</span>({
+    <span class="tok-builtin">@cInclude</span>(<span class="tok-string">"stdio.h"</span>);
+    <span class="tok-builtin">@cInclude</span>(<span class="tok-string">"math.h"</span>);
 });
 
-pub fn main() void {
-    // 1. Call standard C math functions
-    const result = c.sqrt(144.0);
-    std.debug.print("Square root from C math.h: {d}\n", .{result}); // 12.0
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
+    <span class="tok-comment">// 1. Call standard C math functions</span>
+    <span class="tok-keyword">const</span> result = c.<span class="tok-func">sqrt</span>(<span class="tok-number">144.0</span>);
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Square root from C math.h: {d}\n"</span>, .{result}); <span class="tok-comment">// 12.0</span>
 
-    // 2. Interacting with C strings: converting [*:0]const u8 to Zig slice []const u8
-    const c_str: [*:0]const u8 = "Hello from C string";
-    const zig_slice: []const u8 = std.mem.span(c_str);
-    std.debug.print("Zig slice length: {d}, content: {s}\n", .{ zig_slice.len, zig_slice });
+    <span class="tok-comment">// 2. Interacting with C strings: converting [*:0]const u8 to Zig slice []const u8</span>
+    <span class="tok-keyword">const</span> c_str: [*:<span class="tok-number">0</span>]<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> = <span class="tok-string">"Hello from C string"</span>;
+    <span class="tok-keyword">const</span> zig_slice: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> = std.mem.<span class="tok-func">span</span>(c_str);
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Zig slice length: {d}, content: {s}\n"</span>, .{ zig_slice.len, zig_slice });
 }</code></pre>
     </div>
   </div>
@@ -51,42 +51,42 @@ pub fn main() void {
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">addon.zig (Native Node-API Addon)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-// Import Node-API C declarations
-const napi = @cImport({
-    @cInclude("node_api.h");
+<span class="tok-comment">// Import Node-API C declarations</span>
+<span class="tok-keyword">const</span> napi = <span class="tok-builtin">@cImport</span>({
+    <span class="tok-builtin">@cInclude</span>(<span class="tok-string">"node_api.h"</span>);
 });
 
-// Implementation of the exported function: fastMultiply(a, b)
-fn fastMultiply(env: napi.napi_env, info: napi.napi_callback_info) callconv(.C) napi.napi_value {
-    var argc: usize = 2;
-    var argv: [2]napi.napi_value = undefined;
-    _ = napi.napi_get_cb_info(env, info, &argc, &argv, null, null);
+<span class="tok-comment">// Implementation of the exported function: fastMultiply(a, b)</span>
+<span class="tok-keyword">fn</span> <span class="tok-func">fastMultiply</span>(env: napi.napi_env, info: napi.napi_callback_info) <span class="tok-func">callconv</span>(.C) napi.napi_value {
+    <span class="tok-keyword">var</span> argc: <span class="tok-builtin">usize</span> = <span class="tok-number">2</span>;
+    <span class="tok-keyword">var</span> argv: [<span class="tok-number">2</span>]napi.napi_value = <span class="tok-builtin">undefined</span>;
+    _ = napi.<span class="tok-func">napi_get_cb_info</span>(env, info, &amp;argc, &amp;argv, <span class="tok-builtin">null</span>, <span class="tok-builtin">null</span>);
 
-    var a: f64 = 0;
-    var b: f64 = 0;
-    _ = napi.napi_get_value_double(env, argv[0], &a);
-    _ = napi.napi_get_value_double(env, argv[1], &b);
+    <span class="tok-keyword">var</span> a: <span class="tok-builtin">f64</span> = <span class="tok-number">0</span>;
+    <span class="tok-keyword">var</span> b: <span class="tok-builtin">f64</span> = <span class="tok-number">0</span>;
+    _ = napi.<span class="tok-func">napi_get_value_double</span>(env, argv[<span class="tok-number">0</span>], &amp;a);
+    _ = napi.<span class="tok-func">napi_get_value_double</span>(env, argv[<span class="tok-number">1</span>], &amp;b);
 
-    var result: napi.napi_value = undefined;
-    _ = napi.napi_create_double(env, a * b, &result);
-    return result;
+    <span class="tok-keyword">var</span> result: napi.napi_value = <span class="tok-builtin">undefined</span>;
+    _ = napi.<span class="tok-func">napi_create_double</span>(env, a * b, &amp;result);
+    <span class="tok-keyword">return</span> result;
 }
 
-// Module initialization callback
-export fn napi_register_module_v1(env: napi.napi_env, exports: napi.napi_value) napi.napi_value {
-    var fn_val: napi.napi_value = undefined;
-    _ = napi.napi_create_function(
+<span class="tok-comment">// Module initialization callback</span>
+<span class="tok-keyword">export</span> <span class="tok-keyword">fn</span> <span class="tok-func">napi_register_module_v1</span>(env: napi.napi_env, exports: napi.napi_value) napi.napi_value {
+    <span class="tok-keyword">var</span> fn_val: napi.napi_value = <span class="tok-builtin">undefined</span>;
+    _ = napi.<span class="tok-func">napi_create_function</span>(
         env,
-        "fastMultiply",
+        <span class="tok-string">"fastMultiply"</span>,
         napi.NAPI_AUTO_LENGTH,
         fastMultiply,
-        null,
-        &fn_val,
+        <span class="tok-builtin">null</span>,
+        &amp;fn_val,
     );
-    _ = napi.napi_set_named_property(env, exports, "fastMultiply", fn_val);
-    return exports;
+    _ = napi.<span class="tok-func">napi_set_named_property</span>(env, exports, <span class="tok-string">"fastMultiply"</span>, fn_val);
+    <span class="tok-keyword">return</span> exports;
 }</code></pre>
     </div>
   </div>
@@ -97,10 +97,10 @@ export fn napi_register_module_v1(env: napi.napi_env, exports: napi.napi_value) 
     <p style="color: #475569; margin-bottom: 0.75rem;">Compile the shared library using Zig with Node.js include headers, then load directly:</p>
     
     <div style="background: #020617; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;">
-      <code># Single command build for native Node addon (zero node-gyp needed!)
-zig build-lib addon.zig -dynamic -lc \
-  -I $(node -p "path.dirname(process.execPath)")/include/node \
-  -O ReleaseFast -femit-bin=addon.node</code>
+      <code><span class="tok-comment"># Single command build for native Node addon (zero node-gyp needed!)</span>
+<span class="tok-keyword">zig</span> build-lib addon.zig <span class="tok-builtin">-dynamic</span> <span class="tok-builtin">-lc</span> \
+  <span class="tok-builtin">-I</span> <span class="tok-builtin">$(node -p "path.dirname(process.execPath)</span>")/include/node \
+  <span class="tok-builtin">-O</span> ReleaseFast <span class="tok-builtin">-femit-bin=addon</span>.node</code>
     </div>
 
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
@@ -108,13 +108,13 @@ zig build-lib addon.zig -dynamic -lc \
         <span style="color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">index.js (Consuming in Node.js)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">JavaScript</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">import</span> { createRequire } <span class="tok-keyword">from</span> <span class="tok-string">'module'</span>;
+<span class="tok-keyword">const</span> <span class="tok-keyword">require</span> = <span class="tok-func">createRequire</span>(<span class="tok-keyword">import</span>.meta.url);
 
-// Load the compiled Zig native addon directly
-const addon = require('./addon.node');
+<span class="tok-comment">// Load the compiled Zig native addon directly</span>
+<span class="tok-keyword">const</span> addon = <span class="tok-keyword">require</span>(<span class="tok-string">'./addon.node'</span>);
 
-console.log(addon.fastMultiply(6.5, 4.0)); // 26.0 (running at bare-metal native CPU speed!)</code></pre>
+<span class="tok-builtin">console</span>.<span class="tok-func">log</span>(addon.<span class="tok-func">fastMultiply</span>(<span class="tok-number">6.5</span>, <span class="tok-number">4.0</span>)); <span class="tok-comment">// 26.0 (running at bare-metal native CPU speed!)</span></code></pre>
     </div>
   </div>
 
@@ -122,15 +122,15 @@ console.log(addon.fastMultiply(6.5, 4.0)); // 26.0 (running at bare-metal native
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
     <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">⚡ Alternative: Zero-Header Bun FFI</h2>
     <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">If using Bun, you don't even need Node-API headers. Export a raw C-ABI function from Zig and consume it via <code>bun:ffi</code>:</p>
-    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code>import { dlopen, FFIType } from "bun:ffi";
+    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code><span class="tok-keyword">import</span> { dlopen, FFIType } <span class="tok-keyword">from</span> <span class="tok-string">"bun:ffi"</span>;
 
-const { symbols: { fastMultiply } } = dlopen("./libaddon.so", {
+<span class="tok-keyword">const</span> { symbols: { fastMultiply } } = <span class="tok-func">dlopen</span>(<span class="tok-string">"./libaddon.so"</span>, {
   fastMultiply: {
     args: [FFIType.f64, FFIType.f64],
     returns: FFIType.f64,
   },
 });
 
-console.log(fastMultiply(10.5, 2.0)); // 21.0</code></pre>
+<span class="tok-builtin">console</span>.<span class="tok-func">log</span>(<span class="tok-func">fastMultiply</span>(<span class="tok-number">10.5</span>, <span class="tok-number">2.0</span>)); <span class="tok-comment">// 21.0</span></code></pre>
   </div>
 </div>

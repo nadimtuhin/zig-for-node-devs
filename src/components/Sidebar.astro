@@ -18,45 +18,57 @@ const groupedParts = chaptersList.reduce((acc, [key, ch]) => {
   return acc;
 }, {} as Record<string, any[]>);
 ---
-<nav class="chapters-sidebar" id="sidebar">
+<nav class="chapters-sidebar" id="sidebar" aria-label="Table of Contents">
   <div class="sidebar-header-box">
-    <div class="sidebar-title-row">
-      <div style="display: flex; align-items: center; gap: 0.4rem;">
-        <span class="sidebar-title">📖 Table of Contents</span>
-        <span class="sidebar-badge-count" id="sidebarCountBadge">56 Chapters</span>
-      </div>
-      <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="window.toggleSidebar()" aria-label="Collapse Table of Contents sidebar" title="Collapse sidebar">◀</button>
+    <div class="sidebar-brand-row">
+      <a href="/" class="brand" aria-label="Zig for Node.js Developers Book Home">
+        <span class="brand-title">⚡ Zig for Node Devs</span>
+      </a>
+      <a href="https://github.com/nadimtuhin/zig-for-node-devs" target="_blank" rel="noopener noreferrer" class="sidebar-github-link" aria-label="GitHub repository" title="GitHub">
+        GitHub ★
+      </a>
     </div>
+
+    <div class="sidebar-title-row">
+      <div class="sidebar-title-wrap">
+        <span class="sidebar-title">Table of Contents</span>
+        <span class="sidebar-badge-count" id="sidebarCountBadge" aria-live="polite" aria-atomic="true">56 Chapters</span>
+      </div>
+      <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" onclick="window.toggleSidebar && window.toggleSidebar()" aria-label="Collapse Table of Contents sidebar" title="Collapse sidebar">◀</button>
+    </div>
+
     <div class="sidebar-search-box" role="search">
       <input type="search" id="lessonSearchInput" aria-label="Search lessons by title or keyword" placeholder="Filter 56 chapters... (⌘+K)" oninput="filterLessons(this.value)">
       <button id="clearSearchBtn" aria-label="Clear lesson search query" class="clear-search-btn" onclick="clearLessonSearch()" style="display:none;">✕</button>
     </div>
-    <div id="noResultsNotice" class="search-empty-state" style="display:none; padding: 0.75rem 1rem; color: #64748b; font-size: 0.85rem;" role="status" aria-live="polite">No lessons found matching filter.</div>
+    <div id="noResultsNotice" class="search-empty-state" style="display:none;" role="status" aria-live="polite">No lessons found matching filter.</div>
   </div>
 
-  {Object.entries(groupedParts).map(([partName, items]) => (
-    <div>
-      <div class="sidebar-part-label">{partName}</div>
-      {items.map((item) => (
-        <div 
-          class={`chapter-nav-item ${currentKey === item.key ? 'active' : ''}`}
-          role="button" 
-          tabindex="0" 
-          aria-label={`Select lesson ${item.title}`} 
-          data-id={item.key} 
-          onclick={`selectChapter('${item.key}')`}
-          onkeydown={`if(event.key==='Enter'||event.key===' '){event.preventDefault();selectChapter('${item.key}')}`}
-        >
-          <span class="chapter-num">{item.num}</span>
-          <span>{item.title}</span>
-        </div>
-      ))}
-    </div>
-  ))}
+  <div class="sidebar-scrollable-content">
+    {Object.entries(groupedParts).map(([partName, items]) => (
+      <div class="sidebar-part-group">
+        <div class="sidebar-part-label">{partName}</div>
+        {items.map((item) => (
+          <div 
+            class={`chapter-nav-item ${currentKey === item.key ? 'active' : ''}`}
+            role="button" 
+            tabindex="0" 
+            aria-label={`Select lesson ${item.title}`} 
+            data-id={item.key} 
+            onclick={`selectChapter('${item.key}')`}
+            onkeydown={`if(event.key==='Enter'||event.key===' '){event.preventDefault();selectChapter('${item.key}')}`}
+          >
+            <span class="chapter-num">{item.num}</span>
+            <span class="chapter-nav-title">{item.title}</span>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
 
-  <div class="sidebar-appendices-footer" style="padding: 1rem; border-top: 1px solid var(--border);">
-    <a href="/chapters" class="sidebar-appendices-link" style="color: #b45309; font-weight: 700; text-decoration: none; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-      <span>📚 Book Index & Appendices (13)</span>
+  <div class="sidebar-appendices-footer">
+    <a href="/chapters" class="sidebar-appendices-link">
+      <span>📚 All 56 Chapters & Appendices</span>
       <span aria-hidden="true">→</span>
     </a>
   </div>

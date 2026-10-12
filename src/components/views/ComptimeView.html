@@ -21,47 +21,47 @@
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generic_point.zig</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn Point(comptime T: type) type {
-    // Assert at compile time that T is either an integer or float
-    comptime {
-        const info = @typeInfo(T);
-        if (info != .int and info != .float) {
-            @compileError("Point(T) only supports integer or float types!");
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">Point</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>) <span class="tok-builtin">type</span> {
+    <span class="tok-comment">// Assert at compile time that T is either an integer or float</span>
+    <span class="tok-keyword">comptime</span> {
+        <span class="tok-keyword">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);
+        <span class="tok-keyword">if</span> (info != .int <span class="tok-keyword">and</span> info != .float) {
+            <span class="tok-builtin">@compileError</span>(<span class="tok-string">"Point(T) only supports integer or float types!"</span>);
         }
     }
 
-    return struct {
+    <span class="tok-keyword">return</span> <span class="tok-keyword">struct</span> {
         x: T,
         y: T,
 
-        const Self = @This();
+        <span class="tok-keyword">const</span> Self = <span class="tok-builtin">@This</span>();
 
-        pub fn distance(self: Self) f64 {
-            const x_f64: f64 = switch (@typeInfo(T)) {
-                .int => @floatFromInt(self.x),
-                .float => @floatCast(self.x),
-                else => unreachable,
+        <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">distance</span>(self: Self) <span class="tok-builtin">f64</span> {
+            <span class="tok-keyword">const</span> x_f64: <span class="tok-builtin">f64</span> = <span class="tok-keyword">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {
+                .int =&gt; <span class="tok-builtin">@floatFromInt</span>(self.x),
+                .float =&gt; <span class="tok-builtin">@floatCast</span>(self.x),
+                <span class="tok-keyword">else</span> =&gt; <span class="tok-keyword">unreachable</span>,
             };
-            const y_f64: f64 = switch (@typeInfo(T)) {
-                .int => @floatFromInt(self.y),
-                .float => @floatCast(self.y),
-                else => unreachable,
+            <span class="tok-keyword">const</span> y_f64: <span class="tok-builtin">f64</span> = <span class="tok-keyword">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {
+                .int =&gt; <span class="tok-builtin">@floatFromInt</span>(self.y),
+                .float =&gt; <span class="tok-builtin">@floatCast</span>(self.y),
+                <span class="tok-keyword">else</span> =&gt; <span class="tok-keyword">unreachable</span>,
             };
-            return @sqrt(x_f64 * x_f64 + y_f64 * y_f64);
+            <span class="tok-keyword">return</span> <span class="tok-builtin">@sqrt</span>(x_f64 * x_f64 + y_f64 * y_f64);
         }
     };
 }
 
-pub fn main() void {
-    const PointI32 = Point(i32);
-    const pt1 = PointI32{ .x = 3, .y = 4 };
-    std.debug.print("Distance: {d}\n", .{pt1.distance()}); // 5.0
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
+    <span class="tok-keyword">const</span> PointI32 = <span class="tok-func">Point</span>(<span class="tok-builtin">i32</span>);
+    <span class="tok-keyword">const</span> pt1 = PointI32{ .x = <span class="tok-number">3</span>, .y = <span class="tok-number">4</span> };
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Distance: {d}\n"</span>, .{pt1.<span class="tok-func">distance</span>()}); <span class="tok-comment">// 5.0</span>
 
-    const PointF32 = Point(f32);
-    const pt2 = PointF32{ .x = 1.5, .y = 2.0 };
-    std.debug.print("Distance: {d}\n", .{pt2.distance()}); // 2.5
+    <span class="tok-keyword">const</span> PointF32 = <span class="tok-func">Point</span>(<span class="tok-builtin">f32</span>);
+    <span class="tok-keyword">const</span> pt2 = PointF32{ .x = <span class="tok-number">1.5</span>, .y = <span class="tok-number">2.0</span> };
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Distance: {d}\n"</span>, .{pt2.<span class="tok-func">distance</span>()}); <span class="tok-comment">// 2.5</span>
 }</code></pre>
     </div>
   </div>
@@ -75,35 +75,35 @@ pub fn main() void {
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">serializer.zig (Zero-Overhead Reflection)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn printStructFields(comptime T: type, value: T) void {
-    const info = @typeInfo(T);
-    switch (info) {
-        .@"struct" => |s| {
-            std.debug.print("Inspecting struct {s}:\n", .{@typeName(T)});
-            inline for (s.fields) |field| {
-                const val = @field(value, field.name);
-                std.debug.print("  - {s} ({s}) = {any}\n", .{
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">printStructFields</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>, value: T) <span class="tok-builtin">void</span> {
+    <span class="tok-keyword">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);
+    <span class="tok-keyword">switch</span> (info) {
+        .@<span class="tok-string">"struct"</span> =&gt; |s| {
+            std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Inspecting struct {s}:\n"</span>, .{<span class="tok-builtin">@typeName</span>(T)});
+            <span class="tok-keyword">inline</span> <span class="tok-keyword">for</span> (s.fields) |field| {
+                <span class="tok-keyword">const</span> val = <span class="tok-builtin">@field</span>(value, field.name);
+                std.debug.<span class="tok-func">print</span>(<span class="tok-string">"  - {s} ({s}) = {any}\n"</span>, .{
                     field.name,
-                    @typeName(field.type),
+                    <span class="tok-builtin">@typeName</span>(field.<span class="tok-builtin">type</span>),
                     val,
                 });
             }
         },
-        else => @compileError("printStructFields requires a struct type!"),
+        <span class="tok-keyword">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-string">"printStructFields requires a struct type!"</span>),
     }
 }
 
-const UserAccount = struct {
-    id: u64,
-    name: []const u8,
-    active: bool,
+<span class="tok-keyword">const</span> UserAccount = <span class="tok-keyword">struct</span> {
+    id: <span class="tok-builtin">u64</span>,
+    name: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>,
+    active: <span class="tok-builtin">bool</span>,
 };
 
-pub fn main() void {
-    const user = UserAccount{ .id = 42, .name = "Alice", .active = true };
-    printStructFields(UserAccount, user);
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
+    <span class="tok-keyword">const</span> user = UserAccount{ .id = <span class="tok-number">42</span>, .name = <span class="tok-string">"Alice"</span>, .active = <span class="tok-builtin">true</span> };
+    <span class="tok-func">printStructFields</span>(UserAccount, user);
 }</code></pre>
     </div>
   </div>
@@ -117,28 +117,28 @@ pub fn main() void {
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">comptime_router.zig</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn hashString(s: []const u8) u64 {
-    var h: u64 = 0xcbf29ce484222325;
-    for (s) |b| {
-        h = (h ^ b) *% 0x100000001b3;
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">hashString</span>(s: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) <span class="tok-builtin">u64</span> {
+    <span class="tok-keyword">var</span> h: <span class="tok-builtin">u64</span> = <span class="tok-number">0xcbf29ce484222325</span>;
+    <span class="tok-keyword">for</span> (s) |b| {
+        h = (h ^ b) *% <span class="tok-number">0x100000001b3</span>;
     }
-    return h;
+    <span class="tok-keyword">return</span> h;
 }
 
-pub fn route(path: []const u8) []const u8 {
-    // When called in a switch pragma, hashString is evaluated at compile time!
-    switch (hashString(path)) {
-        comptime hashString("/health") => return "200 OK: Healthy",
-        comptime hashString("/api/v1/users") => return "200 OK: Users List",
-        comptime hashString("/api/v1/orders") => return "200 OK: Orders List",
-        else => return "404 Not Found",
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">route</span>(path: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
+    <span class="tok-comment">// When called in a switch pragma, hashString is evaluated at compile time!</span>
+    <span class="tok-keyword">switch</span> (<span class="tok-func">hashString</span>(path)) {
+        <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/health"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Healthy"</span>,
+        <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/users"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Users List"</span>,
+        <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/orders"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Orders List"</span>,
+        <span class="tok-keyword">else</span> =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"404 Not Found"</span>,
     }
 }
 
-pub fn main() void {
-    std.debug.print("Route result: {s}\n", .{route("/health")});
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Route result: {s}\n"</span>, .{<span class="tok-func">route</span>(<span class="tok-string">"/health"</span>)});
 }</code></pre>
     </div>
   </div>

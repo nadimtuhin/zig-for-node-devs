@@ -1018,13 +1018,15 @@ header {
   display: block;
 }
 
-/* JavaScript / TypeScript Syntax Highlighting Tokens */
+/* Syntax Highlighting Tokens (Zig, C, JS/TS, Bash, Dockerfile) */
 .tok-comment { color: #94a3b8; font-style: italic; }
 .tok-string { color: #34d399; }
 .tok-keyword { color: #c084fc; font-weight: 600; }
 .tok-builtin { color: #38bdf8; }
+.tok-type { color: #38bdf8; font-weight: 500; }
 .tok-number { color: #fbbf24; }
 .tok-func { color: #60a5fa; }
+.tok-operator { color: #f43f5e; }
 
 .node-file-tag {
   font-size: 0.72rem;

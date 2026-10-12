@@ -49,50 +49,50 @@
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (Idiomatic 0.13+ Build Graph)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn build(b: *std.Build) void {
-    // 1. Standard cross-compilation target and optimization options (-Dtarget, -Doptimize)
-    const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">build</span>(b: *std.Build) <span class="tok-builtin">void</span> {
+    <span class="tok-comment">// 1. Standard cross-compilation target and optimization options (-Dtarget, -Doptimize)</span>
+    <span class="tok-keyword">const</span> target = b.<span class="tok-func">standardTargetOptions</span>(.{});
+    <span class="tok-keyword">const</span> optimize = b.<span class="tok-func">standardOptimizeOption</span>(.{});
 
-    // 2. Custom command-line build flag: e.g. zig build -Denable-telemetry=true
-    const enable_telemetry = b.option(bool, "enable-telemetry", "Embed telemetry hooks") orelse false;
+    <span class="tok-comment">// 2. Custom command-line build flag: e.g. zig build -Denable-telemetry=true</span>
+    <span class="tok-keyword">const</span> enable_telemetry = b.<span class="tok-func">option</span>(<span class="tok-builtin">bool</span>, <span class="tok-string">"enable-telemetry"</span>, <span class="tok-string">"Embed telemetry hooks"</span>) <span class="tok-keyword">orelse</span> <span class="tok-builtin">false</span>;
 
-    // 3. Define the main executable artifact
-    const exe = b.addExecutable(.{
-        .name = "server",
-        .root_source_file = b.path("src/main.zig"),
+    <span class="tok-comment">// 3. Define the main executable artifact</span>
+    <span class="tok-keyword">const</span> exe = b.<span class="tok-func">addExecutable</span>(.{
+        .name = <span class="tok-string">"server"</span>,
+        .root_source_file = b.<span class="tok-func">path</span>(<span class="tok-string">"src/main.zig"</span>),
         .target = target,
         .optimize = optimize,
     });
 
-    // 4. Pass build-time configuration constants to the executable
-    const build_options = b.addOptions();
-    build_options.addOption(bool, "telemetry_enabled", enable_telemetry);
-    exe.root_module.addOptions("build_config", build_options);
+    <span class="tok-comment">// 4. Pass build-time configuration constants to the executable</span>
+    <span class="tok-keyword">const</span> build_options = b.<span class="tok-func">addOptions</span>();
+    build_options.<span class="tok-func">addOption</span>(<span class="tok-builtin">bool</span>, <span class="tok-string">"telemetry_enabled"</span>, enable_telemetry);
+    exe.root_module.<span class="tok-func">addOptions</span>(<span class="tok-string">"build_config"</span>, build_options);
 
-    // 5. Output binary to zig-out/bin/server
-    b.installArtifact(exe);
+    <span class="tok-comment">// 5. Output binary to zig-out/bin/server</span>
+    b.<span class="tok-func">installArtifact</span>(exe);
 
-    // 6. Define "run" step: `zig build run`
-    const run_cmd = b.addRunArtifact(exe);
-    run_cmd.step.dependOn(b.getInstallStep());
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
+    <span class="tok-comment">// 6. Define "run" step: `zig build run`</span>
+    <span class="tok-keyword">const</span> run_cmd = b.<span class="tok-func">addRunArtifact</span>(exe);
+    run_cmd.step.<span class="tok-func">dependOn</span>(b.<span class="tok-func">getInstallStep</span>());
+    <span class="tok-keyword">if</span> (b.args) |args| {
+        run_cmd.<span class="tok-func">addArgs</span>(args);
     }
-    const run_step = b.step("run", "Run the microservice application");
-    run_step.dependOn(&run_cmd.step);
+    <span class="tok-keyword">const</span> run_step = b.<span class="tok-func">step</span>(<span class="tok-string">"run"</span>, <span class="tok-string">"Run the microservice application"</span>);
+    run_step.<span class="tok-func">dependOn</span>(&amp;run_cmd.step);
 
-    // 7. Define "test" step: `zig build test`
-    const unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/main.zig"),
+    <span class="tok-comment">// 7. Define "test" step: `zig build test`</span>
+    <span class="tok-keyword">const</span> unit_tests = b.<span class="tok-func">addTest</span>(.{
+        .root_source_file = b.<span class="tok-func">path</span>(<span class="tok-string">"src/main.zig"</span>),
         .target = target,
         .optimize = optimize,
     });
-    const run_unit_tests = b.addRunArtifact(unit_tests);
-    const test_step = b.step("test", "Run unit tests with leak detection");
-    test_step.dependOn(&run_unit_tests.step);
+    <span class="tok-keyword">const</span> run_unit_tests = b.<span class="tok-func">addRunArtifact</span>(unit_tests);
+    <span class="tok-keyword">const</span> test_step = b.<span class="tok-func">step</span>(<span class="tok-string">"test"</span>, <span class="tok-string">"Run unit tests with leak detection"</span>);
+    test_step.<span class="tok-func">dependOn</span>(&amp;run_unit_tests.step);
 }</code></pre>
     </div>
   </div>
@@ -107,18 +107,18 @@ pub fn build(b: *std.Build) void {
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig ZON</span>
       </div>
       <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>.{
-    .name = "user-microservice",
-    .version = "1.0.0",
-    .minimum_zig_version = "0.13.0",
+    .name = <span class="tok-string">"user-microservice"</span>,
+    .version = <span class="tok-string">"1.0.0"</span>,
+    .minimum_zig_version = <span class="tok-string">"0.13.0"</span>,
     .dependencies = .{
-        // Add external dependencies via URL + SHA-256 hash
-        // Install automatically via: zig fetch --save <tarball-url>
+        <span class="tok-comment">// Add external dependencies via URL + SHA-256 hash</span>
+        <span class="tok-comment">// Install automatically via: zig fetch --save &lt;tarball-url&gt;</span>
     },
     .paths = .{
-        "build.zig",
-        "build.zig.zon",
-        "src",
-        "README.md",
+        <span class="tok-string">"build.zig"</span>,
+        <span class="tok-string">"build.zig.zon"</span>,
+        <span class="tok-string">"src"</span>,
+        <span class="tok-string">"README.md"</span>,
     },
 }</code></pre>
     </div>

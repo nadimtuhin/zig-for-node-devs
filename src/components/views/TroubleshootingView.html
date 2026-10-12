@@ -9,13 +9,13 @@
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h2 style="color: #0f172a; margin-top: 0;">1. Detecting Memory Leaks with GPA</h2>
       <p style="color: #475569;">In Debug and Test modes, <code>GeneralPurposeAllocator</code> outputs stack traces for any allocation that was not freed prior to program exit.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px;"><code>const std = @import("std");
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer {
-        const check = gpa.deinit();
-        if (check == .leak) @panic("Memory leak detected!");
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
+    <span class="tok-keyword">var</span> gpa = std.heap.<span class="tok-func">GeneralPurposeAllocator</span>(.{}){};
+    <span class="tok-keyword">defer</span> {
+        <span class="tok-keyword">const</span> check = gpa.<span class="tok-func">deinit</span>();
+        <span class="tok-keyword">if</span> (check == .leak) <span class="tok-builtin">@panic</span>(<span class="tok-string">"Memory leak detected!"</span>);
     }
 }</code></pre>
     </div>
@@ -23,13 +23,13 @@ pub fn main() !void {
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h2 style="color: #0f172a; margin-top: 0;">2. Native Breakpoints with LLDB / GDB</h2>
       <p style="color: #475569;">Zig binaries compile with rich DWARF debug information by default in Debug mode. Step through your code directly in terminal:</p>
-      <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px;"><code># Build with debug symbols
-zig build
+      <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px;"><code><span class="tok-comment"># Build with debug symbols</span>
+<span class="tok-keyword">zig</span> <span class="tok-keyword">build</span>
 
-# Launch debugger
+<span class="tok-comment"># Launch debugger</span>
 lldb ./zig-out/bin/my_app
-(lldb) breakpoint set --file main.zig --line 25
-(lldb) run
+(lldb) breakpoint set <span class="tok-builtin">--file</span> main.zig <span class="tok-builtin">--line</span> <span class="tok-number">25</span>
+(lldb) <span class="tok-keyword">run</span>
 (lldb) frame variable</code></pre>
     </div>
   </div>

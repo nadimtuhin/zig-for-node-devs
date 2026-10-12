@@ -94,4 +94,52 @@ test.describe('Zig for Node.js Devs — Master Suite E2E', () => {
       await expect(footer).toBeVisible();
     }
   });
+
+  test('Syntax highlighting is applied across dynamic chapter switching and architecture guides', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', err => pageErrors.push(err.message));
+
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // 1. Initial Node.js snippet has syntax tokens
+    const nodeTokensInitial = page.locator('#detailNodeCode code .tok-keyword');
+    await expect(nodeTokensInitial.first()).toBeVisible();
+
+    // 2. CodeMirror has custom Zig keyword and builtin tokens
+    const cmBuiltin = page.locator('.CodeMirror .cm-builtin');
+    await expect(cmBuiltin.first()).toBeVisible();
+    const cmKeyword = page.locator('.CodeMirror .cm-keyword');
+    await expect(cmKeyword.first()).toBeVisible();
+
+    // 3. Navigate to next chapter and verify Node.js syntax tokens are preserved
+    const nextBtn = page.locator('#btnTopNextLesson');
+    await nextBtn.click();
+    const nodeTokensAfterNext = page.locator('#detailNodeCode code .tok-keyword');
+    await expect(nodeTokensAfterNext.first()).toBeVisible();
+
+    // 4. Click another chapter in sidebar and verify highlighting remains
+    const chapterItem = page.locator('.chapter-nav-item').nth(5);
+    await chapterItem.click();
+    const nodeTokensAfterSidebar = page.locator('#detailNodeCode code .tok-keyword');
+    await expect(nodeTokensAfterSidebar.first()).toBeVisible();
+
+    // 5. Verify architecture guides have syntax highlighted code blocks
+    await page.goto('/memory');
+    await page.waitForLoadState('domcontentloaded');
+    const memoryCodeTokens = page.locator('pre code .tok-keyword');
+    await expect(memoryCodeTokens.first()).toBeVisible();
+
+    await page.goto('/docker');
+    await page.waitForLoadState('domcontentloaded');
+    const dockerCodeTokens = page.locator('pre code .tok-keyword');
+    await expect(dockerCodeTokens.first()).toBeVisible();
+
+    await page.goto('/c-interop');
+    await page.waitForLoadState('domcontentloaded');
+    const cInteropCodeTokens = page.locator('pre code .tok-keyword');
+    await expect(cInteropCodeTokens.first()).toBeVisible();
+
+    expect(pageErrors).toEqual([]);
+  });
 });

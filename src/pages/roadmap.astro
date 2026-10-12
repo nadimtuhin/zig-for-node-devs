@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import RoadmapView from '../components/views/RoadmapView.astro';
 ---
@@ -10,8 +9,7 @@ import RoadmapView from '../components/views/RoadmapView.astro';
   description="Step-by-step visual learning roadmap for JavaScript, TypeScript, and Node.js developers learning Zig. Core milestones, memory models, comptime, and production systems."
   canonicalPath="/roadmap"
 >
-  <Header />
-  <main id="main-content" role="main" style="min-height: calc(100vh - 54px); overflow-y: auto;">
+  <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <RoadmapView />
     <Footer />
   </main>

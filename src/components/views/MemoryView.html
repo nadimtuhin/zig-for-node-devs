@@ -28,10 +28,10 @@
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
     <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">🔍 What is `std.mem.Allocator`?</h2>
     <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.5rem;">In Zig, an allocator is not a heavyweight C++ virtual class or an invisible runtime global. It is a 16-byte fat pointer consisting of two words:</p>
-    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code>pub const Allocator = struct {
-    ptr: *anyopaque,
-    vtable: *const VTable,
-    // VTable functions: alloc, resize, free
+    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code><span class="tok-keyword">pub</span> <span class="tok-keyword">const</span> Allocator = <span class="tok-keyword">struct</span> {
+    ptr: *<span class="tok-builtin">anyopaque</span>,
+    vtable: *<span class="tok-keyword">const</span> VTable,
+    <span class="tok-comment">// VTable functions: alloc, resize, free</span>
 };</code></pre>
   </div>
 
@@ -46,26 +46,26 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">gpa_example.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer {
-        const deinit_status = gpa.deinit();
-        if (deinit_status == .leak) {
-            std.debug.print("❌ Memory leak detected by GPA!\n", .{});
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
+    <span class="tok-keyword">var</span> gpa = std.heap.<span class="tok-func">GeneralPurposeAllocator</span>(.{}){};
+    <span class="tok-keyword">defer</span> {
+        <span class="tok-keyword">const</span> deinit_status = gpa.<span class="tok-func">deinit</span>();
+        <span class="tok-keyword">if</span> (deinit_status == .leak) {
+            std.debug.<span class="tok-func">print</span>(<span class="tok-string">"❌ Memory leak detected by GPA!\n"</span>, .{});
         }
     }
-    const allocator = gpa.allocator();
+    <span class="tok-keyword">const</span> allocator = gpa.<span class="tok-func">allocator</span>();
 
-    // Allocate dynamic slice
-    const numbers = try allocator.alloc(i32, 5);
-    defer allocator.free(numbers); // Pair allocation with defer free!
+    <span class="tok-comment">// Allocate dynamic slice</span>
+    <span class="tok-keyword">const</span> numbers = <span class="tok-keyword">try</span> allocator.<span class="tok-func">alloc</span>(<span class="tok-builtin">i32</span>, <span class="tok-number">5</span>);
+    <span class="tok-keyword">defer</span> allocator.<span class="tok-func">free</span>(numbers); <span class="tok-comment">// Pair allocation with defer free!</span>
 
-    for (numbers, 0..) |*val, idx| {
-        val.* = @intCast(idx * 10);
+    <span class="tok-keyword">for</span> (numbers, <span class="tok-number">0</span>..) |*val, idx| {
+        val.* = <span class="tok-builtin">@intCast</span>(idx * <span class="tok-number">10</span>);
     }
-    std.debug.print("Allocated: {any}\n", .{numbers});
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Allocated: {any}\n"</span>, .{numbers});
 }</code></pre>
       </div>
     </div>
@@ -79,27 +79,27 @@ pub fn main() !void {
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">arena_example.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-fn handleRequest(root_allocator: std.mem.Allocator) !void {
-    var arena = std.heap.ArenaAllocator.init(root_allocator);
-    defer arena.deinit(); // Instant batch cleanup for all 10,000 allocations!
-    const req_allocator = arena.allocator();
+<span class="tok-keyword">fn</span> <span class="tok-func">handleRequest</span>(root_allocator: std.mem.Allocator) !<span class="tok-builtin">void</span> {
+    <span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(root_allocator);
+    <span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>(); <span class="tok-comment">// Instant batch cleanup for all 10,000 allocations!</span>
+    <span class="tok-keyword">const</span> req_allocator = arena.<span class="tok-func">allocator</span>();
 
-    var list = std.ArrayList([]const u8).init(req_allocator);
-    var i: usize = 0;
-    while (i < 100) : (i += 1) {
-        const item = try std.fmt.allocPrint(req_allocator, "User session #{d}", .{i});
-        try list.append(item);
+    <span class="tok-keyword">var</span> list = std.<span class="tok-func">ArrayList</span>([]<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>).<span class="tok-func">init</span>(req_allocator);
+    <span class="tok-keyword">var</span> i: <span class="tok-builtin">usize</span> = <span class="tok-number">0</span>;
+    <span class="tok-keyword">while</span> (i &lt; <span class="tok-number">100</span>) : (i += <span class="tok-number">1</span>) {
+        <span class="tok-keyword">const</span> item = <span class="tok-keyword">try</span> std.fmt.<span class="tok-func">allocPrint</span>(req_allocator, <span class="tok-string">"User session #{d}"</span>, .{i});
+        <span class="tok-keyword">try</span> list.<span class="tok-func">append</span>(item);
     }
 
-    std.debug.print("Processed {d} items with zero individual frees!\n", .{list.items.len});
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Processed {d} items with zero individual frees!\n"</span>, .{list.items.len});
 }
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    try handleRequest(gpa.allocator());
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
+    <span class="tok-keyword">var</span> gpa = std.heap.<span class="tok-func">GeneralPurposeAllocator</span>(.{}){};
+    <span class="tok-keyword">defer</span> _ = gpa.<span class="tok-func">deinit</span>();
+    <span class="tok-keyword">try</span> <span class="tok-func">handleRequest</span>(gpa.<span class="tok-func">allocator</span>());
 }</code></pre>
       </div>
     </div>
@@ -113,17 +113,17 @@ pub fn main() !void {
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">fixed_buffer_example.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>const std = @import("std");
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-pub fn main() !void {
-    // 64 KB allocated strictly on the CPU stack
-    var stack_buffer: [64 * 1024]u8 = undefined;
-    var fba = std.heap.FixedBufferAllocator.init(&stack_buffer);
-    const allocator = fba.allocator();
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
+    <span class="tok-comment">// 64 KB allocated strictly on the CPU stack</span>
+    <span class="tok-keyword">var</span> stack_buffer: [<span class="tok-number">64</span> * <span class="tok-number">1024</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
+    <span class="tok-keyword">var</span> fba = std.heap.FixedBufferAllocator.<span class="tok-func">init</span>(&amp;stack_buffer);
+    <span class="tok-keyword">const</span> allocator = fba.<span class="tok-func">allocator</span>();
 
-    // Allocates inside stack_buffer with ZERO OS syscalls
-    const text = try std.fmt.allocPrint(allocator, "Ultra-fast stack formatted string: {d}", .{42});
-    std.debug.print("{s}\n", .{text});
+    <span class="tok-comment">// Allocates inside stack_buffer with ZERO OS syscalls</span>
+    <span class="tok-keyword">const</span> text = <span class="tok-keyword">try</span> std.fmt.<span class="tok-func">allocPrint</span>(allocator, <span class="tok-string">"Ultra-fast stack formatted string: {d}"</span>, .{<span class="tok-number">42</span>});
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"{s}\n"</span>, .{text});
 }</code></pre>
       </div>
     </div>
