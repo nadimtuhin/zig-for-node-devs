@@ -84,7 +84,7 @@ pub fn main() !void {
             .email = "nadim@example.com",
         };
 
-        const json_body = try std.fmt.allocPrint(req_allocator, "{f}", .{std.json.fmt(mock_user, .{})});
+        const json_body = try std.fmt.allocPrint(req_allocator, "{}", .{std.json.fmt(mock_user, .{})});
         const http_response = try std.fmt.allocPrint(
             req_allocator,
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{s}",

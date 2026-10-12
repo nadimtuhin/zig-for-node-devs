@@ -117,7 +117,7 @@ export const chapterInsights: Record<string, ChapterInsight> = {
     "footgun": "Combine `mutex.lock()` with `defer mutex.unlock()` immediately on the next line to ensure locks are never held permanently, even if errors occur."
   },
   "channel_patterns": {
-    "mentalModel": "In Go, goroutines communicate via built-in channels. In Zig, synchronization primitives (`Condition`, `Semaphore`, `ResetEvent`) give you granular control over locking and wakeup signaling without runtime scheduler baggage.",
+    "mentalModel": "In Go, goroutines communicate via built-in channels. In Zig, synchronization primitives (`Condition`, `Semaphore`, `Mutex`) give you granular control over locking and wakeup signaling without runtime scheduler baggage.",
     "footgun": "Zig lets you tailor queues for single-producer single-consumer (SPSC) lock-free execution for maximum throughput."
   },
   "event_loops_in_zig": {
