@@ -22,9 +22,7 @@ const initialChapter = chaptersData[initialKey];
 
     <Sidebar activeKey={initialKey} />
 
-    <section class="lesson-column" aria-label="Lesson Details and Architecture">
-      <LessonDetail chapterKey={initialKey} />
-    </section>
+    <LessonDetail chapterKey={initialKey} />
 
     <Playground chapterKey={initialKey} />
   </main>
