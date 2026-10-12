@@ -190,9 +190,9 @@ window.chaptersData = {
   },
   "generics_in_practice": {
     "num": "22",
-    "title": "Writing Generic Data Structures (Queue, HashMap)",
+    "title": "Writing Generic Data Structures (Generic Stack)",
     "part": "Part 5: Comptime \u2014 The Superpower of Zig",
-    "desc": "Step-by-step implementation of a type-safe generic RingBuffer and HashMap in idiomatic Zig.",
+    "desc": "Step-by-step implementation of a type-safe generic Stack backed by ArrayList in idiomatic Zig.",
     "nodeCode": "// JavaScript / TypeScript:\nclass SimpleQueue<T> {\n    private items: T[] = [];\n    push(item: T) { this.items.push(item); }\n    pop(): T | undefined { return this.items.shift(); }\n}",
     "code": "const std = @import(\"std\");\n\npub fn Stack(comptime T: type) type {\n    return struct {\n        items: std.ArrayList(T),\n\n        pub fn init(allocator: std.mem.Allocator) @This() {\n            return .{ .items = std.ArrayList(T).init(allocator) };\n        }\n\n        pub fn deinit(self: *@This()) void {\n            self.items.deinit();\n        }\n\n        pub fn push(self: *@This(), value: T) !void {\n            try self.items.append(value);\n        }\n\n        pub fn pop(self: *@This()) ?T {\n            return self.items.popOrNull();\n        }\n    };\n}\n\npub fn main() !void {\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n\n    var num_stack = Stack(i32).init(gpa.allocator());\n    defer num_stack.deinit();\n\n    try num_stack.push(10);\n    try num_stack.push(20);\n\n    std.debug.print(\"Popped item: {?}\\n\", .{num_stack.pop()});\n}",
     "why": "TypeScript classes with generics are runtime prototypes. Zig's generic patterns instantiate concrete structs tailored to the exact type `T`, generating optimal cache-friendly assembly for integers, structs, or pointers."
@@ -253,9 +253,9 @@ window.chaptersData = {
   },
   "channel_patterns": {
     "num": "29",
-    "title": "Thread Synchronization & Channels",
+    "title": "Thread Synchronization & Signaling Primitives",
     "part": "Part 7: Concurrency & Async in Zig",
-    "desc": "Building Go-style CSP channels and message queues in Zig using Condition Variables and Ring Buffers.",
+    "desc": "Coordinating worker threads without runtime overhead using `ResetEvent`, `Semaphore`, and atomic wakeups.",
     "nodeCode": "// JavaScript / TypeScript:\n// MessagePort in Node.js worker_threads\n// port.postMessage({ task: 'process' });",
     "code": "const std = @import(\"std\");\n\npub fn main() !void {\n    // Demonstration of thread synchronization using Semaphore / WaitGroup\n    var reset_event = std.Thread.ResetEvent{};\n\n    const worker = try std.Thread.spawn(.{}, struct {\n        fn run(ev: *std.Thread.ResetEvent) void {\n            std.debug.print(\"Worker waiting for signal...\\n\", .{});\n            ev.wait();\n            std.debug.print(\"Worker received trigger!\\n\", .{});\n        }\n    }.run, .{&reset_event});\n\n    std.time.sleep(std.time.ns_per_ms * 10);\n    reset_event.set();\n    worker.join();\n}",
     "why": "In Go, goroutines communicate via built-in channels. In Zig, synchronization primitives (`Condition`, `Semaphore`, `ResetEvent`) give you granular control over locking and wakeup signaling without runtime scheduler baggage."
@@ -345,9 +345,9 @@ window.chaptersData = {
     "num": "39",
     "title": "Building a High-Performance HTTP Server",
     "part": "Part 10: Building Real-World Systems & Microservices",
-    "desc": "Sockets, request parsing, and response framing. Comparing a native Zig HTTP server against Node.js Express.",
+    "desc": "Setting up TCP listeners, accepting connections, and framing responses. Comparing native Zig sockets against Node.js Express.",
     "nodeCode": "// JavaScript / TypeScript:\nimport express from 'express';\nconst app = express();\napp.get('/health', (req, res) => res.json({ status: 'ok' }));\napp.listen(3000);",
-    "code": "const std = @import(\"std\");\n\npub fn main() !void {\n    const address = try std.net.Address.parseIp4(\"127.0.0.1\", 3000);\n    var server = try address.listen(.{ .reuse_port = true });\n    defer server.deinit();\n\n    std.debug.print(\"Zig HTTP Server listening on http://127.0.0.1:3000\\n\", .{});\n    // In production, accept connections and write HTTP/1.1 response headers\n}",
+    "code": "const std = @import(\"std\");\n\npub fn main() !void {\n    const address = try std.net.Address.parseIp4(\"127.0.0.1\", 3000);\n    var server = try address.listen(.{ .reuse_address = true });\n    defer server.deinit();\n\n    std.debug.print(\"Zig HTTP Server listening on http://127.0.0.1:3000\\n\", .{});\n    // Accept connection socket:\n    // const conn = try server.accept();\n    // defer conn.stream.close();\n    // try conn.stream.writeAll(\"HTTP/1.1 200 OK\\r\\nContent-Length: 2\\r\\n\\r\\nOK\");\n}",
     "why": "Express adds multiple layers of middleware, object creation, and GC pressure to every HTTP request. A Zig HTTP server parses request lines directly into memory slices with zero heap allocations."
   },
   "json_parsing_comptime": {
