@@ -2,70 +2,70 @@
    ZIG FOR NODE DEVS BRAND THEME & ACCESSIBILITY SYSTEM
    ========================================================================== */
 :root {
-  /* ZIG BRAND PALETTE */
-  --zig-amber: #00add8;             /* Official Zig / Systems Cyan-Blue */
-  --zig-dark-amber: #007d9c;        /* Deep Cyan-Blue (WCAG AA compliant text on white: 4.8:1) */
-  --zig-dark-amber-hover: #00627a;  /* AAA contrast hover cyan (6.5:1) */
-  --zig-light-amber: #e0f2fe;       /* Soft cyan tinted background */
-  --zig-turquoise: #29beb0;         /* Systems turquoise accent */
-  --zig-navy: #0b2545;              /* Accent Navy (deep brand contrast) */
-  --zig-dark: #0f172a;              /* Slate-900 developer dark aesthetics */
+  /* ZIG BRAND PALETTE (Authentic Zig Amber) */
+  --zig-amber: #f7a41d;             /* Official Zig Amber/Orange */
+  --zig-dark-amber: #d97706;        /* Deep Amber text */
+  --zig-dark-amber-hover: #b45309;  /* Accessible dark amber */
+  --zig-light-amber: #fef3c7;       /* Soft amber tinted background */
+  --zig-turquoise: #00add8;         /* Secondary accent */
+  --zig-navy: #0f172a;              /* Slate-900 */
+  --zig-dark: #0f172a;
 
   /* ACCENT HIGHLIGHTS (WCAG AA & AAA COMPLIANT) */
-  --emerald-success: #047857;     /* Emerald success (5.2:1 on white) */
+  --emerald-success: #059669;
   --emerald-bg: #ecfdf5;
   --emerald-border: #a7f3d0;
-  --amber-warning: #b45309;       /* Darkened amber warning (5.0:1 on white) */
-  --amber-bg: #fef3c7;
-  --amber-border: #fde68a;
-  --error: #dc2626;               /* Accessible error red */
+  --amber-warning: #d97706;
+  --amber-bg: #fffbeb;
+  --amber-border: #fef3c7;
+  --error: #dc2626;
   --error-bg: #fef2f2;
   --error-border: #fecaca;
 
-  /* NEUTRAL BACKGROUNDS & SURFACES (CLEAN LIGHT MODE) */
-  --bg: #f8fafc;                  /* Clean, crisp light mode neutral page background */
-  --panel: #ffffff;               /* Pure white cards & containers */
+  /* NEUTRAL BACKGROUNDS & SURFACES (GITBOOK CLEAN SLATE/WHITE) */
+  --bg: #ffffff;                  /* Pure clean GitBook white */
+  --panel: #ffffff;
   --sidebar-nav: #f8fafc;
   --detail-bg: #ffffff;
-  --border: #e2e8f0;              /* Subtle border */
+  --border: #e2e8f0;              /* Crisp 1px border */
   --border-subtle: #f1f5f9;
   --border-dark: #cbd5e1;
 
   /* TYPOGRAPHY SCALE & ACCESSIBLE CONTRAST */
-  --text: #0f172a;                /* Crisp dark text (15.5:1 on white, WCAG AAA) */
-  --text-body: #334155;           /* Body copy (7.6:1 on white, WCAG AAA) */
-  --text-muted: #475569;          /* Secondary/muted text (4.7:1 on white, WCAG AA compliant) */
+  --text: #0f172a;                /* Deep Slate Header (15.5:1 on white) */
+  --text-body: #334155;           /* Slate-700 readable body (7.6:1 on white) */
+  --text-muted: #64748b;          /* Slate-500 secondary text */
 
   /* KEYBOARD ACCESSIBILITY & FOCUS STATES */
-  --focus-ring: #00add8;          /* High-visibility focus ring */
+  --focus-ring: #f7a41d;
   --focus-ring-offset: 2px;
 
   /* CODE & TERMINAL AESTHETICS */
-  --console-bg: #0b2545;          /* Navy terminal background */
-  --console-header-bg: #0f172a;   /* Dark navy console header */
-  --console-text: #f1f5f9;        /* High-contrast crisp terminal font (14.2:1) */
-  --console-muted: #cbd5e1;       /* High-contrast secondary terminal info (8.5:1) */
+  --console-bg: #0f172a;          /* Slate-900 terminal */
+  --console-header-bg: #020617;
+  --console-text: #f8fafc;
+  --console-muted: #94a3b8;
 
   /* COMPATIBILITY ALIASES */
-  --go-navy: #0b2545;
-  --zig-orange: #007d9c;
-  --zig-orange-hover: #00627a;
-  --node-green: #047857;
+  --go-navy: #0f172a;
+  --zig-orange: #f7a41d;
+  --zig-orange-hover: #d97706;
+  --node-green: #059669;
   --node-green-bg: #ecfdf5;
-  --accent-yellow: #b45309;
+  --accent-yellow: #d97706;
   --accent-yellow-bg: #fef3c7;
 
-  /* RADII & ELEVATION SHADOWS */
+  /* RADII & ELEVATION SHADOWS (GITBOOK FLAT/SUBTLE) */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --shadow-sm: 0 1px 2px rgba(11, 37, 69, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(11, 37, 69, 0.06), 0 2px 4px -2px rgba(11, 37, 69, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(11, 37, 69, 0.08), 0 4px 6px -4px rgba(11, 37, 69, 0.04);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
 
   /* FONT FAMILIES */
-  --font-ui: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 * {
@@ -567,29 +567,29 @@ header {
 
 .gitbook-comparison-box {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1.1rem 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .gitbook-callout-box {
-  background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
-  border: 1px solid #99f6e4;
-  border-left: 4px solid #007D9C;
-  border-radius: 8px;
-  padding: 1.15rem 1.35rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--zig-amber);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .gitbook-sandbox {
   width: 100% !important;
   min-width: 0 !important;
   background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
 }
@@ -598,24 +598,24 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.65rem 1.1rem;
-  background: #f1f5f9;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 1.25rem;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
 }
 
 .gitbook-sandbox-title {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.825rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .gitbook-sandbox-hint {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .gitbook-sandbox .editor-container {
@@ -630,35 +630,36 @@ header {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
 }
 
 .gitbook-pager-card {
   display: flex;
   flex-direction: column;
-  padding: 1.1rem 1.35rem;
+  padding: 1.25rem 1.5rem;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   font-family: inherit;
+  box-shadow: var(--shadow-sm);
 }
 
 .gitbook-pager-card.next {
   text-align: right;
   align-items: flex-end;
-  border-color: #bae6fd;
-  background: #f0f9ff;
+  border-color: #fed7aa;
+  background: #fffbeb;
 }
 
 .gitbook-pager-card:hover {
-  border-color: #00ADD8;
+  border-color: var(--zig-amber);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 173, 216, 0.14);
+  box-shadow: var(--shadow-md);
 }
 
 .pager-direction {
@@ -666,7 +667,7 @@ header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #007D9C;
+  color: var(--zig-dark-amber);
   margin-bottom: 0.25rem;
 }
 
