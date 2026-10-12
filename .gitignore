@@ -4,3 +4,8 @@ dist/
 .DS_Store
 *.log
 .env.local
+.vercel
+
+test-results/
+playwright-report/
+.omh/

@@ -138,6 +138,36 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
         editor.setValue(data.code);
       }
 
+      // Update Top Nav Pager Buttons (Prev / Next)
+      if (window.chaptersData) {
+        const keys = Object.keys(window.chaptersData);
+        const currIdx = keys.indexOf(key);
+        const hasPrev = currIdx > 0;
+        const hasNext = currIdx !== -1 && currIdx < keys.length - 1;
+
+        const prevBtn = document.getElementById('btnTopPrevLesson');
+        if (prevBtn) {
+          prevBtn.disabled = !hasPrev;
+          prevBtn.classList.toggle('disabled', !hasPrev);
+          if (hasPrev) {
+            prevBtn.title = `Previous: ${window.chaptersData[keys[currIdx - 1]].title}`;
+          } else {
+            prevBtn.removeAttribute('title');
+          }
+        }
+
+        const nextBtn = document.getElementById('btnTopNextLesson');
+        if (nextBtn) {
+          nextBtn.disabled = !hasNext;
+          nextBtn.classList.toggle('disabled', !hasNext);
+          if (hasNext) {
+            nextBtn.title = `Next: ${window.chaptersData[keys[currIdx + 1]].title}`;
+          } else {
+            nextBtn.removeAttribute('title');
+          }
+        }
+      }
+
       updateStatus('Ready', 'ready');
       const consoleArea = document.getElementById('consoleArea');
       if (consoleArea) {
@@ -301,13 +331,10 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
         const data = await response.json();
         
         if (data.code !== 0 && (data.stderr && data.stderr.length > 0)) {
-          const errText = data.stderr.map(e => e.text).join('
-');
+          const errText = data.stderr.map(e => e.text).join('\n');
           if (consoleArea) {
             consoleArea.className = 'console-body is-error';
-            consoleArea.textContent = '❌ Compilation Failed:
-
-' + errText;
+            consoleArea.textContent = '❌ Compilation Failed:\n\n' + errText;
           }
           if (statusDot) statusDot.className = 'status-dot error';
           if (statusTag) {
@@ -333,8 +360,7 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
           
           if (consoleArea) {
             consoleArea.className = 'console-body';
-            consoleArea.textContent = outLines.join('
-');
+            consoleArea.textContent = outLines.join('\n');
           }
           if (statusDot) statusDot.className = 'status-dot';
           if (statusTag) {
@@ -347,11 +373,7 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
         if (statusLatency) statusLatency.innerText = `${elapsed}ms`;
         if (consoleArea) {
           consoleArea.className = 'console-body is-error';
-          consoleArea.textContent = '⚠️ Request Failed:
-' + err.message + '
-
-Tip: You can verify your Zig code locally via:
-  zig run main.zig';
+          consoleArea.textContent = '⚠️ Request Failed:\n' + err.message + '\n\nTip: You can verify your Zig code locally via:\n  zig run main.zig';
         }
         if (statusDot) statusDot.className = 'status-dot error';
         if (statusTag) {
