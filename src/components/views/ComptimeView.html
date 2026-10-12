@@ -7,7 +7,7 @@
 
   <!-- CONCEPTUAL OVERVIEW -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-    <h3 style="font-size: 1.25rem; font-weight: 700; margin-top: 0; color: #0f172a;">⚡ What is `comptime`?</h3>
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 0; color: #0f172a;">⚡ What is `comptime`?</h2>
     <p style="color: #475569; margin-bottom: 0.75rem;">In TypeScript, generics are stripped at build time (type erasure), leaving zero trace at runtime. To inspect objects dynamically in Node.js, you must rely on expensive runtime reflection (<code>Object.keys()</code>, <code>Reflect.get()</code>, <code>class-transformer</code>). In C++, template metaprogramming introduces cryptic compiler errors and huge build times.</p>
     <p style="color: #475569; margin: 0;">In Zig, <strong>types are first-class values at compile time</strong>. You write ordinary Zig functions, loops, and switches. When a parameter or expression is marked <code>comptime</code>, the Zig compiler executes that code during compilation inside its internal virtual machine, generating specialized, zero-overhead machine code.</p>
   </div>
@@ -146,7 +146,8 @@ pub fn main() void {
 
   <!-- COMPARISON TABLE -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-    <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">TypeScript vs Zig Metaprogramming</h3>
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">TypeScript vs Zig Metaprogramming</h2>
+  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
     <table style="width: 100%; border-collapse: collapse; margin-top: 0.75rem; border: 1px solid #e2e8f0; font-size: 0.92rem;">
       <thead>
         <tr style="background: #f1f5f9; text-align: left;">

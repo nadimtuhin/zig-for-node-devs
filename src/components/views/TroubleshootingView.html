@@ -7,7 +7,7 @@
 
   <div style="display: flex; flex-direction: column; gap: 2rem;">
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-      <h3 style="color: #0f172a; margin-top: 0;">1. Detecting Memory Leaks with GPA</h3>
+      <h2 style="color: #0f172a; margin-top: 0;">1. Detecting Memory Leaks with GPA</h2>
       <p style="color: #475569;">In Debug and Test modes, <code>GeneralPurposeAllocator</code> outputs stack traces for any allocation that was not freed prior to program exit.</p>
       <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px;"><code>const std = @import("std");
 
@@ -21,7 +21,7 @@ pub fn main() !void {
     </div>
 
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-      <h3 style="color: #0f172a; margin-top: 0;">2. Native Breakpoints with LLDB / GDB</h3>
+      <h2 style="color: #0f172a; margin-top: 0;">2. Native Breakpoints with LLDB / GDB</h2>
       <p style="color: #475569;">Zig binaries compile with rich DWARF debug information by default in Debug mode. Step through your code directly in terminal:</p>
       <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px;"><code># Build with debug symbols
 zig build

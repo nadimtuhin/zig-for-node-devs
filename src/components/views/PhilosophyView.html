@@ -6,7 +6,7 @@
   </div>
 
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-    <h3 style="color: #0f172a; margin-top: 0;">What Zig Deliberately Left Out (and WHY)</h3>
+    <h2 style="color: #0f172a; margin-top: 0;">What Zig Deliberately Left Out (and WHY)</h2>
     <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
       <li><strong>NO Operator Overloading:</strong> In C++ or Python, <code>a + b</code> might invoke an arbitrary 500-line method or network call. In Zig, <code>+</code> is always simple hardware integer or float addition.</li>
       <li><strong>NO Hidden Control Flow:</strong> There are no exceptions, no <code>setjmp/longjmp</code>, and no hidden property getters. A function call looks like <code>f()</code>, and an error return looks like <code>try</code> or <code>catch</code>.</li>

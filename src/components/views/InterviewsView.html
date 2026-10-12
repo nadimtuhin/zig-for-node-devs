@@ -7,22 +7,22 @@
 
   <div style="display: flex; flex-direction: column; gap: 1.75rem;">
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q1: Why does Zig pass an explicit Allocator to functions rather than using a global malloc?</h3>
+      <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q1: Why does Zig pass an explicit Allocator to functions rather than using a global malloc?</h2>
       <p style="color: #475569; line-height: 1.6;"><strong>Answer:</strong> Passing allocators explicitly eliminates hidden control flow and hidden side effects. It allows callers to determine memory lifecycles based on usage patterns: an HTTP request handler can pass a fast <code>ArenaAllocator</code> that deallocates all allocations at once upon request completion, while a unit test passes <code>std.testing.allocator</code> to detect leaks. Functions that take no allocator are mathematically guaranteed never to allocate heap memory.</p>
     </div>
 
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q2: How does `comptime` achieve generics without C++ template bloat or runtime type erasure?</h3>
+      <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q2: How does `comptime` achieve generics without C++ template bloat or runtime type erasure?</h2>
       <p style="color: #475569; line-height: 1.6;"><strong>Answer:</strong> In Zig, types are first-class values at compile time. A generic struct is simply a regular function that accepts a <code>comptime T: type</code> parameter and returns a <code>type</code>. The compiler executes normal Zig code during compile time to construct the struct layout. There is no special template metaprogramming language to learn, compile times remain rapid, and the resulting machine code has zero runtime reflection overhead.</p>
     </div>
 
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q3: How are optional pointers `?*T` represented in memory under the hood?</h3>
+      <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q3: How are optional pointers `?*T` represented in memory under the hood?</h2>
       <p style="color: #475569; line-height: 1.6;"><strong>Answer:</strong> Zig optimizes optional pointers with zero space overhead using pointer tagging. Because a valid pointer in modern operating systems cannot be null (address <code>0</code>), Zig represents <code>null</code> as the null pointer value <code>0x0</code>. Therefore, <code>?*T</code> occupies exactly 8 bytes on a 64-bit architecture (the same as a raw pointer), avoiding any extra boolean discriminant flag.</p>
     </div>
 
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h3 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q4: What is the mechanical difference between an Array `[N]T` and a Slice `[]T`?</h3>
+      <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Q4: What is the mechanical difference between an Array `[N]T` and a Slice `[]T`?</h2>
       <p style="color: #475569; line-height: 1.6;"><strong>Answer:</strong> An array <code>[N]T</code> has a fixed length known at compile time, and its values reside directly in place (e.g. on the stack or inline in a struct). A slice <code>[]T</code> is a 16-byte fat pointer consisting of a pointer to the first element (<code>[*]T</code>) and a runtime length (<code>usize</code>). Slices do not own memory; they represent a view over contiguous elements with runtime bounds checking in Debug and ReleaseSafe modes.</p>
     </div>
   </div>

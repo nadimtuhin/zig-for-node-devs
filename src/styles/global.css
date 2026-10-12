@@ -3,19 +3,19 @@
    ========================================================================== */
 :root {
   /* ZIG BRAND PALETTE */
-  --zig-amber: #00add8;             /* Official Go Blue (Primary Brand Cyan/Blue) */
-  --zig-dark-amber: #007d9c;        /* Go Dark Cyan (WCAG AA compliant text on white: 4.8:1) */
+  --zig-amber: #00add8;             /* Official Zig / Systems Cyan-Blue */
+  --zig-dark-amber: #007d9c;        /* Deep Cyan-Blue (WCAG AA compliant text on white: 4.8:1) */
   --zig-dark-amber-hover: #00627a;  /* AAA contrast hover cyan (6.5:1) */
   --zig-light-amber: #e0f2fe;       /* Soft cyan tinted background */
-  --go-gopher-turquoise: #29beb0; /* Go Gopher turquoise accent */
-  --go-navy: #0b2545;             /* Go Accent Navy (deep brand contrast) */
-  --go-dark: #0f172a;             /* Slate-900 developer dark aesthetics */
+  --zig-turquoise: #29beb0;         /* Systems turquoise accent */
+  --zig-navy: #0b2545;              /* Accent Navy (deep brand contrast) */
+  --zig-dark: #0f172a;              /* Slate-900 developer dark aesthetics */
 
   /* ACCENT HIGHLIGHTS (WCAG AA & AAA COMPLIANT) */
-  --emerald-success: #059669;     /* Emerald success (4.5:1 on white) */
+  --emerald-success: #047857;     /* Emerald success (5.2:1 on white) */
   --emerald-bg: #ecfdf5;
   --emerald-border: #a7f3d0;
-  --amber-warning: #d97706;       /* Amber warning */
+  --amber-warning: #b45309;       /* Darkened amber warning (5.0:1 on white) */
   --amber-bg: #fef3c7;
   --amber-border: #fde68a;
   --error: #dc2626;               /* Accessible error red */
@@ -37,11 +37,11 @@
   --text-muted: #475569;          /* Secondary/muted text (4.7:1 on white, WCAG AA compliant) */
 
   /* KEYBOARD ACCESSIBILITY & FOCUS STATES */
-  --focus-ring: #00add8;          /* High-visibility official Go Blue outline */
+  --focus-ring: #00add8;          /* High-visibility focus ring */
   --focus-ring-offset: 2px;
 
   /* CODE & TERMINAL AESTHETICS */
-  --console-bg: #0b2545;          /* Go Accent Navy terminal background */
+  --console-bg: #0b2545;          /* Navy terminal background */
   --console-header-bg: #0f172a;   /* Dark navy console header */
   --console-text: #f1f5f9;        /* High-contrast crisp terminal font (14.2:1) */
   --console-muted: #cbd5e1;       /* High-contrast secondary terminal info (8.5:1) */
@@ -49,9 +49,9 @@
   /* COMPATIBILITY ALIASES */
   --zig-orange: #007d9c;
   --zig-orange-hover: #00627a;
-  --node-green: #059669;
+  --node-green: #047857;
   --node-green-bg: #ecfdf5;
-  --accent-yellow: #d97706;
+  --accent-yellow: #b45309;
   --accent-yellow-bg: #fef3c7;
 
   /* RADII & ELEVATION SHADOWS */
@@ -434,7 +434,8 @@ header {
 /* ==========================================================================
    GITBOOK-STYLE BOOK READER LAYOUT
    ========================================================================== */
-.studio-container {
+.studio-container,
+.studio-main-3col {
   display: flex;
   flex: 1;
   height: calc(100vh - 54px);
@@ -686,7 +687,8 @@ header {
   transition: margin-left 0.25s ease, opacity 0.2s ease;
 }
 
-.studio-container.sidebar-collapsed .chapters-sidebar {
+.studio-container.sidebar-collapsed .chapters-sidebar,
+.studio-main-3col.sidebar-collapsed .chapters-sidebar {
   margin-left: -300px;
   opacity: 0;
   pointer-events: none;
@@ -895,7 +897,8 @@ header {
   transition: width 0.25s ease, max-width 0.25s ease;
 }
 
-.studio-container.sidebar-collapsed .lesson-detail-panel {
+.studio-container.sidebar-collapsed .lesson-detail-panel,
+.studio-main-3col.sidebar-collapsed .lesson-detail-panel {
   width: 520px;
   max-width: 650px;
 }
@@ -911,7 +914,7 @@ header {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--zig-dark-amber);
+  color: var(--zig-dark-amber-hover);
   background: var(--zig-light-amber);
   border: 1px solid #bae6fd;
   padding: 0.2rem 0.55rem;
@@ -1893,6 +1896,13 @@ main#main-content:not(.playground-column) {
 }
 
 @media (max-width: 860px) {
+  .studio-main-3col {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 54px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   /* GitBook single scroll container on phone & tablet */
   .studio-container,
   .gitbook-container {
@@ -1921,6 +1931,8 @@ main#main-content:not(.playground-column) {
     margin-left: 0 !important;
   }
 
+  .chapters-sidebar.mobile-open,
+  .studio-main-3col.mobile-sidebar-open .chapters-sidebar,
   .studio-container.mobile-sidebar-open .chapters-sidebar,
   .gitbook-container.mobile-sidebar-open .chapters-sidebar {
     transform: translateX(0);
@@ -1943,6 +1955,8 @@ main#main-content:not(.playground-column) {
     transition: opacity 0.25s ease;
   }
 
+  .sidebar-backdrop.active,
+  .studio-main-3col.mobile-sidebar-open .sidebar-backdrop,
   .studio-container.mobile-sidebar-open .sidebar-backdrop,
   .gitbook-container.mobile-sidebar-open .sidebar-backdrop {
     opacity: 1;
@@ -2079,6 +2093,15 @@ main#main-content:not(.playground-column) {
   }
 }
 
+/* Global pre and responsive table overflow guards */
+pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
-
-
+.table-responsive-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 1.25rem 0;
+  -webkit-overflow-scrolling: touch;
+}
