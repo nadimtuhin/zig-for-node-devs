@@ -1,7 +1,7 @@
 window.chapterInsights = {
   "basic_vars": {
     "mentalModel": "In JavaScript, all numbers are 64-bit IEEE-754 floats. In Zig, integers have precise bit-widths (`u8`, `i32`, `u64`, `usize`, `isize`). Variables are `const` by default to avoid unintended state mutations.",
-    "footgun": "Variables declared with `= undefined` contain uninitialized memory for performance, which triggers runtime panics in Debug mode if read before write."
+    "footgun": "Variables declared with `= undefined` contain uninitialized memory; in Debug mode, Zig poisons this memory with `0xaa` bytes to expose accidental uninitialized reads."
   },
   "functions_params": {
     "mentalModel": "In JS/TS, function arguments are mutable local variables by default. In Zig, function parameters are always immutable `const`. This allows the Zig compiler to optimize passing by value or invisible pointer without defensive copying.",
@@ -17,7 +17,7 @@ window.chapterInsights = {
   },
   "control_flow": {
     "mentalModel": "Zig does not have C-style `for (int i=0; i<N; i++)`. Instead, Zig's `for` operates over slices or ranges, and `while` features an optional continue expression `: (step += 1)` to prevent infinite loop errors.",
-    "footgun": "Loops can capture indexes using the `0..` range syntax inside the capture bar `|val, idx|`."
+    "footgun": "Loops capture indexes by passing the range `0..` into the `for` header alongside the slice: `for (slice, 0..) |val, idx|`."
   },
   "blocks_as_expressions": {
     "mentalModel": "JavaScript developers constantly use IIFEs `(() => { ... })()` or complex nested ternaries to initialize complex `const` values. Zig lets any labeled block return a value cleanly via `break :label val`.",
