@@ -5,10 +5,10 @@
   "description": "Interactive, visual learning platform and live playground tailored for Node.js & TypeScript developers learning Zig.",
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
+    "start": "astro preview",
     "build": "astro build",
     "preview": "astro preview",
-    "test:e2e": "playwright test",
+    "test:e2e": "astro build && playwright test",
     "astro": "astro"
   },
   "dependencies": {
