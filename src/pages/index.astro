@@ -123,10 +123,10 @@ const initialChapter = chaptersData[initialKey];
       if (walkthroughEl) walkthroughEl.innerHTML = data.walkthroughHtml;
 
       const mentalModelEl = document.getElementById('detailInsightMentalModel');
-      if (mentalModelEl) mentalModelEl.innerText = insight.mentalModel || '';
+      if (mentalModelEl) mentalModelEl.innerHTML = insight.mentalModelHtml || '';
 
       const footgunEl = document.getElementById('detailInsightFootgun');
-      if (footgunEl) footgunEl.innerText = insight.footgun || '';
+      if (footgunEl) footgunEl.innerHTML = insight.footgunHtml || '';
 
       const fileTab = document.getElementById('editorCurrentFile');
       if (fileTab) fileTab.innerText = `📄 main.zig — ${data.title}`;

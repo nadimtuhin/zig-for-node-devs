@@ -41,3 +41,19 @@ test('client-side chapter switching renders the same walkthrough as the server',
   await expect(page.locator('#detailZigWhy code').first()).toBeVisible();
   await expect(page.locator('#detailZigWhy')).not.toContainText('`');
 });
+
+test('chapter insights render inline code on the server and after client-side switching', async ({ page }) => {
+  await page.goto('/chapter/basic_vars');
+  for (const id of ['#detailInsightMentalModel', '#detailInsightFootgun']) {
+    await expect(page.locator(`${id} code`).first()).toBeVisible();
+    await expect(page.locator(id)).not.toContainText('`');
+  }
+
+  await page.locator('#btnNextLesson').click();
+  await expect(page.locator('#detailTitle')).toHaveText(chaptersData[chapterKeys[1]].title);
+  for (const id of ['#detailInsightMentalModel', '#detailInsightFootgun']) {
+    await expect(page.locator(id)).not.toBeEmpty();
+    await expect(page.locator(id)).not.toContainText('`');
+  }
+  await expect(page.locator('#detailInsightMentalModel code').first()).toBeVisible();
+});

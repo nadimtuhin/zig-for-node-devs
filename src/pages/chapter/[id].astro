@@ -5,6 +5,7 @@ import LessonDetail from '../../components/LessonDetail.astro';
 import Playground from '../../components/Playground.astro';
 import { chaptersData } from '../../data/chapters';
 import { chapterInsights } from '../../data/chapterInsights';
+import { stripInlineMarkdown } from '../../lib/inlineMarkdown';
 
 export function getStaticPaths() {
   return Object.keys(chaptersData).map((id) => ({
@@ -21,11 +22,11 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
 const chapterFaq = [
   {
     question: `How does ${chapter.title} in Zig differ from Node.js / JavaScript?`,
-    answer: insight.mentalModel
+    answer: stripInlineMarkdown(insight.mentalModel)
   },
   {
     question: `What is the common pitfall or footgun in Zig for ${chapter.title}?`,
-    answer: insight.footgun
+    answer: stripInlineMarkdown(insight.footgun)
   }
 ];
 ---
@@ -157,10 +158,10 @@ const chapterFaq = [
       if (walkthroughEl) walkthroughEl.innerHTML = data.walkthroughHtml;
 
       const mentalModelEl = document.getElementById('detailInsightMentalModel');
-      if (mentalModelEl) mentalModelEl.innerText = insight.mentalModel || '';
+      if (mentalModelEl) mentalModelEl.innerHTML = insight.mentalModelHtml || '';
 
       const footgunEl = document.getElementById('detailInsightFootgun');
-      if (footgunEl) footgunEl.innerText = insight.footgun || '';
+      if (footgunEl) footgunEl.innerHTML = insight.footgunHtml || '';
 
       const fileTab = document.getElementById('editorCurrentFile');
       if (fileTab) fileTab.innerText = `📄 main.zig — ${data.title}`;

@@ -7,7 +7,7 @@ const { chapterKey = 'basic_vars' } = Astro.props;
 import { chaptersData } from '../data/chapters';
 import { chapterInsights } from '../data/chapterInsights';
 import { highlightJS } from '../utils/highlight';
-import { renderListItems, renderParagraphs, stripInlineMarkdown } from '../lib/inlineMarkdown';
+import { renderInlineCode, renderListItems, renderParagraphs, stripInlineMarkdown } from '../lib/inlineMarkdown';
 
 const chapter = chaptersData[chapterKey] || chaptersData['basic_vars'];
 const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
@@ -87,10 +87,10 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
       <h2 class="insight-heading">⚡ Zig Systems Architecture Insight</h2>
       <dl class="insight-definition-list">
         <dt class="insight-term insight-term-model">Mental Model</dt>
-        <dd class="insight-desc" id="detailInsightMentalModel">{insight.mentalModel}</dd>
+        <dd class="insight-desc" id="detailInsightMentalModel" set:html={renderInlineCode(insight.mentalModel)} />
         
         <dt class="insight-term insight-term-footgun">Footgun</dt>
-        <dd class="insight-desc" id="detailInsightFootgun">{insight.footgun}</dd>
+        <dd class="insight-desc" id="detailInsightFootgun" set:html={renderInlineCode(insight.footgun)} />
       </dl>
     </div>
   </section>

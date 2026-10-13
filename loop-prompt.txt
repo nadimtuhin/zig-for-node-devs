@@ -2,19 +2,17 @@ You are an elite SEO, AEO (Answer Engine Optimization for Perplexity, ChatGPT, C
 Target project: /Users/nadimtuhin/opensource/zig-for-node-devs
 Target URL: https://zig-for-node-devs.vercel.app
 
-Execute LOOP 4: Chapter Content Expansion & In-Depth Technical Explanations.
-Goal: Transform every chapter's explanation and takeaway from brief summaries into exhaustive, authoritative, citable technical references. AEO engines (Perplexity, ChatGPT, Claude) cite sources that provide clear definitions, memory model comparisons, and exact syntax mechanics.
+Execute LOOP 5: Technical Accuracy, Code Verification & False Claims Audit (Zig 0.13.0 / 0.14.0 LTS compatibility).
+CRITICAL DIRECTIVE: The user explicitly demanded: "make sure contents are solid no false claims".
 
-Tasks in this loop:
-1. Audit and deepen `src/data/chapters.ts`:
-   - Inspect all 56 chapters in `src/data/chapters.ts`.
-   - Ensure every chapter has:
-     * `desc`: clear, authoritative, punchy (no raw backticks in short metadata; clean typography).
-     * `why`: an in-depth systems explanation detailing the concrete V8 runtime / JS engine mechanics vs Zig compiler mechanics (e.g. stack allocation vs heap, zero-cost slices, explicit bitwidth, error union payload layout, comptime code execution, allocator lifetimes).
-     * Provide concrete, technically precise commentary explaining what the code is doing line-by-line.
-2. Synchronize data stores:
-   - Ensure any additions to `src/data/chapters.ts` are synchronized with `public/chapters-data.js` so client-side CodeMirror and lesson viewer render the updated text seamlessly.
-3. Strip unrendered raw markdown backticks in meta descriptions (`og:description` and `meta[name="description"]` in `Layout.astro` or helper function) so search engine snippets look pristine.
-4. Validation:
-   - Run `npm run build` and `npx playwright test`.
-   - Verify that all 56 chapters load with zero formatting errors or broken layout.
+In Loop 4, the audit identified several specific technical issues in chapter code examples:
+1. `comptime_reflection`: Uses the Zig 0.14-only syntax `.@"struct"`, causing failures on Zig 0.13. Make sure code examples are either compatible with Zig 0.13/0.14 or explicitly clarify version differences.
+2. `custom_allocator_implementation`: References `.remap` which does not exist in Zig 0.13 std.mem.Allocator.VTable. Replace or align with idiomatic Zig 0.13/0.14 Allocator VTable (`alloc`, `resize`, `free`).
+3. `graceful_shutdown`: The POSIX signal handler example never properly registered the handler with `std.os.linux.sigaction` or `std.posix.sigaction`. Make it a working, idiomatic example.
+4. `wasm_compilation`: Calls `std.debug.print` directly which panics or fails on `wasm32-freestanding`. Fix to a proper freestanding wasm export function (`export fn add(a: i32, b: i32) i32 { return a + b; }`).
+5. `http_server_fundamentals`: Check `std.http.Server` usage for 0.13 compatibility (`std.net.Address.listen`, `std.http.Server.init`).
+6. `database_sqlite`: Ensure the embedded SQLite example correctly reflects Zig's C-ABI integration with `@cImport`.
+7. `chapterInsights`: In `src/data/chapterInsights.ts` and `public/chapter-insights.js`, eliminate raw backticks in dynamic UI rendering or format properly with inline code tags, and audit every `mentalModel` and `footgun` for 100% technical truth.
+8. Delete obsolete root Python scripts (`apply_final_polish.py`, `build_full_zig_curriculum.py`, `update_curriculum_and_views.py`) that could accidentally overwrite `chapters.ts` or recreate stale files.
+
+Run `pnpm build` and `npx playwright test` to verify everything builds cleanly with 0 errors.

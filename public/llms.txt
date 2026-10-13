@@ -108,13 +108,13 @@ Format: every lesson has (1) a JS/TS example, (2) the idiomatic Zig version, (3)
 ## Part 10: Building Real-World Systems & Microservices
 
 - [39. Building a High-Performance HTTP Server](https://zig-for-node-devs.vercel.app/chapter/http_server_fundamentals): Setting up TCP listeners, accepting connections, and framing responses. Comparing native Zig sockets against Node.js Express.
-- [40. Zero-Allocation JSON Parsing with `std.json`](https://zig-for-node-devs.vercel.app/chapter/json_parsing_comptime): Replacing `JSON.parse` and `zod` with type-safe comptime schema deserialization.
+- [40. Typed JSON Parsing with `std.json`](https://zig-for-node-devs.vercel.app/chapter/json_parsing_comptime): Replacing `JSON.parse` and `zod` with type-safe comptime schema deserialization.
 - [41. Database Persistence with SQLite & C Drivers](https://zig-for-node-devs.vercel.app/chapter/database_sqlite): Embedding SQLite directly into your Zig microservice binary with zero external daemon dependencies.
 - [42. Signal Handling & Graceful Shutdown](https://zig-for-node-devs.vercel.app/chapter/graceful_shutdown): Handling `SIGINT` (Ctrl+C) and `SIGTERM` gracefully. Draining active connections and flushing pending buffers.
 
 ## Part 11: Production Deployment & Docker
 
-- [43. Ultra-Minimal Docker Containers (< 5MB Scratch)](https://zig-for-node-devs.vercel.app/chapter/docker_scratch_containers): Packaging Zig microservices into zero-vulnerability `scratch` Docker containers vs 200MB+ Node.js images.
+- [43. Ultra-Minimal Docker Containers (Scratch Images of a Few MB)](https://zig-for-node-devs.vercel.app/chapter/docker_scratch_containers): Packaging Zig microservices into zero-vulnerability `scratch` Docker containers vs 200MB+ Node.js images.
 - [44. CI/CD Workflows with GitHub Actions & Cache](https://zig-for-node-devs.vercel.app/chapter/ci_cd_github_actions): Automating `zig build`, `zig test`, and cross-platform binary releases across macOS, Linux, and Windows.
 - [45. Observability: Prometheus Metrics & Tracing](https://zig-for-node-devs.vercel.app/chapter/observability_metrics): Exposing Prometheus metrics endpoints (`/metrics`) and counting events with atomic counters.
 
