@@ -4,7 +4,7 @@
 :root {
   /* ZIG BRAND PALETTE (Authentic Zig Amber) */
   --zig-amber: #f7a41d;             /* Official Zig Amber/Orange */
-  --zig-dark-amber: #d97706;        /* Deep Amber text */
+  --zig-dark-amber: #b45309;        /* Deep Amber text */
   --zig-dark-amber-hover: #b45309;  /* Accessible dark amber */
   --zig-light-amber: #fef3c7;       /* Soft amber tinted background */
   --zig-turquoise: #00add8;         /* Secondary accent */
@@ -12,7 +12,7 @@
   --zig-dark: #0f172a;
 
   /* ACCENT HIGHLIGHTS (WCAG AA & AAA COMPLIANT) */
-  --emerald-success: #059669;
+  --emerald-success: #047857;
   --emerald-bg: #ecfdf5;
   --emerald-border: #a7f3d0;
   --amber-warning: #d97706;
@@ -850,6 +850,7 @@ header {
   border-left: 3px solid transparent;
   transition: all 0.15s ease;
   user-select: none;
+  text-decoration: none;
 }
 .chapter-nav-item:hover {
   background: #f1f5f9;
@@ -1031,7 +1032,7 @@ header {
 .node-file-tag {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #64748b;
+  color: #475569;
   font-family: var(--font-mono, monospace);
   background: #f1f5f9;
   padding: 0.15rem 0.45rem;
@@ -1703,7 +1704,7 @@ header {
 
 .rust-badge {
   background: #fff7ed;
-  color: #d97706;
+  color: #b45309;
   border: 1px solid #ffedd5;
   padding: 0.18rem 0.55rem;
   border-radius: 9999px;

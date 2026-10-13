@@ -26,7 +26,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generics.ts</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">TypeScript</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">function</span> <span class="tok-func">first</span>&lt;T&gt;(xs: T[]): T | <span class="tok-builtin">undefined</span> {
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">function</span> <span class="tok-func">first</span>&lt;T&gt;(xs: T[]): T | <span class="tok-builtin">undefined</span> {
   <span class="tok-keyword">return</span> xs[0];
 }
 
@@ -42,7 +42,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generics.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">fn</span> <span class="tok-func">first</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>, xs: []<span class="tok-keyword">const</span> T) ?T {
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">fn</span> <span class="tok-func">first</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>, xs: []<span class="tok-keyword">const</span> T) ?T {
     <span class="tok-keyword">if</span> (xs.len == <span class="tok-number">0</span>) <span class="tok-keyword">return</span> <span class="tok-builtin">null</span>;
     <span class="tok-keyword">return</span> xs[<span class="tok-number">0</span>];
 }
@@ -67,7 +67,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generic_point.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">Point</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>) <span class="tok-builtin">type</span> {
     <span class="tok-comment">// Assert at compile time that T is either an integer or float</span>
@@ -150,7 +150,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">typeinfo_tags.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">fn</span> <span class="tok-func">describe</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>) []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
     <span class="tok-keyword">return</span> <span class="tok-keyword">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {
@@ -185,7 +185,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">serializer.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">printStructFields</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>, value: T) <span class="tok-builtin">void</span> {
     <span class="tok-keyword">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);
@@ -227,7 +227,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">comptime_router.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">hashString</span>(s: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) <span class="tok-builtin">u64</span> {
     <span class="tok-keyword">var</span> h: <span class="tok-builtin">u64</span> = <span class="tok-number">0xcbf29ce484222325</span>;
@@ -259,7 +259,7 @@
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">quota.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
-        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">fn</span> <span class="tok-func">sumTo</span>(<span class="tok-keyword">comptime</span> n: <span class="tok-builtin">u32</span>) <span class="tok-builtin">u32</span> {
     <span class="tok-builtin">@setEvalBranchQuota</span>(<span class="tok-number">100_000</span>); <span class="tok-comment">// default is 1000 backward branches</span>

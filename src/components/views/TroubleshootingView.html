@@ -15,21 +15,21 @@
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h3 style="color: #0f172a; margin-top: 0;">error: expected type 'u32', found 'i32'</h3>
       <p style="color: #475569;"><strong>Cause:</strong> Zig never converts between integer types implicitly when the value might not fit. JavaScript's single <code>number</code> type hides this. <strong>Fix:</strong> convert explicitly; <code>@intCast</code> checks the value in safe builds.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> signed: <span class="tok-builtin">i32</span> = <span class="tok-number">42</span>;
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> signed: <span class="tok-builtin">i32</span> = <span class="tok-number">42</span>;
 <span class="tok-keyword">const</span> unsigned: <span class="tok-builtin">u32</span> = <span class="tok-builtin">@intCast</span>(signed); <span class="tok-comment">// panics in safe builds if signed is negative</span></code></pre>
     </div>
 
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h3 style="color: #0f172a; margin-top: 0;">error: unused local constant</h3>
       <p style="color: #475569;"><strong>Cause:</strong> the compiler rejects declared but unused locals, and the same applies to unused function parameters. <strong>Fix:</strong> delete it, use it, or discard it explicitly with <code>_ = name;</code> while prototyping.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> unused = <span class="tok-number">10</span>;
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> unused = <span class="tok-number">10</span>;
 _ = unused; <span class="tok-comment">// explicit discard; remove both lines once the code is finished</span></code></pre>
     </div>
 
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h3 style="color: #0f172a; margin-top: 0;">error: error union is ignored</h3>
       <p style="color: #475569;"><strong>Cause:</strong> you called a function returning <code>!T</code> and dropped the result, like an un-awaited rejected promise. Zig forces every error to be handled. <strong>Fix:</strong> propagate with <code>try</code>, handle with <code>catch</code>, or consciously ignore it with <code>catch {}</code> (for <code>!void</code>). A similar message, <code>value of type 'T' ignored</code>, appears for non-error results you drop.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">try</span> file.<span class="tok-func">writeAll</span>(data);                          <span class="tok-comment">// propagate to the caller</span>
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">try</span> file.<span class="tok-func">writeAll</span>(data);                          <span class="tok-comment">// propagate to the caller</span>
 file.<span class="tok-func">writeAll</span>(data) <span class="tok-keyword">catch</span> |err| log.<span class="tok-func">warn</span>(<span class="tok-string">"{s}"</span>, .{<span class="tok-builtin">@errorName</span>(err)}); <span class="tok-comment">// handle here</span></code></pre>
     </div>
 
@@ -38,7 +38,7 @@ file.<span class="tok-func">writeAll</span>(data) <span class="tok-keyword">catc
       <p style="color: #475569;"><strong>Cause:</strong> your code uses <code>std.heap.c_allocator</code> or other libc functions, but the build does not link libc. <strong>Fix:</strong> link it in <code>build.zig</code> (or pass <code>-lc</code> on the command line).</p>
       <h3 style="color: #0f172a; margin-top: 1rem;">C import failed: libc headers not available</h3>
       <p style="color: #475569;"><strong>Cause:</strong> <code>@cImport</code> of a libc header (such as <code>stdio.h</code>) without linking libc. <strong>Fix:</strong> call <code>exe.linkLibC()</code> in <code>build.zig</code> (or pass <code>-lc</code> on the command line).</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>exe.<span class="tok-func">linkLibC</span>();</code></pre>
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>exe.<span class="tok-func">linkLibC</span>();</code></pre>
     </div>
   </div>
 
@@ -53,7 +53,7 @@ file.<span class="tok-func">writeAll</span>(data) <span class="tok-keyword">catc
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h3 style="color: #0f172a; margin-top: 0;">panic: integer overflow</h3>
       <p style="color: #475569;"><strong>Cause:</strong> <code>+</code>, <code>-</code>, <code>*</code> on fixed-width integers are checked in Debug and ReleaseSafe; JavaScript silently switches to floating point. <strong>Fix:</strong> pick a wider type, use wrapping operators (<code>+%</code>) when wraparound is intended, or detect it with <code>std.math.add</code>, which returns <code>error.Overflow</code>.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">var</span> counter: <span class="tok-builtin">u8</span> = <span class="tok-number">255</span>;
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">var</span> counter: <span class="tok-builtin">u8</span> = <span class="tok-number">255</span>;
 counter +%= <span class="tok-number">1</span>;                                  <span class="tok-comment">// wraps to 0 on purpose</span>
 <span class="tok-keyword">const</span> sum = <span class="tok-keyword">try</span> std.math.<span class="tok-func">add</span>(<span class="tok-builtin">u8</span>, <span class="tok-number">200</span>, <span class="tok-number">100</span>); <span class="tok-comment">// error.Overflow instead of a panic</span></code></pre>
     </div>
@@ -68,7 +68,7 @@ counter +%= <span class="tok-number">1</span>;                                  
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
     <h3 style="color: #0f172a; margin-top: 0;">Leak reports at deinit()</h3>
     <p style="color: #475569;">In Debug and ReleaseSafe builds, <code>std.heap.DebugAllocator</code> (named <code>GeneralPurposeAllocator</code> in 0.13, still available as a deprecated alias in 0.14) tracks leaks and reports every allocation that was not freed before <code>deinit()</code>, which returns <code>.ok</code> or <code>.leak</code>; Debug builds add allocation stack traces. The log lines look like <code>memory address 0x... leaked:</code> followed by the allocating stack trace. <strong>Fix:</strong> find the allocation site in the trace and add the missing <code>defer allocator.free(...)</code> or <code>deinit()</code>. Inside tests, <code>std.testing.allocator</code> fails the test automatically on a leak.</p>
-    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+    <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
     <span class="tok-comment">// 0.14; on 0.13 use: var gpa = std.heap.GeneralPurposeAllocator(.{}){};</span>
@@ -88,7 +88,7 @@ counter +%= <span class="tok-number">1</span>;                                  
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
     <h3 style="color: #0f172a; margin-top: 0;">Native debugging</h3>
     <p style="color: #475569;">Zig binaries compile with DWARF debug information by default in Debug mode (<code>-Doptimize=Debug</code>). Step through your code directly in the terminal:</p>
-    <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-comment"># Build with debug symbols</span>
+    <pre tabindex="0" style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-comment"># Build with debug symbols</span>
 <span class="tok-keyword">zig</span> <span class="tok-keyword">build</span>
 
 <span class="tok-comment"># Launch debugger</span>

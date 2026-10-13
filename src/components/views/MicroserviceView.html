@@ -55,7 +55,7 @@
 
   <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2.5rem 0 1rem;">How do I write the std.http.Server request loop in Zig 0.14?</h2>
   <p style="color: #475569; line-height: 1.7;">The server accepts a TCP connection, wraps it in <code>std.http.Server.init(conn, &amp;read_buffer)</code>, then loops on <code>receiveHead()</code> so keep-alive connections serve several requests. Each request builds its response inside an arena, so no handler needs a matching <code>free</code>.</p>
-  <pre style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+  <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 <span class="tok-keyword">const</span> Allocator = std.mem.Allocator;
 
 <span class="tok-keyword">const</span> User = <span class="tok-keyword">struct</span> {
@@ -132,7 +132,7 @@
 
   <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2.5rem 0 1rem;">How do I handle many connections with std.Thread.Pool?</h2>
   <p style="color: #475569; line-height: 1.7;"><code>std.http.Server</code> is blocking and handles one connection at a time, so the loop above serves a slow client at the expense of everyone else. The simplest fix is to hand each accepted connection to a <code>std.Thread.Pool</code>.</p>
-  <pre style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-keyword">var</span> pool: std.Thread.Pool = <span class="tok-builtin">undefined</span>;
+  <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-keyword">var</span> pool: std.Thread.Pool = <span class="tok-builtin">undefined</span>;
 <span class="tok-keyword">try</span> pool.<span class="tok-func">init</span>(.{ .allocator = base, .n_jobs = <span class="tok-number">8</span> });
 <span class="tok-keyword">defer</span> pool.<span class="tok-func">deinit</span>();
 

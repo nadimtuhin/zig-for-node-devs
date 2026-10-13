@@ -18,7 +18,7 @@
     <div style="color: #f59e0b; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
       Production Multi-Stage Dockerfile (Static Scratch Build)
     </div>
-    <pre style="color: #f8fafc; margin: 0; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-comment"># Stage 1: build the static Zig binary</span>
+    <pre tabindex="0" style="color: #f8fafc; margin: 0; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-comment"># Stage 1: build the static Zig binary</span>
 <span class="tok-keyword">FROM</span> alpine:<span class="tok-number">3</span>.<span class="tok-number">20</span> <span class="tok-keyword">AS</span> build
 
 <span class="tok-keyword">ARG</span> ZIG_VERSION=<span class="tok-number">0</span>.<span class="tok-number">14</span>.<span class="tok-number">0</span>
@@ -96,7 +96,7 @@
   </table>
   </div>
   <p style="color: #475569; line-height: 1.7;">Measure your own build instead of trusting any table:</p>
-  <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code>docker build -t my-zig-svc .
+  <pre tabindex="0" style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code>docker build -t my-zig-svc .
 docker images my-zig-svc
 ls -l zig-out/bin/server
 file zig-out/bin/server   <span class="tok-comment"># expect: statically linked</span></code></pre>

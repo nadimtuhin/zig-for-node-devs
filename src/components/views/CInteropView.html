@@ -35,7 +35,7 @@ zig cc -target aarch64-linux-musl -O2 hello.c -o hello</code>
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">c_interop.zig</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+      <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-comment">// Import standard C headers directly</span>
 <span class="tok-keyword">const</span> c = <span class="tok-builtin">@cImport</span>({
@@ -66,7 +66,7 @@ zig cc -target aarch64-linux-musl -O2 hello.c -o hello</code>
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (excerpt, Zig 0.14)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>exe.<span class="tok-func">addCSourceFiles</span>(.{
+      <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>exe.<span class="tok-func">addCSourceFiles</span>(.{
     .files = &amp;.{ <span class="tok-string">"vendor/sqlite3.c"</span> },
     .flags = &amp;.{ <span class="tok-string">"-std=c99"</span> },
 });
@@ -92,7 +92,7 @@ exe.<span class="tok-func">linkLibC</span>();</code></pre>
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (Node-API addon, Zig 0.14)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+      <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">build</span>(b: *std.Build) <span class="tok-builtin">void</span> {
     <span class="tok-keyword">const</span> target = b.<span class="tok-func">standardTargetOptions</span>(.{});
@@ -126,7 +126,7 @@ exe.<span class="tok-func">linkLibC</span>();</code></pre>
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">addon.zig (Native Node-API Addon)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+      <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-comment">// Import Node-API C declarations (needs the include path from build.zig)</span>
 <span class="tok-keyword">const</span> napi = <span class="tok-builtin">@cImport</span>({
@@ -176,7 +176,7 @@ cp zig-out/lib/addon.node ./addon.node</code>
         <span style="color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">index.js (Consuming in Node.js)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">JavaScript</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-comment">// CommonJS: require works directly. In an ES module, use createRequire(import.meta.url).</span>
+      <pre tabindex="0" style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-comment">// CommonJS: require works directly. In an ES module, use createRequire(import.meta.url).</span>
 <span class="tok-keyword">const</span> addon = <span class="tok-keyword">require</span>(<span class="tok-string">'./addon.node'</span>);
 
 <span class="tok-builtin">console</span>.<span class="tok-func">log</span>(addon.<span class="tok-func">multiply</span>(<span class="tok-number">6.5</span>, <span class="tok-number">4.0</span>)); <span class="tok-comment">// 26</span></code></pre>
@@ -188,7 +188,7 @@ cp zig-out/lib/addon.node ./addon.node</code>
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
     <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Can I skip Node-API headers with Bun FFI?</h2>
     <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">If you use Bun, you can export a plain C-ABI function from Zig (<code>export fn multiply(a: f64, b: f64) f64</code>, built as a shared library) and call it via <code>bun:ffi</code> without any Node-API headers:</p>
-    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; margin: 0;"><code><span class="tok-keyword">import</span> { dlopen, FFIType } <span class="tok-keyword">from</span> <span class="tok-string">"bun:ffi"</span>;
+    <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; margin: 0;"><code><span class="tok-keyword">import</span> { dlopen, FFIType } <span class="tok-keyword">from</span> <span class="tok-string">"bun:ffi"</span>;
 
 <span class="tok-keyword">const</span> { symbols: { multiply } } = <span class="tok-func">dlopen</span>(<span class="tok-string">"./libaddon.so"</span>, {
   multiply: {

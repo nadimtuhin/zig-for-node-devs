@@ -110,17 +110,16 @@ const chapterFaq = [
           indentUnit: 4,
           tabSize: 4,
           lineWrapping: true,
-          viewportMargin: Infinity
+          viewportMargin: Infinity,
+          screenReaderLabel: 'Zig source code editor'
         });
       }
 
-      const params = new URLSearchParams(window.location.search);
-      const requested = params.get('chapter');
-      if (requested && window.chaptersData && window.chaptersData[requested]) {
-        selectChapter(requested);
-      } else {
-        selectChapter('basic_vars');
-      }
+      // Legacy ?chapter= links win; otherwise keep the chapter this static page was rendered for.
+      const requested = new URLSearchParams(window.location.search).get('chapter');
+      const pageKey = window.location.pathname.split('/').filter(Boolean).pop();
+      const isKnownChapter = (key) => key && window.chaptersData && window.chaptersData[key];
+      selectChapter([requested, pageKey].find(isKnownChapter) || 'basic_vars');
     });
 
     function selectChapter(key) {
@@ -132,6 +131,7 @@ const chapterFaq = [
       document.querySelectorAll('.chapter-nav-item').forEach(item => {
         const itemKey = item.getAttribute('data-id');
         item.classList.toggle('active', itemKey === key);
+        if (itemKey === key) item.setAttribute('aria-current', 'page'); else item.removeAttribute('aria-current');
       });
 
       const partTag = document.getElementById('detailPartTag');
@@ -233,7 +233,7 @@ const chapterFaq = [
       }
 
       if (history.replaceState) {
-        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?chapter=' + key;
+        const newUrl = window.location.protocol + "//" + window.location.host + '/chapter/' + key;
         window.history.replaceState({ path: newUrl }, '', newUrl);
       }
     }

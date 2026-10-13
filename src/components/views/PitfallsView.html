@@ -14,7 +14,7 @@
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">1. Returning a Slice of a Local Stack Array</h2>
       <p style="color: #475569;">In Node.js, returning an array from a function is safe because the garbage collector keeps it alive while it is reachable. In Zig, a slice or pointer into a local array dangles once the stack frame unwinds (Zig 0.14 compiles this without complaint). Allocate from a caller-passed allocator when returning dynamically sized data, and document that the caller owns the result.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">greetBad</span>() []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">greetBad</span>() []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
     <span class="tok-keyword">var</span> buf: [<span class="tok-number">16</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
     <span class="tok-keyword">return</span> buf[<span class="tok-number">0</span>..<span class="tok-number">4</span>]; <span class="tok-comment">// dangling: buf dies when greetBad returns</span>
 }
@@ -32,7 +32,7 @@
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">3. Forgetting <code>defer allocator.free(slice)</code></h2>
       <p style="color: #475569;">Because there is no garbage collector, every heap allocation leaks unless it is paired with <code>free</code> or <code>deinit</code>, or owned by an arena that is itself deinitialized. Put the <code>defer</code> on the line right after the allocation. <code>std.testing.allocator</code> fails a test when something is left allocated, and in a real program <code>std.heap.DebugAllocator</code> (<code>GeneralPurposeAllocator</code> before 0.14) reports leaks when you call <code>deinit()</code>.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">test</span> <span class="tok-string">"buffer is freed"</span> {
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">test</span> <span class="tok-string">"buffer is freed"</span> {
     <span class="tok-keyword">const</span> allocator = std.testing.allocator;
     <span class="tok-keyword">const</span> buf = <span class="tok-keyword">try</span> allocator.<span class="tok-func">alloc</span>(<span class="tok-builtin">u8</span>, <span class="tok-number">64</span>);
     <span class="tok-keyword">defer</span> allocator.<span class="tok-func">free</span>(buf); <span class="tok-comment">// delete this line and the test fails with a leak report</span>
@@ -47,7 +47,7 @@
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">5. Assuming Slices Outlive Short-Lived Allocators</h2>
       <p style="color: #475569;">Slices that point into an <code>ArenaAllocator</code> or a temporary buffer become invalid the instant <code>arena.deinit()</code> (or <code>reset()</code>) runs. If a response or long-lived cache needs the data, duplicate the bytes with the persistent allocator before tearing down the arena.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(gpa);
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(gpa);
 <span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>();
 
 <span class="tok-keyword">const</span> scratch = <span class="tok-keyword">try</span> arena.<span class="tok-func">allocator</span>().<span class="tok-func">dupe</span>(<span class="tok-builtin">u8</span>, <span class="tok-string">"temporary"</span>);
@@ -57,7 +57,7 @@
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">6. Silently Swallowing Errors with <code>catch {}</code></h2>
       <p style="color: #475569;">In JavaScript, an unhandled error crashes the process or fires <code>unhandledRejection</code>. In Zig, calling an error-returning function and ignoring the result (<code>doWork();</code>) is a compile error, and so is <code>_ = doWork();</code> (error union is discarded), which is good. The footgun is the escape hatch: <code>doWork() catch {};</code> compiles and silently swallows the error. Reserve it for cases where failure truly does not matter, and log or propagate everywhere else.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-func">doWork</span>();        <span class="tok-comment">// compile error: error union is ignored</span>
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-func">doWork</span>();        <span class="tok-comment">// compile error: error union is ignored</span>
 _ = <span class="tok-func">doWork</span>();     <span class="tok-comment">// compile error: error union is discarded</span>
 <span class="tok-func">doWork</span>() <span class="tok-keyword">catch</span> {};     <span class="tok-comment">// compiles: error silently thrown away</span>
 <span class="tok-func">doWork</span>() <span class="tok-keyword">catch</span> |err| std.log.<span class="tok-func">err</span>(<span class="tok-string">"doWork failed: {s}"</span>, .{<span class="tok-builtin">@errorName</span>(err)});</code></pre>
@@ -71,7 +71,7 @@ _ = <span class="tok-func">doWork</span>();     <span class="tok-comment">// com
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">8. Integer Overflow in Production (ReleaseFast vs ReleaseSafe)</h2>
       <p style="color: #475569;">In Debug and ReleaseSafe, integer arithmetic like <code>a + b</code> panics on overflow. In ReleaseFast and ReleaseSmall, safety checks are removed and overflow is undefined behavior, so you cannot assume it wraps. If wrapping is intentional, use the explicit wrapping operators <code>+%</code>, <code>-%</code>, <code>*%</code>; to detect overflow, use builtins such as <code>@addWithOverflow</code>.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">wrappingAdd</span>(a: <span class="tok-builtin">u8</span>, b: <span class="tok-builtin">u8</span>) <span class="tok-builtin">u8</span> {
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">wrappingAdd</span>(a: <span class="tok-builtin">u8</span>, b: <span class="tok-builtin">u8</span>) <span class="tok-builtin">u8</span> {
     <span class="tok-keyword">return</span> a +% b; <span class="tok-comment">// 250 +% 10 == 4 in every build mode</span>
 }</code></pre>
     </div>

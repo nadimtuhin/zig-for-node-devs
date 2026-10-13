@@ -75,7 +75,8 @@ const initialChapter = chaptersData[initialKey];
           indentUnit: 4,
           tabSize: 4,
           lineWrapping: true,
-          viewportMargin: Infinity
+          viewportMargin: Infinity,
+          screenReaderLabel: 'Zig source code editor'
         });
       }
 
@@ -97,6 +98,7 @@ const initialChapter = chaptersData[initialKey];
       document.querySelectorAll('.chapter-nav-item').forEach(item => {
         const itemKey = item.getAttribute('data-id');
         item.classList.toggle('active', itemKey === key);
+        if (itemKey === key) item.setAttribute('aria-current', 'page'); else item.removeAttribute('aria-current');
       });
 
       const partTag = document.getElementById('detailPartTag');

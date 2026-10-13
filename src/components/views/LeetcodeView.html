@@ -14,7 +14,7 @@
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h2 style="color: #0f172a; margin-top: 0;">1. Two Sum — O(N) Hash Table Lookup</h2>
       <p style="color: #64748b; font-size: 0.95rem;">In Node.js you reach for <code>new Map()</code> and the garbage collector owns it. Zig's <code>AutoHashMap</code> is an open-addressing hash table stored in contiguous arrays, and you own it: it takes an allocator and must be released with <code>deinit()</code>. Time O(n), space O(n). Note that <code>target - num</code> panics on overflow in Debug and ReleaseSafe builds.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">fn</span> <span class="tok-func">twoSum</span>(allocator: std.mem.Allocator, nums: []<span class="tok-keyword">const</span> <span class="tok-builtin">i32</span>, target: <span class="tok-builtin">i32</span>) !?[<span class="tok-number">2</span>]<span class="tok-builtin">usize</span> {
     <span class="tok-keyword">var</span> map = std.<span class="tok-func">AutoHashMap</span>(<span class="tok-builtin">i32</span>, <span class="tok-builtin">usize</span>).<span class="tok-func">init</span>(allocator);
@@ -34,7 +34,7 @@
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h2 style="color: #0f172a; margin-top: 0;">2. Valid Parentheses — Fixed-Size Stack, No Heap</h2>
       <p style="color: #64748b; font-size: 0.95rem;">Instead of a dynamic array, this uses a pre-sized stack buffer and a single pass over the bytes. Time O(n), space O(1) because the buffer size is constant. Trade-off: input nested deeper than 256 levels returns <code>false</code> even if it is balanced, so switch to <code>std.ArrayList(u8)</code> when depth is unbounded.</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">isValid</span>(s: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) <span class="tok-builtin">bool</span> {
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">isValid</span>(s: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) <span class="tok-builtin">bool</span> {
     <span class="tok-keyword">var</span> stack: [<span class="tok-number">256</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
     <span class="tok-keyword">var</span> top: <span class="tok-builtin">usize</span> = <span class="tok-number">0</span>;
 
@@ -58,7 +58,7 @@
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h2 style="color: #0f172a; margin-top: 0;">3. Reverse Linked List — In-Place Pointer Manipulation</h2>
       <p style="color: #64748b; font-size: 0.95rem;">In JavaScript this is the same pointer rewiring on object references, with V8 reclaiming nodes later. In Zig the reversal itself allocates nothing: it rewires <code>next</code> pointers in place, and whoever created the nodes decides when to free them. Time O(n), space O(1).</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> Node = <span class="tok-keyword">struct</span> {
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">const</span> Node = <span class="tok-keyword">struct</span> {
     val: <span class="tok-builtin">i32</span>,
     next: ?*Node = <span class="tok-builtin">null</span>,
 };
@@ -80,7 +80,7 @@
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
       <h2 style="color: #0f172a; margin-top: 0;">4. Binary Search — Overflow-Safe Midpoint</h2>
       <p style="color: #64748b; font-size: 0.95rem;">JavaScript uses <code>Math.floor((left + right) / 2)</code> on floating-point numbers. Zig uses fixed-width integers, so <code>left + (right - left) / 2</code> avoids overflowing <code>left + right</code> on very large slices, and integer division already truncates. Time O(log n), space O(1).</p>
-      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">binarySearch</span>(nums: []<span class="tok-keyword">const</span> <span class="tok-builtin">i32</span>, target: <span class="tok-builtin">i32</span>) ?<span class="tok-builtin">usize</span> {
+      <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">binarySearch</span>(nums: []<span class="tok-keyword">const</span> <span class="tok-builtin">i32</span>, target: <span class="tok-builtin">i32</span>) ?<span class="tok-builtin">usize</span> {
     <span class="tok-keyword">if</span> (nums.len == <span class="tok-number">0</span>) <span class="tok-keyword">return</span> <span class="tok-builtin">null</span>;
     <span class="tok-keyword">var</span> left: <span class="tok-builtin">usize</span> = <span class="tok-number">0</span>;
     <span class="tok-keyword">var</span> right: <span class="tok-builtin">usize</span> = nums.len;
@@ -102,7 +102,7 @@
 
   <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem;">How Do I Test These Solutions in Zig?</h2>
   <p style="color: #475569; line-height: 1.6;">Zig has built-in <code>test</code> blocks. Put them in the same file as the solutions and run <code>zig test leetcode.zig</code>. Passing <code>std.testing.allocator</code> to <code>twoSum</code> also proves the hash map was freed.</p>
-  <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">test</span> <span class="tok-string">"twoSum finds the pair"</span> {
+  <pre tabindex="0" style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">test</span> <span class="tok-string">"twoSum finds the pair"</span> {
     <span class="tok-keyword">const</span> nums = [_]<span class="tok-builtin">i32</span>{ <span class="tok-number">2</span>, <span class="tok-number">7</span>, <span class="tok-number">11</span>, <span class="tok-number">15</span> };
     <span class="tok-keyword">const</span> result = <span class="tok-keyword">try</span> <span class="tok-func">twoSum</span>(std.testing.allocator, &amp;nums, <span class="tok-number">9</span>);
     <span class="tok-keyword">try</span> std.testing.<span class="tok-func">expectEqual</span>([<span class="tok-number">2</span>]<span class="tok-builtin">usize</span>{ <span class="tok-number">0</span>, <span class="tok-number">1</span> }, result.?);
