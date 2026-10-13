@@ -1,70 +1,137 @@
 <div class="appendix-container" style="max-width: 950px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
   <div style="text-align: center; margin-bottom: 3rem;">
     <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 06 • Container Architecture</span>
-    <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Production Docker Recipes (&lt; 5MB Scratch)</h1>
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Production Docker Recipes: Static Zig Binaries on Scratch</h1>
     <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto; line-height: 1.6;">
-      Zero-vulnerability deployment: How statically-linked Zig binaries eliminate 300MB of Linux runtime bloat and eliminate CVE alerts.
+      How a statically linked Zig binary lets you ship a container with no OS layer, no package manager and no Node runtime, and what you give up when you do.
     </p>
   </div>
 
-  <!-- Multi-Stage Dockerfile -->
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">To containerize a Zig service, build it in a multi-stage Dockerfile with <code>zig build -Dtarget=x86_64-linux-musl -Doptimize=ReleaseSafe -Dcpu=baseline</code>, then copy the resulting static ELF into a <code>FROM scratch</code> image and run it as <code>USER 65534</code>. The image is then roughly the size of the binary, because there is no Node runtime, shell or OS package set to ship. Measure the result with <code>docker images</code> and <code>ls -l zig-out/bin</code>.</p>
+  </aside>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2rem;">What does a multi-stage Zig Dockerfile look like?</h2>
+  <p style="color: #475569; line-height: 1.7;">The build stage downloads a pinned Zig release and compiles for <code>x86_64-linux-musl</code>. musl links statically, so the output has no dependency on a system libc and can run on an empty filesystem. For ARM hosts, swap in <code>aarch64</code> in the tarball name and the <code>-Dtarget</code> value.</p>
   <div style="background: #0f172a; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
     <div style="color: #f59e0b; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
       Production Multi-Stage Dockerfile (Static Scratch Build)
     </div>
-    <pre style="color: #f8fafc; margin: 0; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-comment"># Stage 1: Build the static Zig binary</span>
-<span class="tok-keyword">FROM</span> alpine:<span class="tok-number">3</span>.<span class="tok-number">20</span> <span class="tok-keyword">AS</span> builder
+    <pre style="color: #f8fafc; margin: 0; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-comment"># Stage 1: build the static Zig binary</span>
+<span class="tok-keyword">FROM</span> alpine:<span class="tok-number">3</span>.<span class="tok-number">20</span> <span class="tok-keyword">AS</span> build
 
-<span class="tok-comment"># Install Zig compiler</span>
-<span class="tok-keyword">RUN</span> apk add <span class="tok-builtin">--no-cache</span> zig
+<span class="tok-keyword">ARG</span> ZIG_VERSION=<span class="tok-number">0</span>.<span class="tok-number">14</span>.<span class="tok-number">0</span>
 
-<span class="tok-keyword">WORKDIR</span> /build
+<span class="tok-comment"># curl + xz to unpack the compiler; ca-certificates is copied into the final image later</span>
+<span class="tok-keyword">RUN</span> apk add <span class="tok-builtin">--no-cache</span> curl xz ca-certificates
+
+<span class="tok-comment"># Tarball naming changed in 0.14.1: zig-x86_64-linux-&lt;ver&gt;.tar.xz (0.14.0 used zig-linux-x86_64-&lt;ver&gt;). Adjust if you bump ZIG_VERSION.</span>
+<span class="tok-comment"># Official tarball from ziglang.org/download (pin the version, verify the checksum for real pipelines)</span>
+<span class="tok-keyword">RUN</span> curl -fsSL https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz \
+      | tar -xJ -C /opt \
+    &amp;&amp; ln -s /opt/zig-linux-x86_64-${ZIG_VERSION}/zig /usr/local/bin/zig
+
+<span class="tok-keyword">WORKDIR</span> /src
 <span class="tok-keyword">COPY</span> . .
 
-<span class="tok-comment"># Statically compile with Musl libc target and ReleaseSmall optimization</span>
-<span class="tok-keyword">RUN</span> zig build -Doptimize=ReleaseSmall -Dtarget=x86_64-linux-musl
+<span class="tok-comment"># Static musl binary; -Dcpu=baseline avoids CPU-specific instructions so it runs on any x86_64 host.</span>
+<span class="tok-comment"># ReleaseSafe keeps bounds/overflow checks; ReleaseSmall minimises size (both are reasonable for services).</span>
+<span class="tok-keyword">RUN</span> zig build -Dtarget=x86_64-linux-musl -Doptimize=ReleaseSafe -Dcpu=baseline
 
-<span class="tok-comment"># Stage 2: Pristine zero-dependency Scratch container</span>
+<span class="tok-comment"># Stage 2: empty filesystem</span>
 <span class="tok-keyword">FROM</span> scratch
 
-<span class="tok-comment"># Copy the standalone compiled binary</span>
-<span class="tok-keyword">COPY</span> <span class="tok-builtin">--from=builder</span> /build/zig-out/bin/server /app
-
-<span class="tok-comment"># Optional: Copy SSL CA certificates if making outbound HTTPS requests</span>
-<span class="tok-comment"># COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/</span>
+<span class="tok-comment"># CA bundle, only needed for outbound TLS (HTTPS APIs, databases with TLS)</span>
+<span class="tok-keyword">COPY</span> <span class="tok-builtin">--from=build</span> /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+<span class="tok-keyword">COPY</span> <span class="tok-builtin">--from=build</span> /src/zig-out/bin/server /server
 
 <span class="tok-keyword">EXPOSE</span> <span class="tok-number">8080</span>
-<span class="tok-keyword">USER</span> <span class="tok-number">10001</span>:<span class="tok-number">10001</span>
+<span class="tok-comment"># Numeric UID: scratch has no /etc/passwd, so a user name would not resolve</span>
+<span class="tok-keyword">USER</span> <span class="tok-number">65534</span>:<span class="tok-number">65534</span>
 
-<span class="tok-keyword">ENTRYPOINT</span> [<span class="tok-string">"/app"</span>]</code></pre>
+<span class="tok-comment"># Exec form so the server is PID 1 and receives SIGTERM directly; PID 1 ignores SIGTERM unless the program installs a handler</span>
+<span class="tok-keyword">ENTRYPOINT</span> [<span class="tok-string">"/server"</span>]</code></pre>
   </div>
+  <p style="color: #475569; line-height: 1.7;">Your <code>build.zig</code> must expose the target and optimize options for those flags to work: <code>b.standardTargetOptions(.{})</code> and <code>b.standardOptimizeOption(.{})</code>. If you install the executable under a different name, adjust the <code>COPY</code> path.</p>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2rem;">Comparison: Node.js Container vs Zig Scratch</h2>
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem;">How big is a Zig scratch image compared to Node.js images?</h2>
+  <p style="color: #475569; line-height: 1.7;">Official Node image sizes vary by tag and over time, so treat these as rough orders of magnitude and check your own tags. The Zig row is not a fixed number: it is whatever your binary weighs.</p>
   <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
   <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
     <thead>
       <tr style="background: #f1f5f9; text-align: left;">
-        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Metric</th>
-        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Node.js (node:20-alpine)</th>
-        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig Static (FROM scratch)</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Base image</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Roughly (uncompressed)</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">What is inside</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Image Size</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">180MB – 350MB</td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>~3.8MB</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>node:22</code> (Debian bookworm)</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">~1.1 GB</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Full Debian userland, compilers, Node, npm, yarn</td>
       </tr>
       <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Known CVE Vulnerabilities</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">15–40+ across OS packages & npm</td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>0 (Zero CVEs)</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>node:22-slim</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">~200 MB</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Minimal Debian, Node, npm</td>
       </tr>
       <tr>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Cold Start Time</strong></td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">450ms – 1,200ms</td>
-        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>&lt; 5ms</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>node:22-alpine</code></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">~150-160 MB</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Alpine (musl, busybox), Node, npm</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Distroless Node</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Smaller than slim; check the tag</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">No shell or package manager, but still ships the Node runtime plus your <code>node_modules</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Zig on <code>scratch</code></strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>About the size of the binary</strong>. Typically KBs for small tools and low single-digit MB for HTTP services. Measure it.</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">One static ELF (plus the CA bundle if you copied it)</td>
       </tr>
     </tbody>
   </table>
+  </div>
+  <p style="color: #475569; line-height: 1.7;">Measure your own build instead of trusting any table:</p>
+  <pre style="background: #1e293b; color: #38bdf8; padding: 1rem; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code>docker build -t my-zig-svc .
+docker images my-zig-svc
+ls -l zig-out/bin/server
+file zig-out/bin/server   <span class="tok-comment"># expect: statically linked</span></code></pre>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem;">Does a scratch image really have zero CVEs?</h2>
+  <p style="color: #475569; line-height: 1.7;">The precise claim is narrower: an image scanner finds no OS packages to flag, because there are none. That removes the largest source of scanner noise (glibc, OpenSSL, busybox, apt and friends), but it does not make the service vulnerable-free.</p>
+  <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
+    <li>Bugs in your own Zig code, including logic and authorization flaws, are still yours.</li>
+    <li>Vendored C libraries (SQLite, zlib, an HTTP parser) are compiled into the binary, and scanners often cannot see them. Track their versions yourself.</li>
+    <li>Zig dependencies from <code>build.zig.zon</code> have no central advisory database, so review updates manually.</li>
+    <li>The Zig compiler and the build stage are not in the final image, but they still deserve patching in CI.</li>
+  </ul>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem;">What breaks on FROM scratch?</h2>
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem;">No shell</h3>
+  <p style="color: #475569; line-height: 1.7;"><code>docker exec -it c sh</code> fails, and so do shell-form <code>CMD</code> and <code>HEALTHCHECK CMD curl ...</code>. Use exec-form entrypoints, and give the binary its own health subcommand (for example <code>/server --healthcheck</code>) or probe from the orchestrator over HTTP.</p>
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem;">No CA certificates</h3>
+  <p style="color: #475569; line-height: 1.7;">Outbound HTTPS fails certificate verification unless you copy <code>/etc/ssl/certs/ca-certificates.crt</code> from the build stage, as in the Dockerfile above.</p>
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem;">No timezone database and no /etc/passwd</h3>
+  <p style="color: #475569; line-height: 1.7;">There is no <code>/usr/share/zoneinfo</code>, so local-time conversion needs data copied in or, better, keep everything in UTC. Use a numeric <code>USER 65534</code>; user names do not resolve without <code>/etc/passwd</code>.</p>
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem;">No writable temp directory</h3>
+  <p style="color: #475569; line-height: 1.7;">There is no <code>/tmp</code> unless you create it. Mount a volume or <code>tmpfs</code> if the service writes files.</p>
+  <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem;">How do I debug it?</h3>
+  <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
+    <li>Build a second target with <code>FROM alpine</code> and the same binary when you need a shell, then compare behavior.</li>
+    <li>Attach an ephemeral debugger container sharing the process namespace: <code>docker run --rm -it --pid=container:NAME --net=container:NAME alpine sh</code> (Kubernetes: <code>kubectl debug</code>).</li>
+    <li>Log to stderr and let the platform collect it; there is no file system to inspect.</li>
+    <li>Reproduce crashes in Debug mode locally, where Zig prints a stack trace and <code>DebugAllocator</code> reports leaks.</li>
+  </ul>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem;">Which optimize mode and CPU target should I ship?</h2>
+  <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
+    <li><code>ReleaseSafe</code>: optimizations on, bounds checks and integer-overflow checks kept. A good default for network services.</li>
+    <li><code>ReleaseSmall</code>: smallest binary; safety checks are removed.</li>
+    <li><code>ReleaseFast</code>: fastest; safety checks are removed, so violations are undefined behavior.</li>
+    <li><code>-Dcpu=baseline</code>: generic CPU features so the image runs on any host of that architecture. A native build that uses the build machine's newer instructions can crash with SIGILL on older hosts; being explicit documents intent.</li>
+  </ul>
 </div>

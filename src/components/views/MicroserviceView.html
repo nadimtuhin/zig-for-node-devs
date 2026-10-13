@@ -3,39 +3,60 @@
     <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 05 • Production Architecture</span>
     <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">Real-World Microservice Architecture: Express.js vs Zig</h1>
     <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto; line-height: 1.6;">
-      Re-architecting a standard Express.js / Mongoose REST microservice in native Zig with sub-millisecond p99 latencies, embedded SQLite, and clean signal handling.
+      Re-architecting a standard Express.js REST microservice with Zig's std.http.Server, per-request arenas, a thread pool and signal-based shutdown.
     </p>
   </div>
 
-  <!-- Comparison Grid -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-      <h2 style="color: #0f172a; margin-top: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;">
-        <span>🟢</span> Traditional Express.js Architecture
-      </h2>
-      <ul style="color: #475569; font-size: 0.95rem; line-height: 1.7; padding-left: 1.25rem;">
-        <li>Dynamic V8 GC allocations for every request header, query, and param object.</li>
-        <li>Layered middleware pipelines with promise chains and async/await tick overhead.</li>
-        <li>External database driver requiring separate TCP connection pools and serialization.</li>
-        <li>Memory footprint: ~80MB–150MB baseline RSS per container.</li>
-      </ul>
-    </div>
-    <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 12px; padding: 1.5rem;">
-      <h2 style="color: #854d0e; margin-top: 0; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;">
-        <span>🦎</span> Zig Systems Microservice
-      </h2>
-      <ul style="color: #713f12; font-size: 0.95rem; line-height: 1.7; padding-left: 1.25rem;">
-        <li>Zero-allocation HTTP parsing slicing directly into raw socket buffers.</li>
-        <li>Scoped <code>ArenaAllocator</code> for request lifecycles: instant batch cleanup in one pointer reset.</li>
-        <li>Embedded in-process SQLite engine (via direct C interop) with zero RPC serialization overhead.</li>
-        <li>Memory footprint: ~3MB–8MB baseline RSS, sub-millisecond response times.</li>
-      </ul>
-    </div>
-  </div>
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">A Zig microservice replaces Express with <code>std.http.Server</code>: you bind with <code>std.net.Address.listen</code>, call <code>accept()</code>, read headers with <code>receiveHead()</code> and answer with <code>request.respond()</code>. Each request gets its own <code>std.heap.ArenaAllocator</code> that is freed in one <code>deinit()</code>, and concurrency is added explicitly with <code>std.Thread.Pool</code>. There is no garbage collector, so no GC pauses; tail latency depends on your code and the OS scheduler.</p>
+  </aside>
 
-  <!-- Complete Production Code Example -->
-  <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2rem 0 1rem;">Complete Production Zig HTTP Server Blueprint</h2>
+  <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2rem 0 1rem;">How does a Zig request lifecycle compare to Express or Fastify?</h2>
+  <div style="overflow-x: auto;">
+  <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0;">
+    <thead>
+      <tr style="background: #f1f5f9; text-align: left;">
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Stage</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Express / Fastify</th>
+        <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig <code>std.http.Server</code></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Accept</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">libuv accepts; the <code>http</code> module's parser emits a <code>req</code> object</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">You call <code>server.accept()</code> and <code>receiveHead()</code> yourself</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Routing</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Router and middleware stack (<code>app.use</code>); Fastify uses a radix-tree router and hooks</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">A <code>switch</code> or <code>std.mem.eql</code> on <code>request.head.method</code> and <code>request.head.target</code></td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Memory</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Objects allocated on the V8 heap and reclaimed by the garbage collector at times V8 chooses</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Arena per request; everything freed at one known point when the handler returns</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Concurrency</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">One event-loop thread; async I/O; CPU work blocks everything unless moved to worker threads</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Blocking calls; you choose threads (<code>std.Thread.Pool</code>) or a library with an event loop</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><strong>Errors</strong></td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Thrown exceptions and rejected promises, caught by error middleware</td>
+        <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Error unions: <code>try</code> or <code>catch</code>, and you decide the HTTP status</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="color: #475569; line-height: 1.7; margin-top: 1rem;">This guide does not quote latency or throughput figures: they depend on payload, hardware, kernel settings and your handlers. Benchmark your own workload before and after a migration.</p>
+
+  <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2.5rem 0 1rem;">How do I write the std.http.Server request loop in Zig 0.14?</h2>
+  <p style="color: #475569; line-height: 1.7;">The server accepts a TCP connection, wraps it in <code>std.http.Server.init(conn, &amp;read_buffer)</code>, then loops on <code>receiveHead()</code> so keep-alive connections serve several requests. Each request builds its response inside an arena, so no handler needs a matching <code>free</code>.</p>
   <pre style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+<span class="tok-keyword">const</span> Allocator = std.mem.Allocator;
 
 <span class="tok-keyword">const</span> User = <span class="tok-keyword">struct</span> {
     id: <span class="tok-builtin">u32</span>,
@@ -44,54 +65,99 @@
 };
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
-    <span class="tok-comment">// 1. Root GeneralPurposeAllocator with leak detection in Debug mode</span>
-    <span class="tok-keyword">var</span> gpa = std.heap.<span class="tok-func">GeneralPurposeAllocator</span>(.{}){};
-    <span class="tok-keyword">defer</span> _ = gpa.<span class="tok-func">deinit</span>();
-    <span class="tok-keyword">const</span> base_allocator = gpa.<span class="tok-func">allocator</span>();
+    <span class="tok-comment">// 0.14: DebugAllocator (GeneralPurposeAllocator is a deprecated alias; 0.13 only has the old name).</span>
+    <span class="tok-comment">// Reports leaks on deinit() in Debug builds; use std.heap.smp_allocator for ReleaseFast.</span>
+    <span class="tok-keyword">var</span> debug_allocator: std.heap.DebugAllocator(.{}) = .init;
+    <span class="tok-keyword">defer</span> _ = debug_allocator.<span class="tok-func">deinit</span>();
+    <span class="tok-keyword">const</span> base = debug_allocator.<span class="tok-func">allocator</span>();
 
-    <span class="tok-comment">// 2. Bind TCP listener on 0.0.0.0:8080</span>
-    <span class="tok-keyword">const</span> address = <span class="tok-keyword">try</span> std.net.Address.<span class="tok-func">parseIp4</span>(<span class="tok-string">"0.0.0.0"</span>, <span class="tok-number">8080</span>);
-    <span class="tok-keyword">var</span> listener = <span class="tok-keyword">try</span> address.<span class="tok-func">listen</span>(.{ .reuse_address = <span class="tok-builtin">true</span> });
-    <span class="tok-keyword">defer</span> listener.<span class="tok-func">deinit</span>();
+    <span class="tok-keyword">const</span> address = <span class="tok-keyword">try</span> std.net.Address.<span class="tok-func">parseIp</span>(<span class="tok-string">"0.0.0.0"</span>, <span class="tok-number">8080</span>);
+    <span class="tok-keyword">var</span> server = <span class="tok-keyword">try</span> address.<span class="tok-func">listen</span>(.{ .reuse_address = <span class="tok-builtin">true</span> });
+    <span class="tok-keyword">defer</span> server.<span class="tok-func">deinit</span>();
 
-    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"🚀 Zig Microservice listening on http://0.0.0.0:8080\n"</span>, .{});
+    std.log.<span class="tok-func">info</span>(<span class="tok-string">"listening on 0.0.0.0:8080"</span>, .{});
 
-    <span class="tok-comment">// 3. Connection accept loop with scoped ArenaAllocator per request</span>
     <span class="tok-keyword">while</span> (<span class="tok-builtin">true</span>) {
-        <span class="tok-keyword">const</span> conn = <span class="tok-keyword">try</span> listener.<span class="tok-func">accept</span>();
-        <span class="tok-keyword">defer</span> conn.stream.<span class="tok-func">close</span>();
+        <span class="tok-keyword">const</span> conn = <span class="tok-keyword">try</span> server.<span class="tok-func">accept</span>();
+        <span class="tok-func">handleConnection</span>(base, conn) <span class="tok-keyword">catch</span> |err| {
+            std.log.<span class="tok-func">err</span>(<span class="tok-string">"connection failed: {s}"</span>, .{<span class="tok-builtin">@errorName</span>(err)});
+        };
+    }
+}
 
-        <span class="tok-comment">// Create an Arena allocator dedicated to this request's lifecycle</span>
-        <span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(base_allocator);
-        <span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>(); <span class="tok-comment">// Frees ALL allocations made during the request at once!</span>
-        <span class="tok-keyword">const</span> req_allocator = arena.<span class="tok-func">allocator</span>();
+<span class="tok-keyword">fn</span> <span class="tok-func">handleConnection</span>(base: Allocator, conn: std.net.Server.Connection) !<span class="tok-builtin">void</span> {
+    <span class="tok-keyword">defer</span> conn.stream.<span class="tok-func">close</span>();
 
-        <span class="tok-keyword">var</span> read_buf: [<span class="tok-number">4096</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
-        <span class="tok-keyword">const</span> bytes_read = <span class="tok-keyword">try</span> conn.stream.<span class="tok-func">read</span>(&amp;read_buf);
-        <span class="tok-keyword">const</span> request_data = read_buf[<span class="tok-number">0</span>..bytes_read];
+    <span class="tok-keyword">var</span> read_buffer: [<span class="tok-number">4096</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
+    <span class="tok-keyword">var</span> http = std.http.Server.<span class="tok-func">init</span>(conn, &amp;read_buffer);
 
-        <span class="tok-comment">// Health check endpoint: GET /health</span>
-        <span class="tok-keyword">if</span> (std.mem.<span class="tok-func">startsWith</span>(<span class="tok-builtin">u8</span>, request_data, <span class="tok-string">"GET /health"</span>)) {
-            <span class="tok-keyword">const</span> response = <span class="tok-string">"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"status\":\"ok\"}"</span>;
-            <span class="tok-keyword">try</span> conn.stream.<span class="tok-func">writeAll</span>(response);
-            <span class="tok-keyword">continue</span>;
-        }
-
-        <span class="tok-comment">// JSON response endpoint: GET /api/v1/user</span>
-        <span class="tok-keyword">const</span> mock_user = User{
-            .id = <span class="tok-number">101</span>,
-            .username = <span class="tok-string">"nadimtuhin"</span>,
-            .email = <span class="tok-string">"nadim@example.com"</span>,
+    <span class="tok-keyword">while</span> (http.state == .ready) {
+        <span class="tok-keyword">var</span> request = http.<span class="tok-func">receiveHead</span>() <span class="tok-keyword">catch</span> |err| <span class="tok-keyword">switch</span> (err) {
+            <span class="tok-keyword">error</span>.HttpConnectionClosing =&gt; <span class="tok-keyword">return</span>,
+            <span class="tok-keyword">else</span> =&gt; <span class="tok-keyword">return</span> err,
         };
 
-        <span class="tok-keyword">const</span> json_body = <span class="tok-keyword">try</span> std.fmt.<span class="tok-func">allocPrint</span>(req_allocator, <span class="tok-string">"{}"</span>, .{std.json.<span class="tok-func">fmt</span>(mock_user, .{})});
-        <span class="tok-keyword">const</span> http_response = <span class="tok-keyword">try</span> std.fmt.<span class="tok-func">allocPrint</span>(
-            req_allocator,
-            <span class="tok-string">"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{s}"</span>,
-            .{ json_body.len, json_body },
-        );
+        <span class="tok-comment">// One arena per request: every allocation below is freed by this single deinit()</span>
+        <span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(base);
+        <span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>();
 
-        <span class="tok-keyword">try</span> conn.stream.<span class="tok-func">writeAll</span>(http_response);
+        <span class="tok-keyword">try</span> <span class="tok-func">route</span>(arena.<span class="tok-func">allocator</span>(), &amp;request);
     }
+}
+
+<span class="tok-keyword">fn</span> <span class="tok-func">route</span>(req_alloc: Allocator, request: *std.http.Server.Request) !<span class="tok-builtin">void</span> {
+    <span class="tok-keyword">const</span> json_header = std.http.Header{ .name = <span class="tok-string">"content-type"</span>, .value = <span class="tok-string">"application/json"</span> };
+
+    <span class="tok-keyword">if</span> (request.head.method == .GET <span class="tok-keyword">and</span> std.mem.<span class="tok-func">eql</span>(<span class="tok-builtin">u8</span>, request.head.target, <span class="tok-string">"/health"</span>)) {
+        <span class="tok-keyword">return</span> request.<span class="tok-func">respond</span>(<span class="tok-string">"{\"status\":\"ok\"}"</span>, .{ .extra_headers = &amp;.{json_header} });
+    }
+
+    <span class="tok-keyword">if</span> (request.head.method == .GET <span class="tok-keyword">and</span> std.mem.<span class="tok-func">eql</span>(<span class="tok-builtin">u8</span>, request.head.target, <span class="tok-string">"/api/v1/user"</span>)) {
+        <span class="tok-keyword">const</span> user = User{ .id = <span class="tok-number">101</span>, .username = <span class="tok-string">"nadimtuhin"</span>, .email = <span class="tok-string">"nadim@example.com"</span> };
+        <span class="tok-comment">// 0.14 API; later releases rename the JSON helpers, so check your version's std.json</span>
+        <span class="tok-keyword">const</span> body = <span class="tok-keyword">try</span> std.json.<span class="tok-func">stringifyAlloc</span>(req_alloc, user, .{});
+        <span class="tok-keyword">return</span> request.<span class="tok-func">respond</span>(body, .{ .extra_headers = &amp;.{json_header} });
+    }
+
+    <span class="tok-keyword">return</span> request.<span class="tok-func">respond</span>(<span class="tok-string">"not found"</span>, .{ .status = .not_found });
 }</code></pre>
+  <p style="color: #475569; line-height: 1.7; margin-top: 1rem;">Version note: this targets Zig 0.14. The <code>std.http.Server</code> shape (<code>init(conn, &amp;buffer)</code>, <code>receiveHead()</code>, <code>request.respond()</code>) is the same since 0.12, but 0.15 rewrote <code>std.http</code> and <code>std.Io</code>, so expect to adapt the connection setup there.</p>
+
+  <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2.5rem 0 1rem;">Why use an ArenaAllocator per request?</h2>
+  <p style="color: #475569; line-height: 1.7;">An arena collects every allocation made while handling one request and releases them all in <code>deinit()</code>. Individual <code>free</code> calls are effectively no-ops (apart from the most recent allocation), so handlers stay simple and cannot leak across requests. It is the closest Zig analogue to "the garbage collector cleans up after the request", except that the cleanup point is explicit and deterministic.</p>
+  <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
+    <li>Anything that must outlive the request (caches, sessions) has to be allocated from the long-lived base allocator instead, and freed explicitly.</li>
+    <li>For hot paths you can back the arena with <code>std.heap.stackFallback(4096, base).get()</code>, which serves from a stack buffer and falls back to <code>base</code> when it fills.</li>
+  </ul>
+
+  <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2.5rem 0 1rem;">How do I handle many connections with std.Thread.Pool?</h2>
+  <p style="color: #475569; line-height: 1.7;"><code>std.http.Server</code> is blocking and handles one connection at a time, so the loop above serves a slow client at the expense of everyone else. The simplest fix is to hand each accepted connection to a <code>std.Thread.Pool</code>.</p>
+  <pre style="background: #0f172a; color: #f8fafc; padding: 1.5rem; border-radius: 10px; overflow-x: auto; font-family: var(--font-mono, monospace); font-size: 0.9rem; line-height: 1.5;"><code><span class="tok-keyword">var</span> pool: std.Thread.Pool = <span class="tok-builtin">undefined</span>;
+<span class="tok-keyword">try</span> pool.<span class="tok-func">init</span>(.{ .allocator = base, .n_jobs = <span class="tok-number">8</span> });
+<span class="tok-keyword">defer</span> pool.<span class="tok-func">deinit</span>();
+
+<span class="tok-keyword">while</span> (<span class="tok-builtin">true</span>) {
+    <span class="tok-keyword">const</span> conn = <span class="tok-keyword">try</span> server.<span class="tok-func">accept</span>();
+    <span class="tok-keyword">try</span> pool.<span class="tok-func">spawn</span>(worker, .{ base, conn });
+}
+
+<span class="tok-keyword">fn</span> <span class="tok-func">worker</span>(base: Allocator, conn: std.net.Server.Connection) <span class="tok-builtin">void</span> {
+    <span class="tok-func">handleConnection</span>(base, conn) <span class="tok-keyword">catch</span> |err| {
+        std.log.<span class="tok-func">err</span>(<span class="tok-string">"connection failed: {s}"</span>, .{<span class="tok-builtin">@errorName</span>(err)});
+    };
+}</code></pre>
+  <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem; margin-top: 1rem;">
+    <li>Pool jobs cannot return errors, so the worker must catch and log them.</li>
+    <li>The allocator is now shared across threads. <code>DebugAllocator</code> is thread-safe in multi-threaded builds; for production prefer <code>std.heap.smp_allocator</code> (0.14+) or <code>std.heap.c_allocator</code> with libc linked.</li>
+    <li>Shared mutable state (counters, caches) needs <code>std.Thread.Mutex</code> or atomics. Nothing makes this safe for you.</li>
+    <li>A pool of N threads still ties up a thread per slow connection. For tens of thousands of idle keep-alive connections, look at libraries with an event loop such as http.zig, or zap, which wraps facil.io.</li>
+  </ul>
+
+  <h2 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 2.5rem 0 1rem;">How do I shut down gracefully on SIGTERM?</h2>
+  <p style="color: #475569; line-height: 1.7;">Containers receive <code>SIGTERM</code> on stop. A process running as PID 1 gets no default signal action, so a Zig server that never installs a handler will ignore it until Docker force-kills it after the grace period. Install a handler with <code>std.posix.sigaction</code> that sets a <code>std.atomic.Value(bool)</code>, check the flag in the accept loop, stop accepting, then call <code>pool.deinit()</code> so worker threads are joined before exit.</p>
+  <ul style="color: #475569; line-height: 1.7; padding-left: 1.25rem;">
+    <li>A blocking <code>accept()</code> will not notice the flag by itself. Use <code>poll</code> with a timeout and check the flag, or call <code>std.posix.shutdown(listen_fd, .recv)</code> from a watcher thread; <code>close()</code> alone won't wake a blocked <code>accept()</code> on Linux.</li>
+    <li>Signal handlers may only do async-signal-safe work: set the atomic flag and return, no allocation or logging.</li>
+    <li>Verify in your Zig version how <code>pool.deinit()</code> treats queued but unstarted jobs; if in-flight requests must finish, track them yourself.</li>
+  </ul>
 </div>

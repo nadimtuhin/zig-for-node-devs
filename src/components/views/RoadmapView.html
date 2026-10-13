@@ -10,8 +10,59 @@
       Zig Developer Roadmap 2026
     </h1>
     <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto; line-height: 1.6;">
-      A comprehensive, structured step-by-step visual learning path for JavaScript, TypeScript, and Node.js engineers transitioning to bare-metal systems programming in Zig.
+      A structured, step-by-step learning path for JavaScript, TypeScript, and Node.js engineers moving to systems programming in Zig.
     </p>
+  </div>
+
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">A Node.js developer can learn Zig in six steps: syntax and slices, error handling with <code>try</code> and <code>defer</code>, allocators and optionals, <code>comptime</code>, C interop with Node-API addons and <code>build.zig</code>, then production services and Docker. Part-time study typically takes about two to three months to reach a first production-style service, though this varies a lot with prior C or Rust experience. Allocators and <code>comptime</code> are the steps that take the longest.</p>
+  </aside>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0 0 0.75rem;">How Long Does It Take to Learn Zig as a Node.js Developer?</h2>
+  <p style="color: #475569; line-height: 1.6; margin: 0 0 1rem;">These are typical estimates for roughly 5 to 8 hours of study per week. They are not measurements, and your pace will differ. Time is dominated by exercises, not reading.</p>
+  <div style="overflow-x: auto; margin-bottom: 3rem;">
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0;">
+      <thead>
+        <tr style="background: #f1f5f9; text-align: left;">
+          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Step</th>
+          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Typical time</th>
+          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Project to build</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">1. Foundation</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">About 1 week</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A word-count CLI that reads a file into a byte slice</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">2. Resilience</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">3 to 5 days</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A config-file parser that returns typed error sets</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">3. Systems Memory</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">1 to 2 weeks</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A key-value cache that uses a per-request <code>ArenaAllocator</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">4. Superpower (comptime)</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">About 1 week</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A generic <code>RingBuffer(T)</code> and a struct field printer using <code>@typeInfo</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">5. Ecosystem & Node-API</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">1 to 2 weeks</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A <code>.node</code> addon exposing an <code>add(a, b)</code> function to JavaScript</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">6. Production</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">2 to 3 weeks</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A small JSON HTTP service in a <code>FROM scratch</code> image</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Interactive Path Legend -->
@@ -41,7 +92,7 @@
       </div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Syntax, Memory Views & Mental Model Jump</h2>
       <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-        Unlearn dynamic V8 JavaScript assumptions. Learn why integers have explicit bit-widths (<code>u8</code>, <code>i32</code>, <code>usize</code>), variables are <code>const</code> by default, and how fixed arrays differ from fat-pointer slices (<code>[]T</code>).
+        Unlearn dynamic JavaScript assumptions. Learn why integers have explicit bit-widths (<code>u8</code>, <code>i32</code>, <code>usize</code>), variables are <code>const</code> by default, and how fixed arrays differ from fat-pointer slices (<code>[]T</code>).
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <a href="/chapter/basic_vars" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">01. Variables & Types →</a>
@@ -59,7 +110,7 @@
       </div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Errors as Values Without Exceptions</h2>
       <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-        Say goodbye to <code>try/catch/throw</code> exceptions that escape control flow. Master Zig error sets (<code>error{...}</code>), the <code>try</code> propagation operator, and deterministic RAII cleanup with <code>defer</code> and <code>errdefer</code>.
+        Replace <code>throw</code>/<code>try</code>/<code>catch</code> exceptions with errors as values. Learn Zig error sets (<code>error{...}</code>), the <code>try</code> propagation operator, and scope-based cleanup with <code>defer</code> and <code>errdefer</code>.
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <a href="/chapter/errors_as_values" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">07. Error Sets →</a>
@@ -76,7 +127,7 @@
       </div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Optionals, Pointers & The Allocator Philosophy</h2>
       <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-        Zero hidden heap allocation. Learn how optional pointers (<code>?*T</code>) use zero-overhead pointer tagging, how structs map directly to cache lines, and how to choose between GPA, Arena, and FixedBuffer allocators.
+        No hidden heap allocation, by convention across the standard library. Learn why an optional pointer (<code>?*T</code>) is the same size as <code>*T</code> (null is address 0), and how to choose between <code>DebugAllocator</code> (formerly <code>GeneralPurposeAllocator</code>), <code>ArenaAllocator</code>, and <code>FixedBufferAllocator</code>.
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <a href="/memory" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">🧠 Allocators Deep Dive →</a>
@@ -94,7 +145,7 @@
       </div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Comptime Metaprogramming & Type Generation</h2>
       <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-        Run arbitrary Zig code at compile time. Write generic data structures with plain functions, inspect structs via <code>@typeInfo</code>, and fail builds with <code>@compileError</code> assertions.
+        Run ordinary Zig code at compile time (without I/O). Write generic data structures with plain functions that take <code>comptime T: type</code>, inspect structs via <code>@typeInfo</code>, and fail builds with <code>@compileError</code>.
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <a href="/comptime" style="background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">⚡ comptime Deep Dive →</a>
@@ -111,7 +162,7 @@
       </div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">C Interop, Node Addons & The Build System</h2>
       <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-        Leverage Zig as a drop-in C compiler. Compile native Node-API addons in seconds without <code>node-gyp</code>, cross-compile across operating systems, and write build pipelines in pure <code>build.zig</code>.
+        Use <code>zig cc</code>, Zig's bundled Clang front end, as a C compiler. Build Node-API addons without <code>node-gyp</code> or Python (the Node-API headers are still required), cross-compile with <code>-Dtarget</code>, and write build pipelines in <code>build.zig</code>.
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <a href="/c-interop" style="background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">🔌 C & Node-API Guide →</a>
@@ -128,7 +179,7 @@
       </div>
       <h2 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem;">Microservices, Docker Containers & Senior Interview Mastery</h2>
       <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-        Build sub-millisecond HTTP microservices, package 4MB scratch containers with zero CVE vulnerabilities, avoid common systems footguns, and master senior engineering interview questions.
+        Build small HTTP microservices with no garbage collector, so no GC pauses. Package them in <code>FROM scratch</code> images whose size is close to the binary size (measure with <code>docker images</code>) and that contain no OS packages for scanners to flag. Then learn the common systems footguns and senior interview questions.
       </p>
       <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         <a href="/microservice" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; padding: 0.35rem 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">📂 Microservice Architecture →</a>

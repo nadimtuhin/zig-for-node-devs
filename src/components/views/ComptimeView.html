@@ -1,27 +1,73 @@
 <div class="appendix-container" style="max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif); line-height: 1.6;">
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 01 • Metaprogramming Paradigm</span>
-    <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">Mastering Zig `comptime`</h1>
-    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Why Zig eliminates C preprocessor macros, C++ template errors, and JavaScript runtime reflection in favor of ordinary Zig code executed inside the compiler VM.</p>
+    <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">Mastering Zig <code>comptime</code></h1>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">How Zig replaces C preprocessor macros, C++ templates, and much runtime reflection with ordinary Zig code that the compiler executes at build time.</p>
   </div>
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">Zig <code>comptime</code> runs ordinary Zig code inside the compiler, so a generic is a plain function that takes <code>comptime T: type</code> and returns a <code>type</code>, and <code>@typeInfo(T)</code> lets you inspect fields and tags during compilation. TypeScript types are erased by <code>tsc</code> or esbuild before your code runs: they cannot execute code or exist at runtime. Comptime code cannot do I/O, and loops are limited by <code>@setEvalBranchQuota</code> (default 1000 backward branches).</p>
+  </aside>
 
   <!-- CONCEPTUAL OVERVIEW -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 0; color: #0f172a;">⚡ What is `comptime`?</h2>
-    <p style="color: #475569; margin-bottom: 0.75rem;">In TypeScript, generics are stripped at build time (type erasure), leaving zero trace at runtime. To inspect objects dynamically in Node.js, you must rely on expensive runtime reflection (<code>Object.keys()</code>, <code>Reflect.get()</code>, <code>class-transformer</code>). In C++, template metaprogramming introduces cryptic compiler errors and huge build times.</p>
-    <p style="color: #475569; margin: 0;">In Zig, <strong>types are first-class values at compile time</strong>. You write ordinary Zig functions, loops, and switches. When a parameter or expression is marked <code>comptime</code>, the Zig compiler executes that code during compilation inside its internal virtual machine, generating specialized, zero-overhead machine code.</p>
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 0; color: #0f172a;">What is <code>comptime</code>, and how is it different from TypeScript types?</h2>
+    <p style="color: #475569; margin-bottom: 0.75rem;">TypeScript types are erased when <code>tsc</code> or esbuild strips them, so nothing remains at runtime. To inspect objects in Node.js you use runtime reflection (<code>Object.keys()</code>, <code>Reflect.get()</code>, libraries such as <code>class-transformer</code>). TypeScript's type system is Turing-complete (recursive conditional and template literal types can compute), but it only computes other types: it cannot run arbitrary code, do I/O, or produce runtime values.</p>
+    <p style="color: #475569; margin: 0;">In Zig, <strong>types are first-class values at compile time</strong>. You write ordinary Zig functions, loops, and switches. When an expression is marked <code>comptime</code>, the compiler executes it during compilation and can produce values, types and code from the result. Comptime code cannot perform I/O or syscalls, and it stays within an evaluation budget.</p>
+  </div>
+
+  <!-- SIDE BY SIDE -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">What does a TypeScript generic look like next to a Zig generic?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">Same idea, different mechanism. TypeScript generics are annotations the checker validates and then discards. Zig generics are functions that run at compile time, and the compiler specialises code for each type you pass.</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+      <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generics.ts</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">TypeScript</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">function</span> <span class="tok-func">first</span>&lt;T&gt;(xs: T[]): T | <span class="tok-builtin">undefined</span> {
+  <span class="tok-keyword">return</span> xs[0];
+}
+
+<span class="tok-comment">// A type-level "function" (erased at compile time)</span>
+<span class="tok-keyword">type</span> Box&lt;T&gt; = { value: T };
+
+<span class="tok-comment">// After tsc/esbuild, the output is plain JS:</span>
+<span class="tok-comment">// function first(xs) { return xs[0]; }</span>
+<span class="tok-comment">// Box and T no longer exist at runtime.</span></code></pre>
+      </div>
+      <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generics.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">fn</span> <span class="tok-func">first</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>, xs: []<span class="tok-keyword">const</span> T) ?T {
+    <span class="tok-keyword">if</span> (xs.len == <span class="tok-number">0</span>) <span class="tok-keyword">return</span> <span class="tok-builtin">null</span>;
+    <span class="tok-keyword">return</span> xs[<span class="tok-number">0</span>];
+}
+
+<span class="tok-comment">// A type-level function is just a function returning `type`</span>
+<span class="tok-keyword">fn</span> <span class="tok-func">Box</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>) <span class="tok-builtin">type</span> {
+    <span class="tok-keyword">return</span> <span class="tok-keyword">struct</span> { value: T };
+}
+
+<span class="tok-comment">// first(i32, ...) and first(f64, ...) compile to separate</span>
+<span class="tok-comment">// specialised functions. Box(i32) is a real type.</span></code></pre>
+      </div>
+    </div>
   </div>
 
   <!-- PATTERN 1: TYPE GENERICS -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">1. Type Generics without New Syntax</h2>
-    <p style="color: #475569; margin-bottom: 1rem;">In Zig, a generic data structure is simply a regular function that takes a <code>comptime T: type</code> parameter and returns a <code>type</code>. We can enforce type constraints with <code>@compileError</code>:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">How do generics work without new syntax?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">A generic data structure is a regular function that takes a <code>comptime T: type</code> parameter and returns a <code>type</code>. You can reject unsupported types with <code>@compileError</code>, which fails the build with your message. The tag names below (<code>.int</code>, <code>.float</code>) are Zig 0.14 spelling; in 0.13 write <code>.Int</code> and <code>.Float</code>.</p>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generic_point.zig</span>
-        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
-      </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">generic_point.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">Point</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>) <span class="tok-builtin">type</span> {
     <span class="tok-comment">// Assert at compile time that T is either an integer or float</span>
@@ -57,30 +103,94 @@
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
     <span class="tok-keyword">const</span> PointI32 = <span class="tok-func">Point</span>(<span class="tok-builtin">i32</span>);
     <span class="tok-keyword">const</span> pt1 = PointI32{ .x = <span class="tok-number">3</span>, .y = <span class="tok-number">4</span> };
-    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Distance: {d}\n"</span>, .{pt1.<span class="tok-func">distance</span>()}); <span class="tok-comment">// 5.0</span>
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Distance: {d}\n"</span>, .{pt1.<span class="tok-func">distance</span>()}); <span class="tok-comment">// 5</span>
 
     <span class="tok-keyword">const</span> PointF32 = <span class="tok-func">Point</span>(<span class="tok-builtin">f32</span>);
     <span class="tok-keyword">const</span> pt2 = PointF32{ .x = <span class="tok-number">1.5</span>, .y = <span class="tok-number">2.0</span> };
     std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Distance: {d}\n"</span>, .{pt2.<span class="tok-func">distance</span>()}); <span class="tok-comment">// 2.5</span>
 }</code></pre>
-    </div>
+      </div>
+  </div>
+
+  <!-- TYPEINFO VERSIONS -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">How do you inspect types with <code>@typeInfo</code>, and what changed in 0.14?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;"><code>@typeInfo(T)</code> returns a <code>std.builtin.Type</code> tagged union that describes <code>T</code>. Zig 0.14 changed the tag names to lowercase (using <code>@"..."</code> quoting where the name is a keyword), while 0.13 used capitalised tags. Code written for one version fails to compile on the other:</p>
+    <div style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 0.75rem; border: 1px solid #e2e8f0; font-size: 0.92rem;">
+      <thead>
+        <tr style="background: #f1f5f9; text-align: left;"><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Kind</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig 0.14 tag</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig 0.13 tag</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Struct</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.@"struct"</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.Struct</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Integer / float</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.int</code>, <code>.float</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.Int</code>, <code>.Float</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Pointer / array</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.pointer</code>, <code>.array</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.Pointer</code>, <code>.Array</code></td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Enum / union / fn</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.@"enum"</code>, <code>.@"union"</code>, <code>.@"fn"</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>.Enum</code>, <code>.Union</code>, <code>.Fn</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">typeinfo_tags.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+
+<span class="tok-keyword">fn</span> <span class="tok-func">describe</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>) []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
+    <span class="tok-keyword">return</span> <span class="tok-keyword">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {
+        <span class="tok-comment">// Zig 0.14 tag names. In 0.13 these are .Int, .Float, .Struct</span>
+        .int =&gt; <span class="tok-string">"integer"</span>,
+        .float =&gt; <span class="tok-string">"float"</span>,
+        .@"struct" =&gt; <span class="tok-string">"struct"</span>,
+        <span class="tok-keyword">else</span> =&gt; <span class="tok-string">"something else"</span>,
+    };
+}
+
+<span class="tok-keyword">const</span> Pair = <span class="tok-keyword">struct</span> { a: <span class="tok-builtin">i32</span>, b: <span class="tok-builtin">i32</span> };
+
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"{s} {s} {s}\n"</span>, .{
+        <span class="tok-func">describe</span>(<span class="tok-builtin">u8</span>), <span class="tok-func">describe</span>(<span class="tok-builtin">f32</span>), <span class="tok-func">describe</span>(Pair),
+    });
+    <span class="tok-comment">// std.meta.fields(Pair) is a shortcut for the struct field list</span>
+    <span class="tok-keyword">inline</span> <span class="tok-keyword">for</span> (std.meta.<span class="tok-func">fields</span>(Pair)) |fld| {
+        std.debug.<span class="tok-func">print</span>(<span class="tok-string">"field: {s}\n"</span>, .{fld.name});
+    }
+}</code></pre>
+      </div>
   </div>
 
   <!-- PATTERN 2: COMPTIME REFLECTION -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">2. Comptime Reflection with `@typeInfo` and `inline for`</h2>
-    <p style="color: #475569; margin-bottom: 1rem;">Notice <code>inline for</code>! A regular <code>for</code> loop executes at runtime. An <code>inline for</code> loop executes at compile time, unrolling the iteration completely. This allows writing zero-allocation serializers without runtime reflection overhead:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">How does <code>inline for</code> enable compile-time reflection?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">A regular <code>for</code> loop executes at runtime. An <code>inline for</code> loop is unrolled by the compiler, which lets you write a serializer that visits each struct field without a runtime lookup of field names. The field list is known when the code is compiled, so there is no runtime reflection step. This version uses 0.14 tag names (in 0.13 the prong is <code>.Struct</code>):</p>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">serializer.zig (Zero-Overhead Reflection)</span>
-        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
-      </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">serializer.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">printStructFields</span>(<span class="tok-keyword">comptime</span> T: <span class="tok-builtin">type</span>, value: T) <span class="tok-builtin">void</span> {
     <span class="tok-keyword">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);
     <span class="tok-keyword">switch</span> (info) {
-        .@<span class="tok-string">"struct"</span> =&gt; |s| {
+        .<span class="tok-string">@"struct"</span> =&gt; |s| {
             std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Inspecting struct {s}:\n"</span>, .{<span class="tok-builtin">@typeName</span>(T)});
             <span class="tok-keyword">inline</span> <span class="tok-keyword">for</span> (s.fields) |field| {
                 <span class="tok-keyword">const</span> val = <span class="tok-builtin">@field</span>(value, field.name);
@@ -105,19 +215,19 @@
     <span class="tok-keyword">const</span> user = UserAccount{ .id = <span class="tok-number">42</span>, .name = <span class="tok-string">"Alice"</span>, .active = <span class="tok-builtin">true</span> };
     <span class="tok-func">printStructFields</span>(UserAccount, user);
 }</code></pre>
-    </div>
+      </div>
   </div>
 
-  <!-- PATTERN 3: COMPILE-TIME STRING HASHING / PERFECT HASH -->
+  <!-- PATTERN 3: COMPILE-TIME STRING HASHING -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">3. Compile-Time String Hashing for Fast Dispatch</h2>
-    <p style="color: #475569; margin-bottom: 1rem;">Instead of executing linear string comparisons (`std.mem.eql`) across hundreds of API routes at runtime, you can compute 64-bit FNV-1a hashes at compile time and switch on integer cases:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">What can comptime precompute, and what are its limits?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">You can compute values at build time and use them as constants, for example FNV-1a hashes of route strings used as switch cases instead of comparing strings with <code>std.mem.eql</code> in sequence. Different strings can in principle share a hash, so this is a dispatch technique to measure, not a proven win.</p>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">comptime_router.zig</span>
-        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
-      </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">comptime_router.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">hashString</span>(s: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) <span class="tok-builtin">u64</span> {
     <span class="tok-keyword">var</span> h: <span class="tok-builtin">u64</span> = <span class="tok-number">0xcbf29ce484222325</span>;
@@ -128,7 +238,7 @@
 }
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">route</span>(path: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
-    <span class="tok-comment">// When called in a switch pragma, hashString is evaluated at compile time!</span>
+    <span class="tok-comment">// The comptime prong items are evaluated by the compiler, not at runtime</span>
     <span class="tok-keyword">switch</span> (<span class="tok-func">hashString</span>(path)) {
         <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/health"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Healthy"</span>,
         <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/users"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Users List"</span>,
@@ -140,36 +250,65 @@
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
     std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Route result: {s}\n"</span>, .{<span class="tok-func">route</span>(<span class="tok-string">"/health"</span>)});
 }</code></pre>
-    </div>
+      </div>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">What limits does comptime have?</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">Comptime code cannot perform I/O or syscalls (no reading files or the network; use <code>@embedFile</code> to bring a file's bytes in). Evaluation is bounded: the compiler stops a loop after 1000 backward branches by default, and you raise the limit with <code>@setEvalBranchQuota</code>. Heavy comptime work also slows the build.</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">quota.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+
+<span class="tok-keyword">fn</span> <span class="tok-func">sumTo</span>(<span class="tok-keyword">comptime</span> n: <span class="tok-builtin">u32</span>) <span class="tok-builtin">u32</span> {
+    <span class="tok-builtin">@setEvalBranchQuota</span>(<span class="tok-number">100_000</span>); <span class="tok-comment">// default is 1000 backward branches</span>
+    <span class="tok-keyword">var</span> total: <span class="tok-builtin">u32</span> = <span class="tok-number">0</span>;
+    <span class="tok-keyword">var</span> i: <span class="tok-builtin">u32</span> = <span class="tok-number">0</span>;
+    <span class="tok-keyword">while</span> (i &lt; n) : (i += <span class="tok-number">1</span>) total += i;
+    <span class="tok-keyword">return</span> total;
+}
+
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
+    <span class="tok-keyword">const</span> result = <span class="tok-keyword">comptime</span> <span class="tok-func">sumTo</span>(<span class="tok-number">5000</span>); <span class="tok-comment">// computed during compilation</span>
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"{d}\n"</span>, .{result});
+}</code></pre>
+      </div>
   </div>
 
   <!-- COMPARISON TABLE -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">TypeScript vs Zig Metaprogramming</h2>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">TypeScript types vs Zig comptime: what is the difference?</h2>
+  <div style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
     <table style="width: 100%; border-collapse: collapse; margin-top: 0.75rem; border: 1px solid #e2e8f0; font-size: 0.92rem;">
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Feature</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig</th>
-        </tr>
+        <tr style="background: #f1f5f9; text-align: left;"><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Feature</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">TypeScript</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; font-weight: 600;">Generics</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Erased at runtime; no runtime verification</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Generates dedicated concrete machine code per type</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Generics</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Erased after type checking; no runtime trace</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">The compiler generates specialised code per type argument</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; font-weight: 600;">Dynamic Reflection</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>Reflect.get</code>, <code>Object.keys()</code> (slow heap lookups)</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>@typeInfo()</code> and <code>inline for</code> (zero runtime cost)</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Reflection</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>Reflect.get</code>, <code>Object.keys()</code> inspect objects at runtime</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>@typeInfo()</code>, <code>std.meta.fields</code> and <code>inline for</code> inspect types at compile time</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; font-weight: 600;">Compile Validation</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Static types only; cannot execute code at build</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Full compiler VM with <code>@compileError()</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Executes code at build time?</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">No: types only describe values</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Yes: real Zig code, but no I/O</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Computation limits</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Turing-complete, but only computes types; recursion depth is limited</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>@setEvalBranchQuota</code> (default 1000 backward branches)</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Constraint errors</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Compiler type errors</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>@compileError()</code> with your own message</td>
         </tr>
       </tbody>
     </table>

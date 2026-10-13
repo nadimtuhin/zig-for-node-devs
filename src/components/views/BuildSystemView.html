@@ -2,51 +2,64 @@
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <span style="background: #fef3c7; color: #92400e; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 04 • Build Tooling</span>
     <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">`build.zig` vs `package.json`</h1>
-    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Type-safe build graphs in pure Zig instead of fragile bash scripts, CMake, Makefiles, or bloated npm pipelines.</p>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">A type-checked build graph written in Zig instead of JSON, shell scripts, and a bundler config.</p>
   </div>
 
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">Zig replaces <code>package.json</code> plus a bundler with two files: <code>build.zig</code>, a type-checked Zig program that declares the build graph, and <code>build.zig.zon</code>, which lists dependencies as URLs pinned by a content hash. <code>zig fetch --save &lt;url&gt;</code> plays the role of <code>npm install</code>, packages live in one global cache instead of per-project <code>node_modules</code>, and <code>zig build -Dtarget=x86_64-linux-musl -Doptimize=ReleaseSmall</code> cross-compiles from any host.</p>
+    <ul style="margin: 0.75rem 0 0; padding-left: 1.25rem; color: #422006; line-height: 1.7;">
+      <li>No central registry: dependencies are URLs or local paths.</li>
+      <li>The build script runs at build time only; the program you ship contains none of it.</li>
+      <li>Zig 0.14 added <code>.fingerprint</code> and made <code>.name</code> an enum literal in <code>build.zig.zon</code>.</li>
+    </ul>
+  </aside>
+
   <!-- COMPARISON TABLE -->
-  <div style="margin-bottom: 2.5rem; overflow-x: auto;">
-    <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; font-size: 0.92rem;">
-      <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Dimension</th>
-          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Node.js Ecosystem</th>
-          <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Build System</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Build Script Language</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">JSON + Shell + Webpack/Rollup/Vite/esbuild</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;">Pure Zig (<code>build.zig</code>)</td>
-        </tr>
-        <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Dependency Manifest</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>package.json</code> + <code>package-lock.json</code></td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;"><code>build.zig.zon</code> (Zig Object Notation)</td>
-        </tr>
-        <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Artifact Storage</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>node_modules/</code> (gigabytes replicated per project)</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;">Global content-addressed cache (deduplicated)</td>
-        </tr>
-        <tr>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Supply Chain Security</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; color: #dc2626;">npm <code>postinstall</code> scripts run arbitrary shell commands</td>
-          <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; color: #047857; font-weight: 700;">Zero lifecycle hooks; strict SHA-256 package hashes</td>
-        </tr>
-      </tbody>
-    </table>
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How does the Zig build system compare to the Node.js toolchain?</h2>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; font-size: 0.92rem;">
+        <thead>
+          <tr style="background: #f1f5f9; text-align: left;">
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Dimension</th>
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Node.js Ecosystem</th>
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Build System</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Build Script Language</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">JSON + Shell + Webpack/Rollup/Vite/esbuild</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;">Zig (<code>build.zig</code>)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Dependency Manifest</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>package.json</code> + <code>package-lock.json</code></td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;"><code>build.zig.zon</code> (Zig Object Notation)</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Artifact Storage</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>node_modules/</code> (a copy per project; pnpm reduces this with a shared store)</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600; color: #0369a1;">Global package cache shared across projects</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top; font-weight: 600;">Supply Chain</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">npm <code>postinstall</code> scripts can run arbitrary shell commands (unless disabled)</td>
+            <td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">No install-time lifecycle scripts, and packages are pinned by content hash. A dependency's <code>build.zig</code> still runs Zig code when you build, so review what you depend on.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- BUILD.ZIG EXAMPLE -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">1. Production `build.zig` Architecture</h2>
-    <p style="color: #475569; margin-bottom: 1rem;">In Zig, your build script is compiled and executed as a standard Zig program that constructs a directed acyclic graph (DAG) of build steps:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How is a <code>build.zig</code> structured?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">Your build script is compiled and run as a Zig program that constructs a directed acyclic graph (DAG) of build steps. Because it is ordinary Zig, a misspelled function or wrong argument type is a compile error, not a surprise inside a JSON or shell string:</p>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
       <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (Idiomatic 0.13+ Build Graph)</span>
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (Zig 0.13 / 0.14 Build Graph)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
       </div>
       <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
@@ -91,7 +104,7 @@
         .optimize = optimize,
     });
     <span class="tok-keyword">const</span> run_unit_tests = b.<span class="tok-func">addRunArtifact</span>(unit_tests);
-    <span class="tok-keyword">const</span> test_step = b.<span class="tok-func">step</span>(<span class="tok-string">"test"</span>, <span class="tok-string">"Run unit tests with leak detection"</span>);
+    <span class="tok-keyword">const</span> test_step = b.<span class="tok-func">step</span>(<span class="tok-string">"test"</span>, <span class="tok-string">"Run unit tests (the test allocator reports leaks)"</span>);
     test_step.<span class="tok-func">dependOn</span>(&amp;run_unit_tests.step);
 }</code></pre>
     </div>
@@ -99,20 +112,26 @@
 
   <!-- BUILD.ZIG.ZON EXAMPLE -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">2. Dependency Management with `build.zig.zon`</h2>
-    <p style="color: #475569; margin-bottom: 1rem;"><code>build.zig.zon</code> replaces <code>package.json</code>. Packages are locked to strict cryptographic hashes:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How does <code>build.zig.zon</code> manage dependencies?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;"><code>build.zig.zon</code> plays the role of <code>package.json</code>. Each dependency is pinned by a <code>.hash</code>. In Zig 0.14, <code>zig init</code> also generates a <code>.fingerprint</code>, and <code>.name</code> became an enum literal (0.13 used a string):</p>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
       <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig.zon (Package Manifest)</span>
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig.zon (Zig 0.14 Package Manifest)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">Zig ZON</span>
       </div>
       <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>.{
-    .name = <span class="tok-string">"user-microservice"</span>,
+    <span class="tok-comment">// 0.14: enum literal. 0.13 used a string: .name = "user-microservice"</span>
+    .name = .user_microservice,
     .version = <span class="tok-string">"1.0.0"</span>,
-    .minimum_zig_version = <span class="tok-string">"0.13.0"</span>,
+    <span class="tok-comment">// 0.14: generated once by zig init and never changed; regenerate it if you fork a maintained project.</span>
+    .fingerprint = <span class="tok-number">0x0123456789abcdef</span>, <span class="tok-comment">// placeholder: keep the value zig init generated</span>
+    .minimum_zig_version = <span class="tok-string">"0.14.0"</span>,
     .dependencies = .{
-        <span class="tok-comment">// Add external dependencies via URL + SHA-256 hash</span>
-        <span class="tok-comment">// Install automatically via: zig fetch --save &lt;tarball-url&gt;</span>
+        <span class="tok-comment">// `zig fetch --save &lt;url&gt;` appends an entry shaped like this:</span>
+        <span class="tok-comment">// .example = .{</span>
+        <span class="tok-comment">//     .url = "https://example.com/example-1.0.0.tar.gz",</span>
+        <span class="tok-comment">//     .hash = "example-1.0.0-&lt;hash&gt;", // written by zig fetch (0.13 wrote "1220...")</span>
+        <span class="tok-comment">// },</span>
     },
     .paths = .{
         <span class="tok-string">"build.zig"</span>,
@@ -124,15 +143,82 @@
     </div>
   </div>
 
+  <!-- HASH SEMANTICS -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">What does the dependency hash actually cover?</h2>
+    <p style="color: #475569; margin-bottom: 0.75rem;">The <code>.hash</code> is a content hash of the package's files after unpacking, not a hash of the tarball. If the upstream URL later serves different content, the hash no longer matches and the build fails instead of silently using it. Fetched packages go to the global cache (run <code>zig env</code> to see the path; on Linux it is under <code>~/.cache/zig/p/&lt;hash&gt;</code>), so two projects using the same package share one copy.</p>
+    <p style="color: #475569; margin: 0;">There is no central registry like npm: a dependency is a URL (often a GitHub tarball) or a local <code>.path</code>. Unlike <code>package-lock.json</code>, the pin lives in the manifest itself.</p>
+  </div>
+
+  <!-- CROSS COMPILATION AND OPTIMIZE -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How does Zig cross-compile and pick optimization modes?</h2>
+    <p style="color: #475569; margin-bottom: 0.75rem;"><code>b.standardTargetOptions(.{})</code> exposes <code>-Dtarget</code> and <code>b.standardOptimizeOption(.{})</code> exposes <code>-Doptimize</code>. Zig bundles its own compiler backends and libc support for targets such as musl, so cross-compiling does not need a separate cross toolchain:</p>
+    <div style="background: #020617; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;">
+      <code><span class="tok-comment"># static Linux binary, built on macOS or Windows</span>
+zig build -Dtarget=x86_64-linux-musl -Doptimize=ReleaseSmall
+
+<span class="tok-comment"># single file, no build.zig</span>
+zig build-exe main.zig -target aarch64-linux-musl</code>
+    </div>
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 1rem 0 0.5rem;">What do the -Doptimize modes mean?</h3>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; font-size: 0.92rem;">
+        <thead>
+          <tr style="background: #f1f5f9; text-align: left;">
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Mode</th>
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Safety checks</th>
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Optimizes for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>Debug</code> (default)</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">On</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Fast compiles and debugging</td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>ReleaseSafe</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">On</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Speed, keeping overflow and bounds checks</td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>ReleaseFast</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Off</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Speed</td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>ReleaseSmall</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Off</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Binary size</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color: #475569; margin-top: 0.75rem;">Pass <code>-Dcpu=baseline</code> if the binary must run on older CPUs than the build machine. Measure results yourself with <code>ls -l zig-out/bin</code>.</p>
+  </div>
+
+  <!-- NPM TO ZIG TABLE -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">What is the Zig equivalent of each npm concept?</h2>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; font-size: 0.92rem;">
+        <thead>
+          <tr style="background: #f1f5f9; text-align: left;">
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">npm / package.json concept</th>
+            <th style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig equivalent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>name</code>, <code>version</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>.name</code>, <code>.version</code>, <code>.fingerprint</code> (0.14) in <code>build.zig.zon</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>dependencies</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>.dependencies</code> with <code>.url</code> and <code>.hash</code>, used in <code>build.zig</code> via <code>b.dependency()</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>npm install &lt;pkg&gt;</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>zig fetch --save &lt;url&gt;</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>package-lock.json</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">The <code>.hash</code> fields themselves</td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>node_modules/</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Global package cache (path shown by <code>zig env</code>)</td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>scripts</code> (<code>npm run</code>, <code>npm test</code>)</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">Named steps: <code>b.step("run", ...)</code>, then <code>zig build run</code> / <code>zig build test</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>NODE_ENV</code> / bundler mode</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>-Doptimize=ReleaseSafe | ReleaseFast | ReleaseSmall</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">webpack / esbuild / vite config</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>build.zig</code> (<code>addExecutable</code>, <code>addOptions</code>, <code>installArtifact</code>)</td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>engines</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>.minimum_zig_version</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>files</code> / <code>.npmignore</code></td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>.paths</code></td></tr>
+          <tr><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">npm registry</td><td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0; vertical-align: top;">None: URLs or local paths</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- CLI COMMAND CHEATSHEET -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.25rem; font-weight: 700;">3. Essential Build CLI Commands</h2>
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.25rem; font-weight: 700;">Which build commands replace the npm scripts?</h2>
     <ul style="color: #475569; padding-left: 1.25rem; margin-bottom: 0; line-height: 1.8;">
-      <li><code>zig build</code> — Compiles with Debug mode (fast builds, full safety checks and debug symbols).</li>
-      <li><code>zig build -Doptimize=ReleaseFast</code> — Maximum CPU speed with compiler vectorization.</li>
-      <li><code>zig build -Doptimize=ReleaseSmall</code> — Maximum binary size minimization for Docker scratch images.</li>
-      <li><code>zig build -Dtarget=x86_64-linux-musl</code> — Cross-compiles a static Linux binary directly from macOS or Windows!</li>
-      <li><code>zig fetch --save &lt;url&gt;</code> — Equivalent to <code>npm install &lt;package&gt;</code>; downloads and writes hash to <code>build.zig.zon</code>.</li>
+      <li><code>zig build</code> — Compiles in Debug mode (fast builds, safety checks on, debug info).</li>
+      <li><code>zig build -Doptimize=ReleaseFast</code> — Optimizes for speed and turns safety checks off. <code>ReleaseSafe</code> keeps them.</li>
+      <li><code>zig build -Doptimize=ReleaseSmall</code> — Optimizes for binary size, useful for small container images. Measure with <code>ls -l zig-out/bin</code>.</li>
+      <li><code>zig build -Dtarget=x86_64-linux-musl</code> — Cross-compiles a static Linux binary from macOS or Windows.</li>
+      <li><code>zig fetch --save &lt;url&gt;</code> — Closest to <code>npm install &lt;package&gt;</code>; downloads the package and writes its URL and content hash to <code>build.zig.zon</code>.</li>
     </ul>
   </div>
 </div>

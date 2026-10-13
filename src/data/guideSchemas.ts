@@ -21,7 +21,7 @@ export const guideSchemas = {
     description: 'Manual memory management in Zig for JavaScript developers: std.mem.Allocator, DebugAllocator, ArenaAllocator, and leak-free code without a GC.',
     article: { datePublished: PUBLISHED, keywords: ['Zig allocator', 'manual memory management', 'ArenaAllocator', 'DebugAllocator', 'Zig vs garbage collection'] },
     faq: [
-      { question: 'How does Zig manage memory without a garbage collector?', answer: 'Every function that allocates takes a std.mem.Allocator parameter, and the caller frees the memory, usually with defer. Nothing allocates behind your back, so memory cost is visible in every function signature.' },
+      { question: 'How does Zig manage memory without a garbage collector?', answer: 'Every function that allocates takes a std.mem.Allocator parameter, and the caller frees the memory, usually with defer. By convention nothing allocates behind your back, so memory cost is visible in every function signature.' },
       { question: 'Which Zig allocator should I use for an HTTP request?', answer: 'Use an ArenaAllocator per request. Allocate freely while handling it, then free everything in one call when the response is sent. Use DebugAllocator (formerly GeneralPurposeAllocator) in debug builds to catch leaks and double frees.' },
     ],
   },
@@ -45,20 +45,20 @@ export const guideSchemas = {
     description: 'Use Zig as a C compiler and import C headers with @cImport. Build native Node-API addons and Bun FFI libraries without node-gyp or Python toolchains.',
     article: { datePublished: PUBLISHED, keywords: ['Zig C interop', '@cImport', 'Node-API addon', 'node-gyp alternative', 'Bun FFI Zig'] },
     faq: [
-      { question: 'Can Zig replace node-gyp for native Node.js addons?', answer: 'Yes. Zig ships its own C compiler and libc headers, so you can import node_api.h (from the node-api-headers package or your Node.js include path) with @cImport, export functions with the C ABI and build a .node shared library for any target without Python or a system toolchain.' },
+      { question: 'Can Zig replace node-gyp for native Node.js addons?', answer: 'Yes. Zig ships its own C compiler and libc headers, so you can import node_api.h (from the node-api-headers package or your Node.js include path) with @cImport, export functions with the C ABI and build a .node shared library for Linux and macOS (Windows also needs node.lib) without Python or a system toolchain.' },
       { question: 'How do I call a C library from Zig?', answer: 'Wrap the header in @cImport(@cInclude("header.h")) and call the functions directly. Zig translates the C declarations into Zig types at compile time, so there is no binding layer to write.' },
     ],
   },
   docker: {
-    description: 'Ship Zig services in under 5MB Docker images: multi-stage builds, static musl binaries on scratch, and zero-CVE containers compared with typical Node.js images.',
+    description: 'Ship Zig services as static musl binaries in FROM scratch Docker images: a few MB versus roughly 1.1 GB for node:22, and no OS packages for CVE scanners.',
     article: { datePublished: PUBLISHED, keywords: ['Zig Docker', 'scratch image', 'static binary', 'musl', 'small Docker images'] },
     faq: [
       { question: 'Why are Zig Docker images so much smaller than Node.js images?', answer: 'Zig compiles to a single static binary with no runtime, so the final stage can be FROM scratch with just that file. A Node.js image has to carry the V8 runtime, npm packages and usually a full OS base layer.' },
-      { question: 'How do I build a static Zig binary for a scratch container?', answer: 'Target musl, for example zig build -Dtarget=x86_64-linux-musl -Doptimize=ReleaseSmall, in a builder stage, then copy the binary into a FROM scratch stage. The result has no shell, no libc dependency and no OS packages to patch.' },
+      { question: 'How do I build a static Zig binary for a scratch container?', answer: 'Target musl, for example zig build -Dtarget=x86_64-linux-musl -Doptimize=ReleaseSafe, in a builder stage, then copy the binary into a FROM scratch stage. The result has no shell, no libc dependency and no OS packages to patch.' },
     ],
   },
   microservice: {
-    description: 'Production Zig HTTP microservice blueprint for Express.js developers: routing, connection pools, per-request arenas, graceful shutdown, and fast APIs.',
+    description: 'Production Zig HTTP microservice blueprint for Express.js developers: routing, thread pools, per-request arenas, and graceful shutdown with no GC pauses.',
     article: { datePublished: PUBLISHED, keywords: ['Zig HTTP server', 'Zig microservice', 'Express.js vs Zig', 'httpz', 'Zig web framework'] },
     faq: [
       { question: 'What is the Zig equivalent of Express.js?', answer: 'There is no single standard framework. std.http covers the basics, and community libraries such as httpz and zap add routing and middleware with an API that will feel familiar to Express users.' },
@@ -70,7 +70,7 @@ export const guideSchemas = {
     article: { datePublished: PUBLISHED, keywords: ['Zig philosophy', 'zig zen', 'no hidden control flow', 'Zig design principles'] },
     faq: [
       { question: 'Why does Zig have no operator overloading?', answer: 'Zig forbids hidden control flow. If a + b could call a function, reading the code would not tell you whether it allocates, fails or runs slow. In Zig, a function call always looks like a function call.' },
-      { question: 'What does "no hidden control flow" mean in Zig?', answer: 'There are no exceptions, getters, destructors or implicit allocations. Every jump, error and allocation is visible in the source through explicit keywords such as try, defer and allocator parameters.' },
+      { question: 'What does "no hidden control flow" mean in Zig?', answer: 'There are no exceptions, getters, destructors or implicit allocations. By convention every jump, error and allocation is visible in the source through explicit keywords such as try, defer and allocator parameters.' },
     ],
   },
   pitfalls: {
@@ -82,7 +82,7 @@ export const guideSchemas = {
     ],
   },
   troubleshooting: {
-    description: 'Debug Zig like a systems engineer: find memory leaks with DebugAllocator, set LLDB and GDB breakpoints, read stack traces, and analyse core dumps.',
+    description: 'Debug Zig like a systems engineer: find memory leaks with DebugAllocator, set LLDB and GDB breakpoints, read stack traces, and decode safety-check panics.',
     article: { datePublished: PUBLISHED, keywords: ['Zig debugging', 'Zig memory leak', 'LLDB Zig', 'GDB Zig', 'Zig stack trace'] },
     faq: [
       { question: 'How do I find memory leaks in Zig?', answer: 'Use std.heap.DebugAllocator (named GeneralPurposeAllocator before Zig 0.14) and check the result of deinit() at the end of main. In debug builds it reports every leaked allocation along with the stack trace of where it was made.' },
@@ -106,7 +106,7 @@ export const guideSchemas = {
     ],
   },
   leetcode: {
-    description: 'Classic LeetCode problems solved in idiomatic Zig: Two Sum, Valid Parentheses, Reverse Linked List, Binary Search, and Kadane with zero-allocation patterns.',
+    description: 'Classic LeetCode problems in idiomatic Zig: Two Sum, Valid Parentheses, Reverse Linked List, and Binary Search, with explicit allocators and bounded stacks.',
     article: { datePublished: PUBLISHED, keywords: ['LeetCode Zig', 'Zig algorithms', 'Two Sum Zig', 'Zig data structures'] },
     faq: [
       { question: 'Is Zig a good language for LeetCode practice?', answer: 'It is a good way to learn memory layout, since every hash map and stack needs an explicit allocator. Fewer judges support Zig, so many people practise locally with zig test.' },

@@ -21,7 +21,7 @@ const GUIDE_CARDS: OgCard[] = [
   { pagePath: '/comptime', kicker: 'Guide · Metaprogramming', title: 'Comptime Metaprogramming Mastery' },
   { pagePath: '/build-system', kicker: 'Guide · Tooling', title: 'build.zig vs npm & Package Management' },
   { pagePath: '/c-interop', kicker: 'Guide · Interop', title: 'C Interoperability & Node-API Addons' },
-  { pagePath: '/docker', kicker: 'Guide · Deployment', title: 'Production Docker Recipes (< 5MB Scratch)' },
+  { pagePath: '/docker', kicker: 'Guide · Deployment', title: 'Production Docker Recipes: Static Binaries on Scratch' },
   { pagePath: '/microservice', kicker: 'Guide · Architecture', title: 'Production Microservice Architecture' },
   { pagePath: '/philosophy', kicker: 'Guide · Mindset', title: 'The Philosophy & Zen of Zig' },
   { pagePath: '/pitfalls', kicker: 'Guide · Footguns', title: 'Top 8 Zig Pitfalls & Footguns' },

@@ -2,65 +2,100 @@
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 02 • Systems Memory</span>
     <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">The Allocator Architecture</h1>
-    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">No hidden malloc, no stop-the-world V8 garbage collection pauses, and zero mysterious memory leaks through explicit allocator passing.</p>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">No hidden malloc and no garbage collector, so no GC pauses: every allocation goes through an explicit allocator you pass in.</p>
   </div>
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">Node.js allocates every object on the V8 heap and reclaims it with a generational garbage collector (a semi-space Scavenger for new space, Mark-Sweep-Compact for old space). Zig has no garbage collector: any function that allocates takes an explicit <code>std.mem.Allocator</code> (<code>DebugAllocator</code>, <code>ArenaAllocator</code>, <code>FixedBufferAllocator</code>, <code>page_allocator</code>, <code>c_allocator</code> or, in 0.14, <code>smp_allocator</code>). You free with <code>defer</code> or by resetting an arena, so there are no GC pauses, but leaks and use-after-free become your responsibility.</p>
+  </aside>
 
   <!-- ARCHITECTURAL CONTRAST -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
       <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
         <span style="background: #ecfdf5; color: #059669; font-weight: 700; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 4px;">Node.js / V8</span>
-        <h2 style="margin: 0; font-size: 1.2rem; color: #0f172a;">Automatic Garbage Collection</h2>
+        <h2 style="margin: 0; font-size: 1.2rem; color: #0f172a;">How does Node.js manage memory?</h2>
       </div>
-      <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">Every object, closure, or string is allocated on the V8 heap. Generational garbage collection (Scavenge + Mark-Sweep-Compact) runs periodically, causing unpredictable tail latencies and multi-gigabyte memory bloat.</p>
+      <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">Every object, closure, or string lives on the V8 heap. A generational garbage collector (Scavenger + Mark-Sweep-Compact) reclaims it automatically. Much of the work is incremental, concurrent or parallel, but some pauses remain, and when they happen is decided by the collector, not your code.</p>
     </div>
 
     <div style="background: #ffffff; border: 1px solid #fef08a; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
       <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
         <span style="background: #fef3c7; color: #b45309; font-weight: 700; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 4px;">Zig Systems Model</span>
-        <h2 style="margin: 0; font-size: 1.2rem; color: #0f172a;">Explicit Allocator Injection</h2>
+        <h2 style="margin: 0; font-size: 1.2rem; color: #0f172a;">How does Zig manage memory?</h2>
       </div>
-      <p style="color: #713f12; font-size: 0.95rem; margin-bottom: 0.75rem;">No function in the Zig standard library can allocate heap memory without being passed an explicit <code>allocator: std.mem.Allocator</code>. If a function does not accept an allocator, it is mathematically guaranteed not to allocate heap memory.</p>
+      <p style="color: #713f12; font-size: 0.95rem; margin-bottom: 0.75rem;">By convention, enforced across the standard library, a function that allocates heap memory takes an explicit <code>allocator: std.mem.Allocator</code>. If a function has no allocator parameter, it normally does not allocate. This is a convention, not a language guarantee: code can still reach <code>std.heap.page_allocator</code> or <code>c_allocator</code> as globals.</p>
     </div>
   </div>
 
   <!-- THE ALLOCATOR INTERFACE -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
-    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">🔍 What is `std.mem.Allocator`?</h2>
-    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.5rem;">In Zig, an allocator is not a heavyweight C++ virtual class or an invisible runtime global. It is a 16-byte fat pointer consisting of two words:</p>
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">What is <code>std.mem.Allocator</code>?</h2>
+    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.5rem;">In Zig, an allocator is not a heavyweight C++ virtual class or an invisible runtime global. It is a small interface struct of two words (16 bytes on 64-bit targets): a pointer to the allocator's state and a pointer to a table of functions.</p>
     <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code><span class="tok-keyword">pub</span> <span class="tok-keyword">const</span> Allocator = <span class="tok-keyword">struct</span> {
     ptr: *<span class="tok-builtin">anyopaque</span>,
     vtable: *<span class="tok-keyword">const</span> VTable,
-    <span class="tok-comment">// VTable functions: alloc, resize, free</span>
+    <span class="tok-comment">// 0.14 VTable: alloc, resize, remap, free (0.13: alloc, resize, free)</span>
 };</code></pre>
+    <p style="color: #475569; font-size: 0.95rem; margin: 0.75rem 0 0;">Because every allocator implements the same interface, you can swap one for another without changing the code that uses it. The 0.14 vtable has <code>alloc</code>, <code>resize</code>, <code>remap</code>, and <code>free</code> (0.13: <code>alloc</code>, <code>resize</code>, <code>free</code>).</p>
   </div>
 
-  <!-- THE BIG THREE ALLOCATORS -->
-  <div style="display: flex; flex-direction: column; gap: 2rem; margin-bottom: 2.5rem;">
-    <!-- GPA -->
-    <div>
-      <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">1. GeneralPurposeAllocator (GPA): Leak & UAF Detection</h2>
-      <p style="color: #475569; margin-bottom: 1rem;">Use GPA as the top-level application root allocator. In Debug and ReleaseSafe modes, it tracks every active allocation and prints stack traces if any memory is leaked upon exit:</p>
-      <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+  <!-- V8 GC -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">How does V8's generational garbage collector work?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">V8 splits its heap by object age, based on the observation that most objects die young. Short-lived objects are cleaned up cheaply and often; only survivors pay for the more expensive old-space collection.</p>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">New space: the semi-space Scavenger</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">New space is small and divided into two semi-spaces. Allocation bumps a pointer in the active semi-space. When it fills up, the Scavenger copies the live objects into the other semi-space and discards everything left behind. The cost scales with the number of survivors, not with the amount of garbage. In modern V8 the Scavenger runs in parallel across helper threads, but it still pauses JavaScript while it runs.</p>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">Promotion to old space</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">An object that survives scavenges is promoted into old space. Long-lived data (caches, module state, large arrays) ends up there. A leak in Node usually means objects stay reachable (a growing Map, an unremoved listener), so they are promoted and never collected.</p>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">Old space: Mark-Sweep-Compact and Orinoco</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">Old space uses a major GC: mark reachable objects, sweep dead ones, and sometimes compact to reduce fragmentation. V8's Orinoco project made much of this work incremental (in small slices between JavaScript tasks) and concurrent (on background threads while JavaScript keeps running). Sweeping is also concurrent. As a result, pauses are much shorter than a classic stop-the-world collector, but they still exist: parts of marking start and finish on the main thread, and compaction can pause it. You do not control when they happen, and their length depends on heap size and object graph shape, so measure rather than assume a number.</p>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">How do you observe and tune it?</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">Use <code>node --trace-gc</code> to see each collection, <code>process.memoryUsage()</code> for heap totals, and <code>--max-old-space-size</code> (megabytes) to raise or lower the old-space limit. A bigger limit delays an out-of-memory crash but does not remove collections.</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">gpa_example.zig</span>
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">gc_flags.sh</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Shell</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-comment"># Print one line per GC event (Scavenge = young, Mark-Compact = old)</span>
+node --trace-gc server.js
+
+<span class="tok-comment"># Raise the old-space limit (value in MB)</span>
+node --max-old-space-size=4096 server.js
+
+<span class="tok-comment"># Heap totals from inside a process</span>
+node -e <span class="tok-string">"console.log(process.memoryUsage())"</span></code></pre>
+      </div>
+  </div>
+
+  <!-- ZIG ALLOCATORS -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">Which allocators does Zig provide?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">Zig ships several allocators in <code>std.heap</code>. You choose one at the program root and pass it down.</p>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">DebugAllocator: leak and use-after-free detection</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">In Zig 0.14, <code>GeneralPurposeAllocator</code> was renamed <code>std.heap.DebugAllocator</code>; the old name remains as a deprecated alias in 0.14, and 0.13 only has <code>GeneralPurposeAllocator</code>. In Debug and ReleaseSafe it tracks leaks, and <code>deinit()</code> returns <code>.ok</code> or <code>.leak</code>; Debug builds add allocation stack traces. Use it as the root allocator while developing:</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">debug_allocator_example.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
         </div>
         <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
-    <span class="tok-keyword">var</span> gpa = std.heap.<span class="tok-func">GeneralPurposeAllocator</span>(.{}){};
+    <span class="tok-keyword">var</span> debug_allocator = std.heap.<span class="tok-func">DebugAllocator</span>(.{}){};
     <span class="tok-keyword">defer</span> {
-        <span class="tok-keyword">const</span> deinit_status = gpa.<span class="tok-func">deinit</span>();
-        <span class="tok-keyword">if</span> (deinit_status == .leak) {
-            std.debug.<span class="tok-func">print</span>(<span class="tok-string">"❌ Memory leak detected by GPA!\n"</span>, .{});
-        }
+        <span class="tok-keyword">const</span> status = debug_allocator.<span class="tok-func">deinit</span>();
+        <span class="tok-keyword">if</span> (status == .leak) std.debug.<span class="tok-func">print</span>(<span class="tok-string">"memory leak detected\n"</span>, .{});
     }
-    <span class="tok-keyword">const</span> allocator = gpa.<span class="tok-func">allocator</span>();
+    <span class="tok-keyword">const</span> allocator = debug_allocator.<span class="tok-func">allocator</span>();
 
-    <span class="tok-comment">// Allocate dynamic slice</span>
     <span class="tok-keyword">const</span> numbers = <span class="tok-keyword">try</span> allocator.<span class="tok-func">alloc</span>(<span class="tok-builtin">i32</span>, <span class="tok-number">5</span>);
-    <span class="tok-keyword">defer</span> allocator.<span class="tok-func">free</span>(numbers); <span class="tok-comment">// Pair allocation with defer free!</span>
+    <span class="tok-keyword">defer</span> allocator.<span class="tok-func">free</span>(numbers); <span class="tok-comment">// pair every alloc with a defer free</span>
 
     <span class="tok-keyword">for</span> (numbers, <span class="tok-number">0</span>..) |*val, idx| {
         val.* = <span class="tok-builtin">@intCast</span>(idx * <span class="tok-number">10</span>);
@@ -68,13 +103,10 @@
     std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Allocated: {any}\n"</span>, .{numbers});
 }</code></pre>
       </div>
-    </div>
 
-    <!-- ARENA ALLOCATOR -->
-    <div>
-      <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">2. ArenaAllocator: Batch Free for HTTP & CLI Lifecycles</h2>
-      <p style="color: #475569; margin-bottom: 1rem;">The ArenaAllocator wraps any child allocator. Individual allocations do not need individual <code>free()</code> calls. Calling <code>arena.deinit()</code> instantly reclaims the entire pool in a single pointer reset:</p>
-      <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">ArenaAllocator: free everything at once</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">An arena wraps a child allocator. Allocations are cheap and rarely need individual <code>free()</code>: freeing a single allocation is a no-op except for the most recent one. <code>deinit()</code> (or <code>reset()</code>) releases everything at once, which fits request handlers and CLI commands. Forgetting <code>deinit()</code> still leaks the whole arena.</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">arena_example.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
@@ -83,7 +115,7 @@
 
 <span class="tok-keyword">fn</span> <span class="tok-func">handleRequest</span>(root_allocator: std.mem.Allocator) !<span class="tok-builtin">void</span> {
     <span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(root_allocator);
-    <span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>(); <span class="tok-comment">// Instant batch cleanup for all 10,000 allocations!</span>
+    <span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>(); <span class="tok-comment">// releases everything the arena obtained from root_allocator</span>
     <span class="tok-keyword">const</span> req_allocator = arena.<span class="tok-func">allocator</span>();
 
     <span class="tok-keyword">var</span> list = std.<span class="tok-func">ArrayList</span>([]<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>).<span class="tok-func">init</span>(req_allocator);
@@ -93,22 +125,19 @@
         <span class="tok-keyword">try</span> list.<span class="tok-func">append</span>(item);
     }
 
-    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Processed {d} items with zero individual frees!\n"</span>, .{list.items.len});
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Processed {d} items with no individual frees\n"</span>, .{list.items.len});
 }
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
-    <span class="tok-keyword">var</span> gpa = std.heap.<span class="tok-func">GeneralPurposeAllocator</span>(.{}){};
-    <span class="tok-keyword">defer</span> _ = gpa.<span class="tok-func">deinit</span>();
-    <span class="tok-keyword">try</span> <span class="tok-func">handleRequest</span>(gpa.<span class="tok-func">allocator</span>());
+    <span class="tok-keyword">var</span> debug_allocator = std.heap.<span class="tok-func">DebugAllocator</span>(.{}){};
+    <span class="tok-keyword">defer</span> _ = debug_allocator.<span class="tok-func">deinit</span>();
+    <span class="tok-keyword">try</span> <span class="tok-func">handleRequest</span>(debug_allocator.<span class="tok-func">allocator</span>());
 }</code></pre>
       </div>
-    </div>
 
-    <!-- FIXED BUFFER ALLOCATOR -->
-    <div>
-      <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">3. FixedBufferAllocator (FBA): Zero-Syscall Stack Execution</h2>
-      <p style="color: #475569; margin-bottom: 1rem;">When building embedded systems, kernel drivers, or high-frequency trading engines, OS syscalls (`mmap`/`brk`) are unacceptable. FBA turns any pre-allocated stack buffer into a memory allocator:</p>
-      <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">FixedBufferAllocator: allocate from a buffer you provide</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">FixedBufferAllocator hands out memory from a caller-provided buffer, often on the stack. It makes no syscalls and fails with <code>error.OutOfMemory</code> when the buffer is full, which makes memory use bounded and predictable. That suits embedded code and latency-sensitive paths.</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
           <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">fixed_buffer_example.zig</span>
           <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
@@ -116,51 +145,81 @@
         <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() !<span class="tok-builtin">void</span> {
-    <span class="tok-comment">// 64 KB allocated strictly on the CPU stack</span>
+    <span class="tok-comment">// 64 KB reserved on the stack; no heap involved</span>
     <span class="tok-keyword">var</span> stack_buffer: [<span class="tok-number">64</span> * <span class="tok-number">1024</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
     <span class="tok-keyword">var</span> fba = std.heap.FixedBufferAllocator.<span class="tok-func">init</span>(&amp;stack_buffer);
     <span class="tok-keyword">const</span> allocator = fba.<span class="tok-func">allocator</span>();
 
-    <span class="tok-comment">// Allocates inside stack_buffer with ZERO OS syscalls</span>
-    <span class="tok-keyword">const</span> text = <span class="tok-keyword">try</span> std.fmt.<span class="tok-func">allocPrint</span>(allocator, <span class="tok-string">"Ultra-fast stack formatted string: {d}"</span>, .{<span class="tok-number">42</span>});
+    <span class="tok-comment">// Served from stack_buffer, so no syscalls. Returns error.OutOfMemory when full.</span>
+    <span class="tok-keyword">const</span> text = <span class="tok-keyword">try</span> std.fmt.<span class="tok-func">allocPrint</span>(allocator, <span class="tok-string">"formatted on the stack: {d}"</span>, .{<span class="tok-number">42</span>});
     std.debug.<span class="tok-func">print</span>(<span class="tok-string">"{s}\n"</span>, .{text});
 }</code></pre>
       </div>
-    </div>
+
+    <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 1.5rem 0 0.5rem;">page_allocator, c_allocator and smp_allocator</h3>
+    <p style="color: #475569; margin-bottom: 1rem;">These are the lower-level options. Most programs use one of them (or a debug allocator) as the root and layer arenas on top.</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">global_allocators.zig</span>
+          <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+        </div>
+        <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+
+<span class="tok-comment">// Whole pages from the OS (mmap / VirtualAlloc) on every call: wasteful for small objects.</span>
+<span class="tok-keyword">const</span> pages = std.heap.page_allocator;
+
+<span class="tok-comment">// Wraps libc malloc/free. Requires linking libc (exe.linkLibC()).</span>
+<span class="tok-keyword">const</span> libc = std.heap.c_allocator;
+
+<span class="tok-comment">// Zig 0.14+: fast multithreaded general-purpose allocator, meant for ReleaseFast builds.</span>
+<span class="tok-keyword">const</span> fast = std.heap.smp_allocator;</code></pre>
+      </div>
   </div>
 
   <!-- ALLOCATOR DECISION MATRIX -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">📊 Allocator Strategy Decision Guide</h2>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Which allocator should you use, and when?</h2>
+  <div style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
     <table style="width: 100%; border-collapse: collapse; margin-top: 0.75rem; border: 1px solid #e2e8f0; font-size: 0.92rem;">
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Scenario</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Recommended Allocator</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Primary Benefit</th>
-        </tr>
+        <tr style="background: #f1f5f9; text-align: left;"><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Node.js analogue (approximate)</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zig allocator</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Free behaviour</th><th style="padding: 0.75rem; border: 1px solid #e2e8f0;">Best use</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Main Application Root</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>std.heap.GeneralPurposeAllocator</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Debug leak detection, bounds protection</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Default V8 heap (every <code>new</code>/literal), reclaimed by GC</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>DebugAllocator</code> (development), <code>smp_allocator</code> (0.14+, ReleaseFast)</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Individual <code>free</code> per allocation; <code>deinit()</code> reports leaks (Debug)</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Application root allocator</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">HTTP Request / CLI Command</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>std.heap.ArenaAllocator</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Instant batch deallocation, zero leak risk</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Per-request temporary objects that die together</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>ArenaAllocator</code> over the root allocator</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Everything freed by <code>deinit()</code> / <code>reset()</code>; single frees mostly no-ops</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">HTTP requests, CLI commands, parsing passes</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Real-time Audio / HFT / Embedded</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>std.heap.FixedBufferAllocator</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Zero OS syscalls, deterministic performance</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">A pre-sized, reused <code>Buffer</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>FixedBufferAllocator</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Nothing to free; reset the buffer; <code>error.OutOfMemory</code> when full</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Embedded, hot paths, bounded memory</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Unit & Integration Tests</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Large <code>ArrayBuffer</code> backed by the OS</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>page_allocator</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Pages returned to the OS per free</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Large, long-lived blocks; avoid for small objects</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Native addon calling <code>malloc</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>c_allocator</code></td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Calls libc <code>free</code>; needs libc linked</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">C interop and libraries that expect malloc</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Leak checks in Jest/Vitest (no direct equivalent)</td>
           <td style="padding: 0.75rem; border: 1px solid #e2e8f0;"><code>std.testing.allocator</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Fails test automatically on any leaked byte</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Test fails if memory is leaked</td>
+          <td style="padding: 0.75rem; border: 1px solid #e2e8f0;">Unit and integration tests</td>
         </tr>
       </tbody>
     </table>

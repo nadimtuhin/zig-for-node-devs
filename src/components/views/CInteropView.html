@@ -2,20 +2,34 @@
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <span style="background: #fef3c7; color: #b45309; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">Appendix 03 • Native Integration</span>
     <h1 style="font-size: 2.35rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a; letter-spacing: -0.02em;">C Interop & True Node-API Addons</h1>
-    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Replacing `node-gyp`, Python dependencies, and complex C++ binding boilerplate with pure Zig and zero external build tools.</p>
+    <p style="font-size: 1.15rem; color: #64748b; max-width: 720px; margin: 0 auto;">Building Node-API addons with Zig's bundled C compiler instead of node-gyp, Python, and a system C++ toolchain.</p>
   </div>
+
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">Zig bundles Clang (<code>zig cc</code> / <code>zig c++</code>) and libc support, and imports C headers with <code>@cImport</code> and <code>@cInclude</code>. A Node.js native addon is a shared library that exports <code>napi_register_module_v1</code>: build it with <code>b.addSharedLibrary</code>, add the <code>node_api.h</code> include path, set <code>linker_allow_shlib_undefined = true</code>, install it as <code>addon.node</code>, and load it with <code>require('./addon.node')</code>. That removes node-gyp, Python, and a system C toolchain, but not the Node-API headers.</p>
+    <ul style="margin: 0.75rem 0 0; padding-left: 1.25rem; color: #422006; line-height: 1.7;">
+      <li>The headers come from Node's <code>include/node</code> directory or the <code>node-api-headers</code> npm package.</li>
+      <li>Windows additionally needs the <code>node.lib</code> import library.</li>
+      <li>Node-API is ABI-stable, so one build works across Node versions that support the same Node-API version.</li>
+    </ul>
+  </aside>
 
   <!-- HIGHLIGHT CALLOUT -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
-    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">🔌 Zig is a First-Class C Compiler</h2>
-    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">Building native C++ addons for Node.js typically requires Python, CMake/Make, Visual Studio C++ build tools, and <code>node-gyp</code>. A single OS mismatch breaks npm installs.</p>
-    <p style="color: #475569; font-size: 0.95rem; margin: 0;">Zig embeds a full Clang C/C++ compiler and can directly parse C headers via <code>@cImport</code> without generating wrapper code or running pre-build steps.</p>
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Why can Zig replace node-gyp for native addons?</h2>
+    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">Building native C++ addons for Node.js with node-gyp typically requires Python, make or Visual Studio build tools, and a working C++ compiler. A toolchain mismatch on one machine is a common cause of failed <code>npm install</code>.</p>
+    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">Zig ships Clang as <code>zig cc</code> and <code>zig c++</code>, plus libc headers and sources for musl, glibc (selectable versions such as <code>-target x86_64-linux-gnu.2.28</code>), and mingw-w64, and libSystem stubs for macOS. Cross-compiling C for those targets needs no extra sysroot. <code>@cImport</code> translates headers through translate-c, so no hand-written wrapper is needed.</p>
+    <div style="background: #020617; border-radius: 8px; padding: 1rem; color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;">
+      <code><span class="tok-comment"># use Zig as a drop-in C compiler, even cross-compiling</span>
+zig cc -target aarch64-linux-musl -O2 hello.c -o hello</code>
+    </div>
   </div>
 
   <!-- SECTION 1: DIRECT C INTEROP -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">1. Direct C Header Ingestion with `@cImport`</h2>
-    <p style="color: #475569; margin-bottom: 1rem;">Import C headers directly into Zig. Zig handles C types, pointers, and struct layouts seamlessly:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How do I call C from Zig with <code>@cImport</code>?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">Import C headers directly into Zig. Zig translates C types, pointers, and struct layouts. Linking libc is required for libc headers (<code>linkLibC()</code> in <code>build.zig</code>, or <code>-lc</code> on the command line):</p>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
       <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">c_interop.zig</span>
@@ -32,7 +46,7 @@
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">main</span>() <span class="tok-builtin">void</span> {
     <span class="tok-comment">// 1. Call standard C math functions</span>
     <span class="tok-keyword">const</span> result = c.<span class="tok-func">sqrt</span>(<span class="tok-number">144.0</span>);
-    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Square root from C math.h: {d}\n"</span>, .{result}); <span class="tok-comment">// 12.0</span>
+    std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Square root from C math.h: {d}\n"</span>, .{result}); <span class="tok-comment">// 12</span>
 
     <span class="tok-comment">// 2. Interacting with C strings: converting [*:0]const u8 to Zig slice []const u8</span>
     <span class="tok-keyword">const</span> c_str: [*:<span class="tok-number">0</span>]<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> = <span class="tok-string">"Hello from C string"</span>;
@@ -40,12 +54,73 @@
     std.debug.<span class="tok-func">print</span>(<span class="tok-string">"Zig slice length: {d}, content: {s}\n"</span>, .{ zig_slice.len, zig_slice });
 }</code></pre>
     </div>
+    <p style="color: #475569; margin-top: 0.75rem; margin-bottom: 0;">Note: in 0.14 <code>@cImport</code> is a builtin. Newer Zig versions move header translation into the build system (<code>addTranslateC</code>), so expect this to change after 0.14.</p>
   </div>
 
-  <!-- SECTION 2: TRUE NODE-API ADDON -->
+  <!-- SECTION 2: COMPILING C SOURCES -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">2. Building a True Native Node-API (.node) Addon</h2>
-    <p style="color: #475569; margin-bottom: 1rem;">You can build a native <code>.node</code> binary that works with <code>require('./addon.node')</code> in Node.js using Node-API C bindings:</p>
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How do I compile C source files alongside Zig?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">Add C files to the same artifact with <code>addCSourceFiles</code> (or <code>addCSourceFile</code> for one file) and link libc. Zig compiles them with its bundled Clang, using the same <code>-Dtarget</code>:</p>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (excerpt, Zig 0.14)</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code>exe.<span class="tok-func">addCSourceFiles</span>(.{
+    .files = &amp;.{ <span class="tok-string">"vendor/sqlite3.c"</span> },
+    .flags = &amp;.{ <span class="tok-string">"-std=c99"</span> },
+});
+exe.<span class="tok-func">addIncludePath</span>(b.<span class="tok-func">path</span>(<span class="tok-string">"vendor"</span>));
+exe.<span class="tok-func">linkLibC</span>();</code></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 3: TRUE NODE-API ADDON -->
+  <div style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How do I build a Node-API (.node) addon in Zig?</h2>
+    <p style="color: #475569; margin-bottom: 1rem;">A <code>.node</code> file is a shared library that Node loads with <code>dlopen</code> (or <code>LoadLibrary</code>) and then asks for the symbol <code>napi_register_module_v1</code>. The Node-API functions it calls (<code>napi_create_function</code> and so on) are not linked in: the <code>node</code> binary provides them when the addon loads. That is why the build must allow undefined symbols.</p>
+
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.5rem;">Step 1: get the Node-API headers</h3>
+    <p style="color: #475569; margin-bottom: 0.75rem;">You still need <code>node_api.h</code> and <code>js_native_api.h</code>. Either use the <code>include/node</code> directory of your Node installation, or install the <code>node-api-headers</code> package, which this example assumes:</p>
+    <div style="background: #020617; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;">
+      <code>npm install --save-dev node-api-headers</code>
+    </div>
+
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.5rem;">Step 2: write the build.zig</h3>
+    <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 1rem;">
+      <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">build.zig (Node-API addon, Zig 0.14)</span>
+        <span style="color: #94a3b8; font-size: 0.75rem;">Zig</span>
+      </div>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
+
+<span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">build</span>(b: *std.Build) <span class="tok-builtin">void</span> {
+    <span class="tok-keyword">const</span> target = b.<span class="tok-func">standardTargetOptions</span>(.{});
+    <span class="tok-keyword">const</span> optimize = b.<span class="tok-func">standardOptimizeOption</span>(.{});
+
+    <span class="tok-comment">// works in 0.13/0.14 (deprecated in 0.14); prefer b.addLibrary(.{ .linkage = .dynamic, ... }) on 0.14+</span>
+    <span class="tok-keyword">const</span> lib = b.<span class="tok-func">addSharedLibrary</span>(.{
+        .name = <span class="tok-string">"addon"</span>,
+        .root_source_file = b.<span class="tok-func">path</span>(<span class="tok-string">"addon.zig"</span>),
+        .target = target,
+        .optimize = optimize,
+    });
+    lib.<span class="tok-func">linkLibC</span>();
+
+    <span class="tok-comment">// Header include path (node-api-headers package; or Node's include/node directory)</span>
+    lib.<span class="tok-func">addIncludePath</span>(b.<span class="tok-func">path</span>(<span class="tok-string">"node_modules/node-api-headers/include"</span>));
+
+    <span class="tok-comment">// napi_* symbols are resolved by the node binary at load time</span>
+    lib.linker_allow_shlib_undefined = <span class="tok-builtin">true</span>;
+
+    <span class="tok-comment">// Install as zig-out/lib/addon.node</span>
+    <span class="tok-keyword">const</span> install = b.<span class="tok-func">addInstallArtifact</span>(lib, .{ .dest_sub_path = <span class="tok-string">"addon.node"</span> });
+    b.<span class="tok-func">getInstallStep</span>().<span class="tok-func">dependOn</span>(&amp;install.step);
+}</code></pre>
+    </div>
+    <p style="color: #475569; margin-bottom: 1rem;">Windows caveat: the Windows linker needs an import library so it knows which symbols come from <code>node.exe</code>. You must supply <code>node.lib</code> (distributed with Node's headers/dev files) and link it. This guide has not verified a complete Windows recipe, and on macOS the dynamic-lookup behavior of the linker may need additional flags; test on each platform you ship.</p>
+
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 1.25rem 0 0.5rem;">Step 3: write addon.zig</h3>
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
       <div style="background: #1e293b; padding: 0.6rem 1rem; display: flex; justify-content: space-between; align-items: center;">
         <span style="color: #f59e0b; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">addon.zig (Native Node-API Addon)</span>
@@ -53,13 +128,13 @@
       </div>
       <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">const</span> std = <span class="tok-builtin">@import</span>(<span class="tok-string">"std"</span>);
 
-<span class="tok-comment">// Import Node-API C declarations</span>
+<span class="tok-comment">// Import Node-API C declarations (needs the include path from build.zig)</span>
 <span class="tok-keyword">const</span> napi = <span class="tok-builtin">@cImport</span>({
     <span class="tok-builtin">@cInclude</span>(<span class="tok-string">"node_api.h"</span>);
 });
 
-<span class="tok-comment">// Implementation of the exported function: fastMultiply(a, b)</span>
-<span class="tok-keyword">fn</span> <span class="tok-func">fastMultiply</span>(env: napi.napi_env, info: napi.napi_callback_info) <span class="tok-func">callconv</span>(.C) napi.napi_value {
+<span class="tok-comment">// Implementation of the exported function: multiply(a, b)</span>
+<span class="tok-keyword">fn</span> <span class="tok-func">multiply</span>(env: napi.napi_env, info: napi.napi_callback_info) <span class="tok-func">callconv</span>(.c) napi.napi_value {
     <span class="tok-keyword">var</span> argc: <span class="tok-builtin">usize</span> = <span class="tok-number">2</span>;
     <span class="tok-keyword">var</span> argv: [<span class="tok-number">2</span>]napi.napi_value = <span class="tok-builtin">undefined</span>;
     _ = napi.<span class="tok-func">napi_get_cb_info</span>(env, info, &amp;argc, &amp;argv, <span class="tok-builtin">null</span>, <span class="tok-builtin">null</span>);
@@ -74,33 +149,26 @@
     <span class="tok-keyword">return</span> result;
 }
 
-<span class="tok-comment">// Module initialization callback</span>
+<span class="tok-comment">// Node looks up this exact symbol when it loads the .node file</span>
 <span class="tok-keyword">export</span> <span class="tok-keyword">fn</span> <span class="tok-func">napi_register_module_v1</span>(env: napi.napi_env, exports: napi.napi_value) napi.napi_value {
     <span class="tok-keyword">var</span> fn_val: napi.napi_value = <span class="tok-builtin">undefined</span>;
-    _ = napi.<span class="tok-func">napi_create_function</span>(
-        env,
-        <span class="tok-string">"fastMultiply"</span>,
-        napi.NAPI_AUTO_LENGTH,
-        fastMultiply,
-        <span class="tok-builtin">null</span>,
-        &amp;fn_val,
-    );
-    _ = napi.<span class="tok-func">napi_set_named_property</span>(env, exports, <span class="tok-string">"fastMultiply"</span>, fn_val);
+    _ = napi.<span class="tok-func">napi_create_function</span>(env, <span class="tok-string">"multiply"</span>, std.math.<span class="tok-func">maxInt</span>(<span class="tok-builtin">usize</span>), multiply, <span class="tok-builtin">null</span>, &amp;fn_val);
+    _ = napi.<span class="tok-func">napi_set_named_property</span>(env, exports, <span class="tok-string">"multiply"</span>, fn_val);
     <span class="tok-keyword">return</span> exports;
 }</code></pre>
     </div>
+    <p style="color: #475569; margin-top: 0.75rem; margin-bottom: 0;">This sketch ignores the <code>napi_status</code> return values for brevity; real addons should check them and throw a JavaScript error on failure. <code>std.math.maxInt(usize)</code> is the value of <code>NAPI_AUTO_LENGTH</code> (length computed from the NUL terminator). Zig 0.14 spells it <code>callconv(.c)</code>; <code>.C</code> is a deprecated alias there and the only spelling in 0.13.</p>
   </div>
 
-  <!-- SECTION 3: COMPILATION & CONSUMPTION -->
+  <!-- SECTION 4: COMPILATION & CONSUMPTION -->
   <div style="margin-bottom: 2.5rem;">
-    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">3. Compile & Require in Node.js</h2>
-    <p style="color: #475569; margin-bottom: 0.75rem;">Compile the shared library using Zig with Node.js include headers, then load directly:</p>
-    
+    <h2 style="font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">How do I load the addon from JavaScript?</h2>
+    <p style="color: #475569; margin-bottom: 0.75rem;">Build, copy the output next to your script, and <code>require</code> it. Target a different platform with <code>-Dtarget</code>, as long as you have that platform's headers:</p>
+
     <div style="background: #020617; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;">
-      <code><span class="tok-comment"># Single command build for native Node addon (zero node-gyp needed!)</span>
-<span class="tok-keyword">zig</span> build-lib addon.zig <span class="tok-builtin">-dynamic</span> <span class="tok-builtin">-lc</span> \
-  <span class="tok-builtin">-I</span> <span class="tok-builtin">$(node -p "path.dirname(process.execPath)</span>")/include/node \
-  <span class="tok-builtin">-O</span> ReleaseFast <span class="tok-builtin">-femit-bin=addon</span>.node</code>
+      <code><span class="tok-comment"># no node-gyp, no Python, no system C toolchain (headers still required)</span>
+zig build -Doptimize=ReleaseFast
+cp zig-out/lib/addon.node ./addon.node</code>
     </div>
 
     <div style="background: #0f172a; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
@@ -108,29 +176,27 @@
         <span style="color: #38bdf8; font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 600;">index.js (Consuming in Node.js)</span>
         <span style="color: #94a3b8; font-size: 0.75rem;">JavaScript</span>
       </div>
-      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-keyword">import</span> { createRequire } <span class="tok-keyword">from</span> <span class="tok-string">'module'</span>;
-<span class="tok-keyword">const</span> <span class="tok-keyword">require</span> = <span class="tok-func">createRequire</span>(<span class="tok-keyword">import</span>.meta.url);
-
-<span class="tok-comment">// Load the compiled Zig native addon directly</span>
+      <pre style="margin: 0; padding: 1.25rem; color: #f8fafc; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; line-height: 1.6;"><code><span class="tok-comment">// CommonJS: require works directly. In an ES module, use createRequire(import.meta.url).</span>
 <span class="tok-keyword">const</span> addon = <span class="tok-keyword">require</span>(<span class="tok-string">'./addon.node'</span>);
 
-<span class="tok-builtin">console</span>.<span class="tok-func">log</span>(addon.<span class="tok-func">fastMultiply</span>(<span class="tok-number">6.5</span>, <span class="tok-number">4.0</span>)); <span class="tok-comment">// 26.0 (running at bare-metal native CPU speed!)</span></code></pre>
+<span class="tok-builtin">console</span>.<span class="tok-func">log</span>(addon.<span class="tok-func">multiply</span>(<span class="tok-number">6.5</span>, <span class="tok-number">4.0</span>)); <span class="tok-comment">// 26</span></code></pre>
     </div>
+    <p style="color: #475569; margin-top: 0.75rem; margin-bottom: 0;">Each call crosses the JS/native boundary, which has a cost. A native addon pays off for substantial computation, not for trivial arithmetic like this demo; measure before adopting it.</p>
   </div>
 
-  <!-- SECTION 4: BUN / NODE FFI -->
+  <!-- SECTION 5: BUN FFI -->
   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem;">
-    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">⚡ Alternative: Zero-Header Bun FFI</h2>
-    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">If using Bun, you don't even need Node-API headers. Export a raw C-ABI function from Zig and consume it via <code>bun:ffi</code>:</p>
-    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto;"><code><span class="tok-keyword">import</span> { dlopen, FFIType } <span class="tok-keyword">from</span> <span class="tok-string">"bun:ffi"</span>;
+    <h2 style="color: #0f172a; margin-top: 0; font-size: 1.2rem;">Can I skip Node-API headers with Bun FFI?</h2>
+    <p style="color: #475569; font-size: 0.95rem; margin-bottom: 0.75rem;">If you use Bun, you can export a plain C-ABI function from Zig (<code>export fn multiply(a: f64, b: f64) f64</code>, built as a shared library) and call it via <code>bun:ffi</code> without any Node-API headers:</p>
+    <pre style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 8px; font-family: var(--font-mono, monospace); font-size: 0.85rem; overflow-x: auto; margin: 0;"><code><span class="tok-keyword">import</span> { dlopen, FFIType } <span class="tok-keyword">from</span> <span class="tok-string">"bun:ffi"</span>;
 
-<span class="tok-keyword">const</span> { symbols: { fastMultiply } } = <span class="tok-func">dlopen</span>(<span class="tok-string">"./libaddon.so"</span>, {
-  fastMultiply: {
+<span class="tok-keyword">const</span> { symbols: { multiply } } = <span class="tok-func">dlopen</span>(<span class="tok-string">"./libaddon.so"</span>, {
+  multiply: {
     args: [FFIType.f64, FFIType.f64],
     returns: FFIType.f64,
   },
 });
 
-<span class="tok-builtin">console</span>.<span class="tok-func">log</span>(<span class="tok-func">fastMultiply</span>(<span class="tok-number">10.5</span>, <span class="tok-number">2.0</span>)); <span class="tok-comment">// 21.0</span></code></pre>
+<span class="tok-builtin">console</span>.<span class="tok-func">log</span>(<span class="tok-func">multiply</span>(<span class="tok-number">10.5</span>, <span class="tok-number">2.0</span>)); <span class="tok-comment">// 21</span></code></pre>
   </div>
 </div>

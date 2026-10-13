@@ -5,45 +5,83 @@
     <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Where JavaScript and Node.js intuition leads to bugs in systems programming.</p>
   </div>
 
+  <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
+    <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">The most common Zig mistakes for Node.js developers all come from the missing garbage collector: returning a slice of a stack array, forgetting <code>defer allocator.free(...)</code>, and keeping slices after <code>arena.deinit()</code>. Zig also has no implicit safety nets that JavaScript hides, so <code>undefined</code> memory, UTF-8 byte lengths, and integer overflow in ReleaseFast builds need deliberate handling. <code>std.testing.allocator</code> and the Debug and ReleaseSafe build modes catch most of them.</p>
+  </aside>
+
   <div style="display: flex; flex-direction: column; gap: 1.5rem;">
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">1. Returning a Slice of a Local Stack Array</h2>
-      <p style="color: #475569;">In Node.js, returning an array from a function safely retains it in heap memory via garbage collection. In Zig, returning <code>&stack_buf</code> results in a dangling pointer once the stack frame unwinds. Always allocate slices from a caller-passed allocator when returning dynamically sized data.</p>
+      <p style="color: #475569;">In Node.js, returning an array from a function is safe because the garbage collector keeps it alive while it is reachable. In Zig, a slice or pointer into a local array dangles once the stack frame unwinds (Zig 0.14 compiles this without complaint). Allocate from a caller-passed allocator when returning dynamically sized data, and document that the caller owns the result.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">greetBad</span>() []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
+    <span class="tok-keyword">var</span> buf: [<span class="tok-number">16</span>]<span class="tok-builtin">u8</span> = <span class="tok-builtin">undefined</span>;
+    <span class="tok-keyword">return</span> buf[<span class="tok-number">0</span>..<span class="tok-number">4</span>]; <span class="tok-comment">// dangling: buf dies when greetBad returns</span>
+}
+
+<span class="tok-keyword">fn</span> <span class="tok-func">greetGood</span>(allocator: std.mem.Allocator) ![]<span class="tok-builtin">u8</span> {
+    <span class="tok-keyword">return</span> allocator.<span class="tok-func">dupe</span>(<span class="tok-builtin">u8</span>, <span class="tok-string">"ping"</span>); <span class="tok-comment">// caller must free</span>
+}</code></pre>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h2 style="color: #991b1b; margin-top: 0;">2. Reading `undefined` Memory</h2>
-      <p style="color: #475569;">In JS, <code>undefined</code> is a concrete value of type undefined. In Zig, <code>var x: i32 = undefined;</code> means the variable contains whatever garbage bytes were previously at that memory location. Reading it before writing is illegal and triggers panics in Debug mode.</p>
+      <h2 style="color: #991b1b; margin-top: 0;">2. Reading <code>undefined</code> Memory</h2>
+      <p style="color: #475569;">In JS, <code>undefined</code> is a concrete value of its own type. In Zig, <code>var x: i32 = undefined;</code> means the variable holds no meaningful value yet, and reading it before writing is illegal behavior. Debug builds fill the memory with a recognizable <code>0xaa</code> byte pattern to help you spot it, but you cannot rely on a panic. Use <code>undefined</code> only for buffers you are about to fill, and give everything else a real initial value.</p>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h2 style="color: #991b1b; margin-top: 0;">3. Forgetting `defer allocator.free(slice)`</h2>
-      <p style="color: #475569;">Because there is no garbage collector, every heap allocation through an allocator that is not an Arena will leak if not paired with a corresponding <code>free</code> or <code>deinit</code>. Use <code>std.testing.allocator</code> to automatically detect memory leaks during testing.</p>
+      <h2 style="color: #991b1b; margin-top: 0;">3. Forgetting <code>defer allocator.free(slice)</code></h2>
+      <p style="color: #475569;">Because there is no garbage collector, every heap allocation leaks unless it is paired with <code>free</code> or <code>deinit</code>, or owned by an arena that is itself deinitialized. Put the <code>defer</code> on the line right after the allocation. <code>std.testing.allocator</code> fails a test when something is left allocated, and in a real program <code>std.heap.DebugAllocator</code> (<code>GeneralPurposeAllocator</code> before 0.14) reports leaks when you call <code>deinit()</code>.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">test</span> <span class="tok-string">"buffer is freed"</span> {
+    <span class="tok-keyword">const</span> allocator = std.testing.allocator;
+    <span class="tok-keyword">const</span> buf = <span class="tok-keyword">try</span> allocator.<span class="tok-func">alloc</span>(<span class="tok-builtin">u8</span>, <span class="tok-number">64</span>);
+    <span class="tok-keyword">defer</span> allocator.<span class="tok-func">free</span>(buf); <span class="tok-comment">// delete this line and the test fails with a leak report</span>
+}</code></pre>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">4. Modifying Function Parameters Directly</h2>
-      <p style="color: #475569;">All function parameters in Zig are strictly immutable <code>const</code> values. Writing <code>param = new_value;</code> fails at compile time. Make an explicit local copy <code>var local = param;</code> or pass a mutable pointer <code>*T</code>.</p>
+      <p style="color: #475569;">Function parameters in Zig are immutable. Writing <code>param = new_value;</code> is a compile error. Make an explicit local copy with <code>var local = param;</code>, or pass a mutable pointer <code>*T</code> when the caller should see the change.</p>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">5. Assuming Slices Outlive Short-Lived Allocators</h2>
-      <p style="color: #475569;">When using <code>std.heap.ArenaAllocator</code> or temporary buffers, slices referencing that memory become invalid the instant <code>arena.deinit()</code> runs. If a response or long-lived cache needs the data, explicitly dupe the bytes into the persistent allocator before tearing down the arena.</p>
+      <p style="color: #475569;">Slices that point into an <code>ArenaAllocator</code> or a temporary buffer become invalid the instant <code>arena.deinit()</code> (or <code>reset()</code>) runs. If a response or long-lived cache needs the data, duplicate the bytes with the persistent allocator before tearing down the arena.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">var</span> arena = std.heap.ArenaAllocator.<span class="tok-func">init</span>(gpa);
+<span class="tok-keyword">defer</span> arena.<span class="tok-func">deinit</span>();
+
+<span class="tok-keyword">const</span> scratch = <span class="tok-keyword">try</span> arena.<span class="tok-func">allocator</span>().<span class="tok-func">dupe</span>(<span class="tok-builtin">u8</span>, <span class="tok-string">"temporary"</span>);
+<span class="tok-keyword">const</span> keep = <span class="tok-keyword">try</span> gpa.<span class="tok-func">dupe</span>(<span class="tok-builtin">u8</span>, scratch); <span class="tok-comment">// survives arena.deinit(); free it yourself</span></code></pre>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h2 style="color: #991b1b; margin-top: 0;">6. Discarding Error Unions with `_ =`</h2>
-      <p style="color: #475569;">In JavaScript, unhandled errors crash the process or trigger <code>unhandledRejection</code>. In Zig, assigning an error-returning function to <code>_ = doWork();</code> causes a compile error. You must explicitly handle errors via <code>try</code>, <code>catch</code>, or deliberate error pattern matching.</p>
+      <h2 style="color: #991b1b; margin-top: 0;">6. Silently Swallowing Errors with <code>catch {}</code></h2>
+      <p style="color: #475569;">In JavaScript, an unhandled error crashes the process or fires <code>unhandledRejection</code>. In Zig, calling an error-returning function and ignoring the result (<code>doWork();</code>) is a compile error, and so is <code>_ = doWork();</code> (error union is discarded), which is good. The footgun is the escape hatch: <code>doWork() catch {};</code> compiles and silently swallows the error. Reserve it for cases where failure truly does not matter, and log or propagate everywhere else.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-func">doWork</span>();        <span class="tok-comment">// compile error: error union is ignored</span>
+_ = <span class="tok-func">doWork</span>();     <span class="tok-comment">// compile error: error union is discarded</span>
+<span class="tok-func">doWork</span>() <span class="tok-keyword">catch</span> {};     <span class="tok-comment">// compiles: error silently thrown away</span>
+<span class="tok-func">doWork</span>() <span class="tok-keyword">catch</span> |err| std.log.<span class="tok-func">err</span>(<span class="tok-string">"doWork failed: {s}"</span>, .{<span class="tok-builtin">@errorName</span>(err)});</code></pre>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h2 style="color: #991b1b; margin-top: 0;">7. Confusing UTF-8 Byte Length with String Character Count</h2>
-      <p style="color: #475569;">In JavaScript, <code>"⚡".length</code> is 1 (UTF-16 code unit). In Zig, <code>"⚡".len</code> is 3 (raw UTF-8 bytes). Never use slice byte indexing to slice multicharacter Unicode text without a proper UTF-8 iterator like <code>std.unicode.Utf8Iterator</code>.</p>
+      <h2 style="color: #991b1b; margin-top: 0;">7. Confusing UTF-8 Byte Length with Character Count</h2>
+      <p style="color: #475569;">In JavaScript, <code>"⚡".length</code> is 1 because <code>length</code> counts UTF-16 code units (and an emoji outside the BMP such as 😀 reports 2). In Zig, <code>"⚡".len</code> is 3 because strings are plain UTF-8 byte slices. Never slice at arbitrary byte offsets when the text may contain multi-byte characters. Iterate code points with <code>std.unicode.Utf8View</code> (<code>std.unicode.Utf8View.init(s)</code> then <code>.iterator()</code>) instead.</p>
     </div>
 
     <div style="background: #ffffff; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <h2 style="color: #991b1b; margin-top: 0;">8. Integer Overflow in Production (ReleaseFast vs ReleaseSafe)</h2>
-      <p style="color: #475569;">In Debug and ReleaseSafe, integer arithmetic like <code>a + b</code> safely panics on overflow. In ReleaseFast, overflow triggers undefined behavior and machine wrapping. If wrapping arithmetic is intentional, always use explicit wrapping operators: <code>+%</code>, <code>-%</code>, and <code>*%</code>.</p>
+      <p style="color: #475569;">In Debug and ReleaseSafe, integer arithmetic like <code>a + b</code> panics on overflow. In ReleaseFast and ReleaseSmall, safety checks are removed and overflow is undefined behavior, so you cannot assume it wraps. If wrapping is intentional, use the explicit wrapping operators <code>+%</code>, <code>-%</code>, <code>*%</code>; to detect overflow, use builtins such as <code>@addWithOverflow</code>.</p>
+      <pre style="background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 8px; overflow-x: auto;"><code><span class="tok-keyword">fn</span> <span class="tok-func">wrappingAdd</span>(a: <span class="tok-builtin">u8</span>, b: <span class="tok-builtin">u8</span>) <span class="tok-builtin">u8</span> {
+    <span class="tok-keyword">return</span> a +% b; <span class="tok-comment">// 250 +% 10 == 4 in every build mode</span>
+}</code></pre>
     </div>
   </div>
+
+  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem;">How Do I Catch These Pitfalls Before Production?</h2>
+  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Test with <code>std.testing.allocator</code></h3>
+  <p style="color: #475569; line-height: 1.6;">Run <code>zig test</code> or <code>zig build test</code>. Leaks and double frees on testing-allocator memory fail the test with a report (pitfall 3). Use-after-free is not reliably caught, so do not count on tests to find it.</p>
+  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Ship ReleaseSafe unless you have measured a need for ReleaseFast</h3>
+  <p style="color: #475569; line-height: 1.6;">ReleaseSafe keeps overflow and bounds checks (pitfall 8) while still optimizing. Switch to <code>-Doptimize=ReleaseFast</code> only after profiling shows the checks matter.</p>
+  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Use <code>DebugAllocator</code> in development</h3>
+  <p style="color: #475569; line-height: 1.6;">Its <code>deinit()</code> returns <code>.leak</code> when memory was not freed, so you can assert on it at program exit. In 0.14 it replaces <code>GeneralPurposeAllocator</code>, which remains as a deprecated alias.</p>
 </div>
