@@ -1,12 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
+import GuideFaq from '../components/GuideFaq.astro';
 import ViewComponent from '../components/views/LeetcodeView.astro';
 ---
 
-<Layout title="LeetCode Easy & Classic Algorithms in Zig | Zig for Node Devs" description="Two Sum, Valid Parentheses, Reverse Linked List, Binary Search, and Kadane's algorithm solved with zero-allocation Zig patterns.">
+<Layout title="LeetCode Easy & Classic Algorithms in Zig | Zig for Node Devs" {...guideSchemas.leetcode}>
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <ViewComponent />
+    <GuideFaq faq={guideSchemas.leetcode.faq} />
     <Footer />
   </main>
 </Layout>

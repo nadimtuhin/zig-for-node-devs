@@ -1,70 +1,63 @@
 ---
+import {
+  SITE_ORIGIN,
+  buildPageSchema,
+  serializeJsonLd,
+  type ArticleMeta,
+  type Breadcrumb,
+  type CodeSnippet,
+  type FaqEntry
+} from '../lib/structuredData';
+
 interface Props {
   title?: string;
   description?: string;
   canonicalPath?: string;
-  breadcrumbs?: { name: string; item: string }[];
+  breadcrumbs?: Breadcrumb[];
+  article?: ArticleMeta;
+  faq?: FaqEntry[];
+  codeSnippet?: CodeSnippet;
+  isPart?: string;
+  chapterNum?: number;
 }
 
 const {
   title = "Zig for Node.js Devs | Interactive GitBook & Live Compiler",
   description = "Learn Zig with live in-browser Zig Compiler Explorer & Playground, progressive lessons, side-by-side Node.js/TypeScript comparisons, and production systems architecture guides.",
   canonicalPath = Astro.url.pathname,
-  breadcrumbs = []
+  breadcrumbs = [],
+  article,
+  faq,
+  codeSnippet,
+  isPart,
+  chapterNum
 } = Astro.props;
 
 import '../styles/global.css';
 
-const siteOrigin = "https://zig-for-node-devs.vercel.app";
 const cleanPath = canonicalPath.replace(/\/+$/, '') || '';
-const canonicalUrl = `${siteOrigin}${cleanPath}`;
-const ogImageUrl = `${siteOrigin}/og-image.png`;
+const canonicalUrl = `${SITE_ORIGIN}${cleanPath}`;
+const ogImageUrl = `${SITE_ORIGIN}/og-image.png`;
+const pageName = title.split('|')[0].trim();
 
 const defaultBreadcrumbs = [
-  { name: "Home", item: siteOrigin },
-  ...(cleanPath ? [{ name: title.split('|')[0].trim(), item: canonicalUrl }] : [])
+  { name: "Home", item: SITE_ORIGIN },
+  ...(cleanPath ? [{ name: pageName, item: canonicalUrl }] : [])
 ];
 const activeBreadcrumbs = breadcrumbs.length > 0 ? breadcrumbs : defaultBreadcrumbs;
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": `${siteOrigin}/#website`,
-      "url": siteOrigin,
-      "name": "Zig for Node.js Developers Masterclass Studio",
-      "description": "Interactive Zig systems learning platform and Rosetta Stone for Node.js and TypeScript developers.",
-      "inLanguage": "en-US",
-      "publisher": {
-        "@type": "Person",
-        "name": "Nadim Tuhin",
-        "url": "https://github.com/nadimtuhin"
-      }
-    },
-    {
-      "@type": "Course",
-      "@id": `${siteOrigin}/#course`,
-      "name": "Zig for Node.js & TypeScript Developers",
-      "description": "Comprehensive transition guide from single-threaded V8 JavaScript to explicit memory management, comptime metaprogramming, and bare-metal systems programming in Zig.",
-      "provider": {
-        "@type": "Person",
-        "name": "Nadim Tuhin",
-        "sameAs": "https://github.com/nadimtuhin"
-      }
-    },
-    {
-      "@type": "BreadcrumbList",
-      "@id": `${canonicalUrl}/#breadcrumbs`,
-      "itemListElement": activeBreadcrumbs.map((bc, idx) => ({
-        "@type": "ListItem",
-        "position": idx + 1,
-        "name": bc.name,
-        "item": bc.item
-      }))
-    }
-  ]
-};
+const structuredData = serializeJsonLd(buildPageSchema({
+  title: pageName,
+  description,
+  canonicalUrl,
+  imageUrl: ogImageUrl,
+  breadcrumbs: activeBreadcrumbs,
+  article,
+  faq,
+  codeSnippet,
+  isPart,
+  chapterNum
+}));
 ---
 
 <!doctype html>
@@ -77,7 +70,7 @@ const structuredData = {
     <link rel="canonical" href={canonicalUrl} />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? "article" : "website"} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -140,7 +133,7 @@ const structuredData = {
     </script>
 
     <!-- Schema.org Structured Data -->
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <script type="application/ld+json" set:html={structuredData} />
   </head>
   <body>
   <a href="#main-content" class="skip-to-content">Skip to main content</a>

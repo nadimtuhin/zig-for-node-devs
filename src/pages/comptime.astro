@@ -1,12 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
+import GuideFaq from '../components/GuideFaq.astro';
 import ViewComponent from '../components/views/ComptimeView.astro';
 ---
 
-<Layout title="Comptime Metaprogramming Mastery | Zig for Node Devs" description="Comprehensive guide to Zig's comptime execution, compile-time generics, type generation, reflection, and zero-cost abstractions for JavaScript developers.">
+<Layout title="Comptime Metaprogramming Mastery | Zig for Node Devs" {...guideSchemas.comptime}>
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <ViewComponent />
+    <GuideFaq faq={guideSchemas.comptime.faq} />
     <Footer />
   </main>
 </Layout>

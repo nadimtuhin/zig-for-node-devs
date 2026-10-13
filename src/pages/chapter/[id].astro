@@ -17,6 +17,17 @@ const chapterKey = id || 'basic_vars';
 const initialKey = chapterKey;
 const chapter = chaptersData[chapterKey] || chaptersData['basic_vars'];
 const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
+
+const chapterFaq = [
+  {
+    question: `How does ${chapter.title} in Zig differ from Node.js / JavaScript?`,
+    answer: insight.mentalModel
+  },
+  {
+    question: `What is the common pitfall or footgun in Zig for ${chapter.title}?`,
+    answer: insight.footgun
+  }
+];
 ---
 
 <Layout 
@@ -28,6 +39,14 @@ const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
     { name: "Curriculum", item: "https://zig-for-node-devs.vercel.app/chapters" },
     { name: chapter.title, item: `https://zig-for-node-devs.vercel.app/chapter/${chapterKey}` }
   ]}
+  article={{
+    datePublished: "2026-10-11",
+    keywords: ["Zig", chapter.title, "Zig for JavaScript developers", "Node.js to Zig", chapter.part.replace(/^Part \d+:\s*/, '')]
+  }}
+  faq={chapterFaq}
+  codeSnippet={{ language: "Zig", sample: chapter.code }}
+  isPart={chapter.part}
+  chapterNum={Number(chapter.num)}
 >
 
   <!-- GitBook Book Reader Layout -->

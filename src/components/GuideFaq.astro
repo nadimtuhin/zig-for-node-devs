@@ -1,0 +1,46 @@
+---
+import type { FaqEntry } from '../lib/structuredData';
+
+interface Props {
+  faq: FaqEntry[];
+}
+
+const { faq } = Astro.props;
+---
+
+<section class="appendix-container guide-faq" aria-labelledby="guide-faq-heading">
+  <h2 id="guide-faq-heading">Frequently Asked Questions</h2>
+  {faq.map(({ question, answer }) => (
+    <details class="guide-faq-item">
+      <summary>{question}</summary>
+      <p>{answer}</p>
+    </details>
+  ))}
+</section>
+
+<style>
+  .guide-faq {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2.5rem;
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  .guide-faq h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .guide-faq-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .guide-faq-item summary {
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .guide-faq-item p {
+    margin: 0.5rem 0 0;
+  }
+</style>

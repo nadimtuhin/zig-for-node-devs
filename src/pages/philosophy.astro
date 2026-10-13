@@ -1,12 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
+import GuideFaq from '../components/GuideFaq.astro';
 import ViewComponent from '../components/views/PhilosophyView.astro';
 ---
 
-<Layout title="The Philosophy & Zen of Zig | Zig for Node Devs" description="The 18 principles of Zig, why Zig deliberately left out operator overloading, and what makes Zig uniquely maintainable.">
+<Layout title="The Philosophy & Zen of Zig | Zig for Node Devs" {...guideSchemas.philosophy}>
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <ViewComponent />
+    <GuideFaq faq={guideSchemas.philosophy.faq} />
     <Footer />
   </main>
 </Layout>

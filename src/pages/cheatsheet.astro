@@ -1,12 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
+import GuideFaq from '../components/GuideFaq.astro';
 import ViewComponent from '../components/views/CheatsheetView.astro';
 ---
 
-<Layout title="JavaScript to Zig Rosetta Stone Cheatsheet | Zig for Node Devs" description="Side-by-side syntax comparison cheatsheet: variables, arrays, maps, error handling, and memory allocation.">
+<Layout title="JavaScript to Zig Rosetta Stone Cheatsheet | Zig for Node Devs" {...guideSchemas.cheatsheet}>
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <ViewComponent />
+    <GuideFaq faq={guideSchemas.cheatsheet.faq} />
     <Footer />
   </main>
 </Layout>

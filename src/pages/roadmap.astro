@@ -1,16 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
+import GuideFaq from '../components/GuideFaq.astro';
 import RoadmapView from '../components/views/RoadmapView.astro';
 ---
 
 <Layout 
   title="Zig Developer Roadmap 2026 (roadmap.sh style) | Zig for Node Devs" 
-  description="Step-by-step visual learning roadmap for JavaScript, TypeScript, and Node.js developers learning Zig. Core milestones, memory models, comptime, and production systems."
+  {...guideSchemas.roadmap}
   canonicalPath="/roadmap"
 >
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <RoadmapView />
+    <GuideFaq faq={guideSchemas.roadmap.faq} />
     <Footer />
   </main>
 </Layout>
