@@ -157,6 +157,9 @@ const chapterFaq = [
       const walkthroughEl = document.getElementById('detailWalkthrough');
       if (walkthroughEl) walkthroughEl.innerHTML = data.walkthroughHtml;
 
+      const relatedEl = document.getElementById('detailRelatedLinks');
+      if (relatedEl) relatedEl.innerHTML = data.relatedHtml ?? '';
+
       const mentalModelEl = document.getElementById('detailInsightMentalModel');
       if (mentalModelEl) mentalModelEl.innerHTML = insight.mentalModelHtml || '';
 

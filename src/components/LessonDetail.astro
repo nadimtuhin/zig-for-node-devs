@@ -8,6 +8,8 @@ import { chaptersData } from '../data/chapters';
 import { chapterInsights } from '../data/chapterInsights';
 import { highlightJS } from '../utils/highlight';
 import { renderInlineCode, renderListItems, renderParagraphs, stripInlineMarkdown } from '../lib/inlineMarkdown';
+import { chapterRelatedLinks } from '../data/topicClusters';
+import RelatedLinks from './RelatedLinks.astro';
 
 const chapter = chaptersData[chapterKey] || chaptersData['basic_vars'];
 const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
@@ -80,6 +82,8 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
     <h2 class="walkthrough-heading" id="walkthroughHeading">Line-by-line: what the Zig code does</h2>
     <ol class="walkthrough-list" id="detailWalkthrough" set:html={walkthroughHtml}></ol>
   </section>
+
+  <RelatedLinks id="detailRelatedLinks" heading="Related Systems Architecture Guides & Lessons" links={chapterRelatedLinks(chapterKey)} />
 
   <!-- Deep Architecture Breakdown -->
   <section class="chapter-insight-section" aria-label="Architectural Paradigm Comparison">

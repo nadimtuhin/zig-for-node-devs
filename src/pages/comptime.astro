@@ -3,12 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
 import GuideFaq from '../components/GuideFaq.astro';
+import RelatedLinks from '../components/RelatedLinks.astro';
+import { guideRelatedLinks } from '../data/topicClusters';
 import ViewComponent from '../components/views/ComptimeView.astro';
 ---
 
 <Layout title="Comptime Metaprogramming Mastery | Zig for Node Devs" {...guideSchemas.comptime}>
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <ViewComponent />
+    <div style="max-width: 960px; margin: 0 auto; padding: 0 1.5rem 2rem;">
+      <RelatedLinks id="guideRelatedLinks" heading="Related Lessons & Architecture Guides" links={guideRelatedLinks('comptime')} />
+    </div>
     <GuideFaq faq={guideSchemas.comptime.faq} />
     <Footer />
   </main>

@@ -1,0 +1,70 @@
+---
+import type { RelatedLinks } from '../data/topicClusters';
+import { renderRelatedLinks } from '../lib/relatedLinks';
+
+interface Props {
+  id: string;
+  heading: string;
+  links: RelatedLinks;
+}
+
+const { id, heading, links } = Astro.props;
+const headingId = `${id}Heading`;
+---
+
+<nav class="related-links" aria-labelledby={headingId}>
+  <h2 class="related-links-heading" id={headingId}>{heading}</h2>
+  <div class="related-links-groups" id={id} set:html={renderRelatedLinks(links)}></div>
+</nav>
+
+<style>
+  .related-links {
+    background: #ffffff;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: var(--radius-md, 8px);
+    padding: 1.25rem 1.6rem;
+    box-shadow: var(--shadow-sm, none);
+  }
+
+  .related-links-heading {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text, #0f172a);
+    margin: 0 0 0.9rem;
+  }
+
+  .related-links-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem 1.5rem;
+  }
+
+  .related-links-groups :global(.related-links-group-title) {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    margin: 0 0 0.45rem;
+  }
+
+  .related-links-groups :global(.related-links-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .related-links-groups :global(a) {
+    color: #0369a1;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .related-links-groups :global(a:hover) {
+    color: #075985;
+  }
+</style>

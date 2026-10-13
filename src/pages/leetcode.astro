@@ -3,12 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import { guideSchemas } from '../data/guideSchemas';
 import Footer from '../components/Footer.astro';
 import GuideFaq from '../components/GuideFaq.astro';
+import RelatedLinks from '../components/RelatedLinks.astro';
+import { guideRelatedLinks } from '../data/topicClusters';
 import ViewComponent from '../components/views/LeetcodeView.astro';
 ---
 
 <Layout title="LeetCode Easy & Classic Algorithms in Zig | Zig for Node Devs" {...guideSchemas.leetcode}>
   <main id="main-content" role="main" style="min-height: 100vh; overflow-y: auto;">
     <ViewComponent />
+    <div style="max-width: 960px; margin: 0 auto; padding: 0 1.5rem 2rem;">
+      <RelatedLinks id="guideRelatedLinks" heading="Related Lessons & Architecture Guides" links={guideRelatedLinks('leetcode')} />
+    </div>
     <GuideFaq faq={guideSchemas.leetcode.faq} />
     <Footer />
   </main>
