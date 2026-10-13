@@ -1,0 +1,46 @@
+# Zig for Node.js Devs
+
+> Free interactive book that teaches Zig to JavaScript, TypeScript and Node.js engineers. 56 lessons in 13 parts, each pairing a Node.js snippet with the equivalent Zig program and a "why it differs" explanation, plus 13 deep-dive guides (memory, comptime, C interop, build.zig, Docker, microservices, interviews) and an in-browser Zig playground.
+
+Site: https://zig-for-node-devs.vercel.app
+Audience: developers who know JS/TS and Node.js and want to learn systems programming with Zig.
+Format: every lesson has (1) a JS/TS example, (2) the idiomatic Zig version, (3) the mental-model shift between them.
+
+## Core mental model: V8 vs Zig
+
+- No garbage collector. V8 allocates and frees for you; in Zig you free what you allocate, usually with `defer allocator.free(x)` right after the allocation.
+- No hidden allocations. Any function that needs heap memory takes a `std.mem.Allocator` parameter, so the call site always shows who allocates.
+- Pick the allocator for the lifetime: `std.heap.GeneralPurposeAllocator` (GPA, renamed `std.heap.DebugAllocator` in Zig 0.14) for long-lived data and leak detection in debug builds; `std.heap.ArenaAllocator` for request-scoped work, freed in one `arena.deinit()`; `std.heap.FixedBufferAllocator` for zero-syscall stack buffers.
+- Errors are values, not exceptions. Functions return error unions `!T`; `try` propagates, `catch` handles, `errdefer` cleans up only on the error path.
+- No implicit null. Nullable values are `?T`, unwrapped with `orelse` or `if (opt) |v|`.
+- `comptime` replaces macros, templates and runtime reflection. Generics are functions that take a `type` and return a `type`, evaluated at compile time.
+- Slices (`[]T`) are a pointer plus a length. Slicing never copies, unlike `Array.prototype.slice()`.
+- Integers have exact widths (`u8`, `i32`, `usize`). Widening is implicit, but narrowing or sign changes need `@intCast`, and there is no single 64-bit float `number`.
+- Threads are real OS threads (`std.Thread`), not a single event loop with `worker_threads` bolted on.
+- Zig is also a C compiler: `@cImport` reads C headers directly, and `zig cc` cross-compiles to Linux, macOS, Windows and Wasm with one flag.
+
+## Start here
+
+- [Home](https://zig-for-node-devs.vercel.app/): overview, live Zig playground and entry point to the book
+- [All chapters](https://zig-for-node-devs.vercel.app/chapters): full curriculum of 56 lessons grouped into 13 parts
+- [Roadmap](https://zig-for-node-devs.vercel.app/roadmap): step-by-step learning path from JS/TS to production Zig
+
+## Guides
+
+- [Memory & Allocators](https://zig-for-node-devs.vercel.app/memory): manual memory management, GPA vs ArenaAllocator, avoiding leaks without a GC
+- [Comptime](https://zig-for-node-devs.vercel.app/comptime): compile-time execution, generics, type generation and reflection
+- [C Interop & Node-API Addons](https://zig-for-node-devs.vercel.app/c-interop): `@cImport`, Zig as a C compiler, native Node.js addons without node-gyp
+- [Build System](https://zig-for-node-devs.vercel.app/build-system): `build.zig` and `build.zig.zon` vs npm scripts and package.json, no node_modules
+- [Production Microservice](https://zig-for-node-devs.vercel.app/microservice): Express.js vs Zig HTTP servers (httpz, zap), connection pools, graceful shutdown
+- [Docker Recipes](https://zig-for-node-devs.vercel.app/docker): multi-stage builds into sub-5MB `scratch` images
+- [LeetCode in Zig](https://zig-for-node-devs.vercel.app/leetcode): classic algorithms with zero-allocation Zig patterns
+- [Philosophy & Zen of Zig](https://zig-for-node-devs.vercel.app/philosophy): why Zig has no hidden control flow or operator overloading
+- [Pitfalls](https://zig-for-node-devs.vercel.app/pitfalls): 8 traps where JS intuition causes bugs (dangling slices, undefined memory, allocator lifetimes)
+- [Troubleshooting](https://zig-for-node-devs.vercel.app/troubleshooting): debugging leaks, LLDB breakpoints, stack traces, core dumps
+- [Interview Q&A](https://zig-for-node-devs.vercel.app/interviews): senior systems interview questions on memory, comptime and allocators
+- [JS to Zig Cheatsheet](https://zig-for-node-devs.vercel.app/cheatsheet): side-by-side syntax for variables, arrays, maps, errors and allocation
+
+## Optional
+
+- [Chapter index](https://zig-for-node-devs.vercel.app/llms.txt): all 56 lessons with a one-line summary each
+- [Full lesson text](https://zig-for-node-devs.vercel.app/llms-full.txt): every lesson with its JS/TS snippet, Zig code and explanation

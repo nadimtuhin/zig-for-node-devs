@@ -1,0 +1,141 @@
+# Zig for Node.js Devs
+
+> Free interactive book that teaches Zig to JavaScript, TypeScript and Node.js engineers. 56 lessons in 13 parts, each pairing a Node.js snippet with the equivalent Zig program and a "why it differs" explanation, plus 13 deep-dive guides (memory, comptime, C interop, build.zig, Docker, microservices, interviews) and an in-browser Zig playground.
+
+Site: https://zig-for-node-devs.vercel.app
+Audience: developers who know JS/TS and Node.js and want to learn systems programming with Zig.
+Format: every lesson has (1) a JS/TS example, (2) the idiomatic Zig version, (3) the mental-model shift between them.
+
+## Core mental model: V8 vs Zig
+
+- No garbage collector. V8 allocates and frees for you; in Zig you free what you allocate, usually with `defer allocator.free(x)` right after the allocation.
+- No hidden allocations. Any function that needs heap memory takes a `std.mem.Allocator` parameter, so the call site always shows who allocates.
+- Pick the allocator for the lifetime: `std.heap.GeneralPurposeAllocator` (GPA, renamed `std.heap.DebugAllocator` in Zig 0.14) for long-lived data and leak detection in debug builds; `std.heap.ArenaAllocator` for request-scoped work, freed in one `arena.deinit()`; `std.heap.FixedBufferAllocator` for zero-syscall stack buffers.
+- Errors are values, not exceptions. Functions return error unions `!T`; `try` propagates, `catch` handles, `errdefer` cleans up only on the error path.
+- No implicit null. Nullable values are `?T`, unwrapped with `orelse` or `if (opt) |v|`.
+- `comptime` replaces macros, templates and runtime reflection. Generics are functions that take a `type` and return a `type`, evaluated at compile time.
+- Slices (`[]T`) are a pointer plus a length. Slicing never copies, unlike `Array.prototype.slice()`.
+- Integers have exact widths (`u8`, `i32`, `usize`). Widening is implicit, but narrowing or sign changes need `@intCast`, and there is no single 64-bit float `number`.
+- Threads are real OS threads (`std.Thread`), not a single event loop with `worker_threads` bolted on.
+- Zig is also a C compiler: `@cImport` reads C headers directly, and `zig cc` cross-compiles to Linux, macOS, Windows and Wasm with one flag.
+
+## Start here
+
+- [Home](https://zig-for-node-devs.vercel.app/): overview, live Zig playground and entry point to the book
+- [All chapters](https://zig-for-node-devs.vercel.app/chapters): full curriculum of 56 lessons grouped into 13 parts
+- [Roadmap](https://zig-for-node-devs.vercel.app/roadmap): step-by-step learning path from JS/TS to production Zig
+
+## Guides
+
+- [Memory & Allocators](https://zig-for-node-devs.vercel.app/memory): manual memory management, GPA vs ArenaAllocator, avoiding leaks without a GC
+- [Comptime](https://zig-for-node-devs.vercel.app/comptime): compile-time execution, generics, type generation and reflection
+- [C Interop & Node-API Addons](https://zig-for-node-devs.vercel.app/c-interop): `@cImport`, Zig as a C compiler, native Node.js addons without node-gyp
+- [Build System](https://zig-for-node-devs.vercel.app/build-system): `build.zig` and `build.zig.zon` vs npm scripts and package.json, no node_modules
+- [Production Microservice](https://zig-for-node-devs.vercel.app/microservice): Express.js vs Zig HTTP servers (httpz, zap), connection pools, graceful shutdown
+- [Docker Recipes](https://zig-for-node-devs.vercel.app/docker): multi-stage builds into sub-5MB `scratch` images
+- [LeetCode in Zig](https://zig-for-node-devs.vercel.app/leetcode): classic algorithms with zero-allocation Zig patterns
+- [Philosophy & Zen of Zig](https://zig-for-node-devs.vercel.app/philosophy): why Zig has no hidden control flow or operator overloading
+- [Pitfalls](https://zig-for-node-devs.vercel.app/pitfalls): 8 traps where JS intuition causes bugs (dangling slices, undefined memory, allocator lifetimes)
+- [Troubleshooting](https://zig-for-node-devs.vercel.app/troubleshooting): debugging leaks, LLDB breakpoints, stack traces, core dumps
+- [Interview Q&A](https://zig-for-node-devs.vercel.app/interviews): senior systems interview questions on memory, comptime and allocators
+- [JS to Zig Cheatsheet](https://zig-for-node-devs.vercel.app/cheatsheet): side-by-side syntax for variables, arrays, maps, errors and allocation
+
+## Part 1: The Core Mental Model & Syntax Jump
+
+- [01. Variables, Mutability & Types](https://zig-for-node-devs.vercel.app/chapter/basic_vars): Why `const` by default, primitive sizing (`u8`, `i32`, `usize`), no type coercion, and explicit undefined `undefined`.
+- [02. Functions & Immutable Parameters](https://zig-for-node-devs.vercel.app/chapter/functions_params): All function arguments in Zig are strictly immutable `const` values. Returning values and pass-by-value semantics.
+- [03. Arrays, Slices & Memory Views](https://zig-for-node-devs.vercel.app/chapter/arrays_and_slices): Fixed-length arrays `[N]T` vs fat-pointer slices `[]T` (`ptr + len`). Eliminating bounds check bugs.
+- [04. Strings as UTF-8 Byte Slices](https://zig-for-node-devs.vercel.app/chapter/strings_and_bytes): Why Zig has no separate `String` type. String literals are null-terminated arrays `*const [N:0]u8` coerced to `[]const u8`.
+- [05. Control Flow: if, while, for & labeled breaks](https://zig-for-node-devs.vercel.app/chapter/control_flow): Zig's `for` loops with multi-array iteration, `while` with continue expressions, and labeled blocks returning values.
+- [06. Blocks as Expressions & Labeled Breaks](https://zig-for-node-devs.vercel.app/chapter/blocks_as_expressions): Every block `{}` can return a value using `break :label value`. Eliminating immediate IIFEs and ternary nests.
+
+## Part 2: Robust Error Handling Without Exceptions
+
+- [07. Error Sets & Return Tracing](https://zig-for-node-devs.vercel.app/chapter/errors_as_values): Zig has NO exceptions, NO throw/catch, and NO null errors. Error sets `error{...}` are typed integer enums with stack traces.
+- [08. The `try` Operator & Fallback `catch`](https://zig-for-node-devs.vercel.app/chapter/try_and_catch): Propagating errors effortlessly with `try` (shorthand for `catch |err| return err`) vs default fallbacks with `catch value`.
+- [09. Resource Cleanup: `defer` & `errdefer`](https://zig-for-node-devs.vercel.app/chapter/defer_and_errdefer): Deterministic RAII-style cleanup without garbage collection. `errdefer` executes only on error exit paths.
+- [10. Inferred Error Sets `!T` & Anyerror](https://zig-for-node-devs.vercel.app/chapter/inferred_error_sets): How the Zig compiler infers the exact union of all possible error variants returned across functions.
+
+## Part 3: Optionals, Pointers & Memory Safety
+
+- [11. Optionals `?T` vs Undefined vs Null](https://zig-for-node-devs.vercel.app/chapter/optionals_null): Zig has NO implicit null pointers. Nullable types must be declared as `?T`. Safe unwrap with `orelse` and `if (opt) |val|`.
+- [12. Single Pointers `*T` vs Many Pointers `[*]T`](https://zig-for-node-devs.vercel.app/chapter/pointers_basics): Demystifying pointers: address-of `&x`, dereferencing `ptr.*`, and const correctness `*const T`.
+- [13. Structs, Memory Layout & Packed Structs](https://zig-for-node-devs.vercel.app/chapter/memory_layout_structs): Defining typed data models. Struct methods, dot-syntax calling, and `packed struct` for exact binary hardware layouts.
+- [14. Tagged Unions vs TypeScript Discriminated Unions](https://zig-for-node-devs.vercel.app/chapter/tagged_unions): Pattern matching with `union(enum)` and `switch`. Memory efficiency where fields share overlapping storage.
+
+## Part 4: Explicit Memory Management & Allocators
+
+- [15. The Allocator Philosophy: No Hidden Heap](https://zig-for-node-devs.vercel.app/chapter/allocators_philosophy): Why Zig functions that need memory take `std.mem.Allocator`. GeneralPurposeAllocator, ArenaAllocator, and FixedBufferAllocator.
+- [16. Arena Allocator: High-Speed Batch Deallocation](https://zig-for-node-devs.vercel.app/chapter/arena_allocator): Group dozens of allocations together and free them all with a single `arena.deinit()`. The standard pattern for HTTP requests.
+- [17. FixedBufferAllocator & Stack Memory](https://zig-for-node-devs.vercel.app/chapter/fixed_buffer_allocator): Zero-syscall, zero-fragmentation allocation inside pre-allocated stack buffers. Ideal for embedded and high-performance microservices.
+- [18. Built-In Memory Leak Detection](https://zig-for-node-devs.vercel.app/chapter/memory_leak_detection): How Zig's testing harness and GPA catch use-after-free, double-free, and memory leaks automatically during development.
+
+## Part 5: Comptime — The Superpower of Zig
+
+- [19. What is `comptime`? Type Generation Without Macros](https://zig-for-node-devs.vercel.app/chapter/comptime_intro): Running arbitrary Zig code at compile time. Eliminating C preprocessor macros, C++ templates, and runtime reflection.
+- [20. Type Reflection with `@typeInfo` & `@typeName`](https://zig-for-node-devs.vercel.app/chapter/comptime_reflection): Inspecting struct fields, enums, and signatures at compile time. Building zero-overhead serializers without runtime `Reflect`.
+- [21. `@compileError` & Comptime Assertions](https://zig-for-node-devs.vercel.app/chapter/compile_time_assertions): Catching bugs before the binary even links. Enforcing architectural rules, struct sizes, and environment constraints.
+- [22. Writing Generic Data Structures (Generic Stack)](https://zig-for-node-devs.vercel.app/chapter/generics_in_practice): Step-by-step implementation of a type-safe generic Stack backed by ArrayList in idiomatic Zig.
+
+## Part 6: Standard Library & Essential Collections
+
+- [23. `std.ArrayList` Dynamic Arrays](https://zig-for-node-devs.vercel.app/chapter/arraylist): The Zig equivalent to JavaScript's `Array`. Appending, popping, capacity pre-allocation (`ensureTotalCapacity`), and memory ownership.
+- [24. `std.StringHashMap` & `std.AutoHashMap`](https://zig-for-node-devs.vercel.app/chapter/hashmap): Key-value dictionaries without `new Map()`. Wyhash algorithm, entry API, and key allocation caveats.
+- [25. File I/O: Reading & Writing Streams](https://zig-for-node-devs.vercel.app/chapter/file_io): Replacing `node:fs` / `fs.promises`. Working with directory handles, buffered readers, and binary file operations.
+- [26. Formatting & String Building with `std.fmt`](https://zig-for-node-devs.vercel.app/chapter/formatting_and_printing): Zig's `std.fmt.allocPrint` vs template literals. Format specifiers: `{s}`, `{}`, `{x}`, `{d:.2}`, and custom formatters.
+
+## Part 7: Concurrency & Async in Zig
+
+- [27. Native OS Threads with `std.Thread`](https://zig-for-node-devs.vercel.app/chapter/threads_basics): True multi-threading without the overhead of Node.js `worker_threads`. Spawning threads and joining handles.
+- [28. Mutexes & Atomic Operations (`std.Thread.Mutex`)](https://zig-for-node-devs.vercel.app/chapter/atomics_and_mutexes): Preventing data races when threads share state. Atomic integers vs Mutex locking vs Node.js single-thread model.
+- [29. Thread Synchronization & Signaling Primitives](https://zig-for-node-devs.vercel.app/chapter/channel_patterns): Coordinating worker threads without runtime overhead using `Semaphore`, `Mutex`, and atomic wakeups.
+- [30. Event Loops & Async I/O (epoll / kqueue / io_uring)](https://zig-for-node-devs.vercel.app/chapter/event_loops_in_zig): Understanding how Node.js libuv works under the hood and how Zig libraries (like `tigerbeetle`, `zap`, `httpz`) achieve millions of req/sec.
+
+## Part 8: Interoperability with C & Node.js Native Addons
+
+- [31. Zero-Overhead C Interoperability: `@cImport`](https://zig-for-node-devs.vercel.app/chapter/c_interop_basics): Zig is a full C compiler! Directly include `.h` files without wrapper code, bindings generators, or CMake.
+- [32. Building High-Speed Node-API Addons in Zig](https://zig-for-node-devs.vercel.app/chapter/napi_addons): Exporting shared libraries (`.node` / `.dylib`) that Node.js can require directly via `node:process` without `node-gyp`.
+- [33. Compiling Zig to WebAssembly (Wasm) for Node.js & Browsers](https://zig-for-node-devs.vercel.app/chapter/wasm_compilation): Targeting `wasm32-freestanding`. Generating ultra-compact 2KB Wasm binaries executable in Node.js and browsers.
+- [34. Universal Cross-Compilation: `zig cc` as a Superpower](https://zig-for-node-devs.vercel.app/chapter/cross_compilation): Cross-compiling from macOS to Linux x86_64 or ARM64 with a single flag. Why Bun and Uber use Zig for C/C++ builds.
+
+## Part 9: Testing, Tooling & The Build System
+
+- [35. The `build.zig` System: Zig as Its Own Make/Webpack](https://zig-for-node-devs.vercel.app/chapter/build_zig): Why Zig has no YAML, Makefiles, CMake, or npm scripts. Writing build pipelines and dependency graphs in pure Zig.
+- [36. The Zig Package Manager (`build.zig.zon`)](https://zig-for-node-devs.vercel.app/chapter/zig_package_manager): `build.zig.zon` vs `package.json`. Git dependencies, package hashes, and why Zig has no bloated `node_modules`.
+- [37. Built-in Testing Framework: `zig test`](https://zig-for-node-devs.vercel.app/chapter/unit_testing): Declaring tests directly alongside implementation code with `test "..."`. Testing allocator, assertions, and mocks.
+- [38. Build Optimization Modes: Debug, ReleaseSafe, ReleaseFast, ReleaseSmall](https://zig-for-node-devs.vercel.app/chapter/optimization_modes): Choosing the right tradeoff between execution speed, binary size, and runtime safety checks.
+
+## Part 10: Building Real-World Systems & Microservices
+
+- [39. Building a High-Performance HTTP Server](https://zig-for-node-devs.vercel.app/chapter/http_server_fundamentals): Setting up TCP listeners, accepting connections, and framing responses. Comparing native Zig sockets against Node.js Express.
+- [40. Zero-Allocation JSON Parsing with `std.json`](https://zig-for-node-devs.vercel.app/chapter/json_parsing_comptime): Replacing `JSON.parse` and `zod` with type-safe comptime schema deserialization.
+- [41. Database Persistence with SQLite & C Drivers](https://zig-for-node-devs.vercel.app/chapter/database_sqlite): Embedding SQLite directly into your Zig microservice binary with zero external daemon dependencies.
+- [42. Signal Handling & Graceful Shutdown](https://zig-for-node-devs.vercel.app/chapter/graceful_shutdown): Handling `SIGINT` (Ctrl+C) and `SIGTERM` gracefully. Draining active connections and flushing pending buffers.
+
+## Part 11: Production Deployment & Docker
+
+- [43. Ultra-Minimal Docker Containers (< 5MB Scratch)](https://zig-for-node-devs.vercel.app/chapter/docker_scratch_containers): Packaging Zig microservices into zero-vulnerability `scratch` Docker containers vs 200MB+ Node.js images.
+- [44. CI/CD Workflows with GitHub Actions & Cache](https://zig-for-node-devs.vercel.app/chapter/ci_cd_github_actions): Automating `zig build`, `zig test`, and cross-platform binary releases across macOS, Linux, and Windows.
+- [45. Observability: Prometheus Metrics & Tracing](https://zig-for-node-devs.vercel.app/chapter/observability_metrics): Exposing Prometheus metrics endpoints (`/metrics`) and counting events with atomic counters.
+
+## Part 12: Rosetta Stone & Classic Algorithms
+
+- [46. LeetCode: Two Sum in Zig](https://zig-for-node-devs.vercel.app/chapter/two_sum): Solving Two Sum using `std.AutoHashMap` with zero allocations on failure and O(N) runtime.
+- [47. LeetCode: Valid Parentheses with Fixed Stack](https://zig-for-node-devs.vercel.app/chapter/valid_parentheses): Stack-based parsing using a zero-allocation fixed stack array.
+- [48. LeetCode: Reverse Linked List with Pointers](https://zig-for-node-devs.vercel.app/chapter/reverse_linked_list): Mastering pointer manipulation in Zig by reversing an in-place singly linked list.
+- [49. LeetCode: Binary Search & Slice Windows](https://zig-for-node-devs.vercel.app/chapter/binary_search): Sub-slice indexing and integer overflow-safe midpoint calculation.
+
+## Part 13: Advanced Systems & Production Mastery
+
+- [50. Hardware SIMD Vectorization (`@Vector`)](https://zig-for-node-devs.vercel.app/chapter/simd_vectorization): Parallel CPU processing on multiple values simultaneously using Zig's first-class `@Vector` primitive.
+- [51. Writing a Custom Allocator from Scratch](https://zig-for-node-devs.vercel.app/chapter/custom_allocator_implementation): Implementing the `std.mem.Allocator` vtable interface to create specialized memory arenas.
+- [52. Zero-Cost Abstractions: Inline & Assembly](https://zig-for-node-devs.vercel.app/chapter/zero_cost_abstractions): Controlling generated assembly. `inline fn`, `asm volatile`, and examining compiled instructions.
+- [53. Debugging with LLDB & Core Dumps](https://zig-for-node-devs.vercel.app/chapter/production_debugging_gdb_lldb): Setting breakpoints, inspecting registers, and reading core dumps when native binaries crash.
+- [54. Case Studies: Why Bun & TigerBeetle Chose Zig](https://zig-for-node-devs.vercel.app/chapter/bun_and_tigerbeetle_case_studies): Architectural review of Jarred Sumner's Bun JavaScript runtime and TigerBeetle financial database.
+- [55. Senior Systems Engineering Interview Q&A](https://zig-for-node-devs.vercel.app/chapter/senior_interview_questions): Top interview questions: Allocator lifecycles, undefined memory safety, comptime execution limits, and C ABI compatibility.
+- [56. The Zen of Zig & Production Playbook](https://zig-for-node-devs.vercel.app/chapter/zen_of_zig): The guiding principles of the Zen of Zig. What Zig deliberately left out (operator overloading, hidden control flow) and why.
+
+## Optional
+
+- [Full lesson text](https://zig-for-node-devs.vercel.app/llms-full.txt): every lesson with its JS/TS snippet, Zig code and explanation
+- [Short version](https://zig-for-node-devs.vercel.app/llms-small.txt): summary, mental model and guides only
