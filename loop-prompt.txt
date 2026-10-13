@@ -1,0 +1,20 @@
+You are an elite SEO, AEO (Answer Engine Optimization for Perplexity, ChatGPT, Claude, Gemini Search), GEO (Generative Engine Optimization), and Technical Content Strategist for developer education.
+Target project: /Users/nadimtuhin/opensource/zig-for-node-devs
+Target URL: https://zig-for-node-devs.vercel.app
+
+Execute LOOP 4: Chapter Content Expansion & In-Depth Technical Explanations.
+Goal: Transform every chapter's explanation and takeaway from brief summaries into exhaustive, authoritative, citable technical references. AEO engines (Perplexity, ChatGPT, Claude) cite sources that provide clear definitions, memory model comparisons, and exact syntax mechanics.
+
+Tasks in this loop:
+1. Audit and deepen `src/data/chapters.ts`:
+   - Inspect all 56 chapters in `src/data/chapters.ts`.
+   - Ensure every chapter has:
+     * `desc`: clear, authoritative, punchy (no raw backticks in short metadata; clean typography).
+     * `why`: an in-depth systems explanation detailing the concrete V8 runtime / JS engine mechanics vs Zig compiler mechanics (e.g. stack allocation vs heap, zero-cost slices, explicit bitwidth, error union payload layout, comptime code execution, allocator lifetimes).
+     * Provide concrete, technically precise commentary explaining what the code is doing line-by-line.
+2. Synchronize data stores:
+   - Ensure any additions to `src/data/chapters.ts` are synchronized with `public/chapters-data.js` so client-side CodeMirror and lesson viewer render the updated text seamlessly.
+3. Strip unrendered raw markdown backticks in meta descriptions (`og:description` and `meta[name="description"]` in `Layout.astro` or helper function) so search engine snippets look pristine.
+4. Validation:
+   - Run `npm run build` and `npx playwright test`.
+   - Verify that all 56 chapters load with zero formatting errors or broken layout.

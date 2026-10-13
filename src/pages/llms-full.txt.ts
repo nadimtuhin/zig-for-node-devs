@@ -23,7 +23,13 @@ Zig:
 ${chapter.code}
 \`\`\`
 
-Why it differs: ${chapter.why}
+Why it differs:
+
+${chapter.why}
+
+Line by line:
+
+${chapter.walkthrough.map((step) => `- ${step}`).join('\n')}
 `;
 }
 

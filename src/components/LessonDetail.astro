@@ -7,10 +7,13 @@ const { chapterKey = 'basic_vars' } = Astro.props;
 import { chaptersData } from '../data/chapters';
 import { chapterInsights } from '../data/chapterInsights';
 import { highlightJS } from '../utils/highlight';
+import { renderListItems, renderParagraphs, stripInlineMarkdown } from '../lib/inlineMarkdown';
 
 const chapter = chaptersData[chapterKey] || chaptersData['basic_vars'];
 const insight = chapterInsights[chapterKey] || chapterInsights['basic_vars'];
 const highlightedNodeCode = highlightJS(chapter.nodeCode);
+const whyHtml = renderParagraphs(chapter.why);
+const walkthroughHtml = renderListItems(chapter.walkthrough);
 
 const keys = Object.keys(chaptersData);
 const currentIndex = keys.indexOf(chapterKey);
@@ -54,7 +57,7 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
 
   <h1 class="lesson-title gitbook-title" id="detailTitle">{chapter.title}</h1>
   <p class="lesson-desc gitbook-desc" id="detailDesc">
-    {chapter.desc}
+    {stripInlineMarkdown(chapter.desc)}
   </p>
 
   <div class="card-box node-box gitbook-comparison-box" role="region" aria-label="Node.js Code Comparison">
@@ -70,10 +73,13 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
 
   <div class="card-box zig-why-box gitbook-callout-box" role="region" aria-label="Zig Mental Model Rationale">
     <div class="zig-why-title"><span aria-hidden="true">⚡</span> The Zig Mental Model</div>
-    <p class="zig-why-desc" id="detailZigWhy">
-      {chapter.why}
-    </p>
+    <div class="zig-why-desc" id="detailZigWhy" set:html={whyHtml}></div>
   </div>
+
+  <section class="card-box walkthrough-box" aria-labelledby="walkthroughHeading">
+    <h2 class="walkthrough-heading" id="walkthroughHeading">Line-by-line: what the Zig code does</h2>
+    <ol class="walkthrough-list" id="detailWalkthrough" set:html={walkthroughHtml}></ol>
+  </section>
 
   <!-- Deep Architecture Breakdown -->
   <section class="chapter-insight-section" aria-label="Architectural Paradigm Comparison">
@@ -91,6 +97,31 @@ const nextTitle = hasNext ? chaptersData[keys[currentIndex + 1]].title : '';
 </article>
 
 <style>
+  .zig-why-desc :global(p) {
+    margin: 0 0 0.7rem;
+  }
+
+  .zig-why-desc :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .walkthrough-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 0.75rem;
+  }
+
+  .walkthrough-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+
   .chapter-insight-section {
     margin-top: 0.5rem;
   }

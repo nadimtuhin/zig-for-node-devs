@@ -9,6 +9,7 @@ import {
   type FaqEntry
 } from '../lib/structuredData';
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH, OG_TAGLINE, ogImagePathFor } from '../lib/ogCards';
+import { stripInlineMarkdown } from '../lib/inlineMarkdown';
 
 interface Props {
   title?: string;
@@ -49,6 +50,7 @@ import '../styles/global.css';
 const cleanPath = canonicalPath.replace(/\/+$/, '') || '';
 const canonicalUrl = `${SITE_ORIGIN}${cleanPath}`;
 const ogImageUrl = `${SITE_ORIGIN}${ogImagePathFor(cleanPath)}`;
+const metaDescription = stripInlineMarkdown(description);
 const pageName = title.split('|')[0].trim();
 const ogImageAlt = cleanPath ? `${pageName}, from ${SITE_NAME}: ${OG_TAGLINE}` : `${SITE_NAME}: ${OG_TAGLINE}`;
 
@@ -60,7 +62,7 @@ const activeBreadcrumbs = breadcrumbs.length > 0 ? breadcrumbs : defaultBreadcru
 
 const structuredData = serializeJsonLd(buildPageSchema({
   title: pageName,
-  description,
+  description: metaDescription,
   canonicalUrl,
   imageUrl: ogImageUrl,
   breadcrumbs: activeBreadcrumbs,
@@ -78,7 +80,7 @@ const structuredData = serializeJsonLd(buildPageSchema({
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     <meta name="keywords" content={keywords.join(', ')} />
     <meta name="author" content="Nadim Tuhin" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -89,7 +91,7 @@ const structuredData = serializeJsonLd(buildPageSchema({
     <meta property="og:type" content={article ? "article" : "website"} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:site_name" content={SITE_NAME} />
     <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImageUrl} />
@@ -105,7 +107,7 @@ const structuredData = serializeJsonLd(buildPageSchema({
     <meta name="twitter:creator" content={TWITTER_HANDLE} />
     <meta name="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImageUrl} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
 
