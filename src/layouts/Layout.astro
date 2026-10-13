@@ -8,6 +8,7 @@ import {
   type CodeSnippet,
   type FaqEntry
 } from '../lib/structuredData';
+import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH, OG_TAGLINE, ogImagePathFor } from '../lib/ogCards';
 
 interface Props {
   title?: string;
@@ -19,7 +20,16 @@ interface Props {
   codeSnippet?: CodeSnippet;
   isPart?: string;
   chapterNum?: number;
+  keywords?: string[];
 }
+
+const SITE_NAME = 'Zig for Node.js Devs';
+// Unverified: confirm this is the author's X handle before relying on attribution.
+const TWITTER_HANDLE = '@nadimtuhin';
+const DEFAULT_KEYWORDS = [
+  'Zig', 'learn Zig', 'Zig tutorial', 'Zig for JavaScript developers', 'Zig for Node.js developers',
+  'Zig playground', 'Zig compiler explorer', 'systems programming', 'manual memory management',
+];
 
 const {
   title = "Zig for Node.js Devs | Interactive GitBook & Live Compiler",
@@ -30,15 +40,17 @@ const {
   faq,
   codeSnippet,
   isPart,
-  chapterNum
+  chapterNum,
+  keywords = article?.keywords ?? DEFAULT_KEYWORDS
 } = Astro.props;
 
 import '../styles/global.css';
 
 const cleanPath = canonicalPath.replace(/\/+$/, '') || '';
 const canonicalUrl = `${SITE_ORIGIN}${cleanPath}`;
-const ogImageUrl = `${SITE_ORIGIN}/og-image.png`;
+const ogImageUrl = `${SITE_ORIGIN}${ogImagePathFor(cleanPath)}`;
 const pageName = title.split('|')[0].trim();
+const ogImageAlt = cleanPath ? `${pageName}, from ${SITE_NAME}: ${OG_TAGLINE}` : `${SITE_NAME}: ${OG_TAGLINE}`;
 
 const defaultBreadcrumbs = [
   { name: "Home", item: SITE_ORIGIN },
@@ -67,6 +79,10 @@ const structuredData = serializeJsonLd(buildPageSchema({
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="keywords" content={keywords.join(', ')} />
+    <meta name="author" content="Nadim Tuhin" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="theme-color" content="#f7a41d" />
     <link rel="canonical" href={canonicalUrl} />
 
     <!-- Open Graph / Facebook -->
@@ -74,14 +90,24 @@ const structuredData = serializeJsonLd(buildPageSchema({
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:secure_url" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+    <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+    <meta property="og:image:alt" content={ogImageAlt} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={TWITTER_HANDLE} />
+    <meta name="twitter:creator" content={TWITTER_HANDLE} />
     <meta name="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
