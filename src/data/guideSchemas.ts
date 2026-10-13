@@ -98,8 +98,8 @@ export const guideSchemas = {
     ],
   },
   cheatsheet: {
-    description: 'JavaScript to Zig cheatsheet: side-by-side syntax for variables, arrays, maps, strings, error handling, and memory allocation for Node.js developers.',
-    article: { datePublished: PUBLISHED, keywords: ['Zig cheatsheet', 'JavaScript to Zig', 'TypeScript vs Zig syntax', 'Zig Rosetta Stone'] },
+    description: 'JavaScript to Zig cheatsheet: TypeScript types to Zig types, arrays, maps, sets, strings, errors, and V8 heap memory vs Zig allocators, side by side.',
+    article: { datePublished: PUBLISHED, keywords: ['Zig cheatsheet', 'JavaScript to Zig cheatsheet', 'TypeScript type to Zig type', 'V8 vs Zig memory', 'TypeScript vs Zig syntax', 'Zig Rosetta Stone'] },
     faq: [
       { question: 'What is the Zig equivalent of a JavaScript Map?', answer: 'std.StringHashMap or std.AutoHashMap. Both take an allocator at init and must be released with deinit(), usually deferred right after creation.' },
       { question: 'How does try/catch in JavaScript map to Zig?', answer: 'Zig functions return error unions such as !T. try propagates an error to the caller, catch handles it inline, and errdefer runs cleanup only when an error leaves the scope.' },

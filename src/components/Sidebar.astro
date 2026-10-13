@@ -38,7 +38,7 @@ const groupedParts = chaptersList.reduce((acc, [key, ch]) => {
     </div>
 
     <div class="sidebar-search-box" role="search">
-      <input type="search" id="lessonSearchInput" aria-label="Search lessons by title or keyword" placeholder="Filter 56 chapters... (⌘+K)" oninput="filterLessons(this.value)">
+      <input type="search" id="lessonSearchInput" aria-label="Search lessons by title or keyword" placeholder="Filter 56 chapters..." oninput="filterLessons(this.value)">
       <button id="clearSearchBtn" aria-label="Clear lesson search query" class="clear-search-btn" onclick="clearLessonSearch()" style="display:none;">✕</button>
     </div>
     <div id="noResultsNotice" class="search-empty-state" style="display:none;" role="status" aria-live="polite">No lessons found matching filter.</div>

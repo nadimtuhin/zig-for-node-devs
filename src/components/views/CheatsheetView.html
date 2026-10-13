@@ -1,300 +1,434 @@
-<div class="appendix-container" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
+<style>
+  .rosetta h2 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 2.5rem; }
+  .rosetta h3 { font-size: 1.15rem; font-weight: 700; color: #0f172a; }
+  .rosetta .section-answer { background: #f8fafc; border-left: 4px solid #00add8; border-radius: 8px; padding: 0.85rem 1.1rem; margin: 0.75rem 0 1.25rem; color: #334155; line-height: 1.65; }
+  .rosetta .table-responsive-wrapper { overflow-x: auto; max-width: 100%; margin: 1.25rem 0; }
+  .rosetta table { width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0; }
+  .rosetta thead tr { background: #f1f5f9; text-align: left; }
+  .rosetta th, .rosetta td { padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top; }
+  .rosetta caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+<div class="appendix-container rosetta" style="max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; color: #1e293b; font-family: var(--font-ui, sans-serif);">
   <div style="text-align: center; margin-bottom: 2.5rem;">
     <span style="background: #fef3c7; color: #92400e; padding: 0.35rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem;">Appendix 12 • Quick Reference</span>
     <h1 style="font-size: 2.25rem; font-weight: 800; margin: 0.75rem 0; color: #0f172a;">JavaScript to Zig Rosetta Stone Cheatsheet</h1>
-    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Direct mapping between familiar JavaScript / TypeScript patterns and their idiomatic Zig equivalents.</p>
+    <p style="font-size: 1.1rem; color: #64748b; max-width: 650px; margin: 0 auto;">Direct mapping between familiar JavaScript / TypeScript patterns and their idiomatic Zig equivalents: types, collections, control flow, errors, and V8 heap memory versus Zig allocators.</p>
   </div>
 
   <aside class="direct-answer" aria-labelledby="direct-answer-heading" style="background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 2.5rem;">
     <h2 id="direct-answer-heading" style="margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.04em;">Direct Answer</h2>
-    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">Most JavaScript constructs have a direct Zig counterpart: <code>const</code>/<code>let</code> become <code>const</code>/<code>var</code> with explicit types like <code>i32</code>, <code>throw</code> and <code>try/catch</code> become error unions (<code>!T</code>) handled with <code>try</code> and <code>catch</code>, <code>??</code> becomes <code>orelse</code>, <code>new Map()</code> becomes <code>std.StringHashMap(V).init(allocator)</code>, and <code>finally</code> becomes <code>defer</code>. The main difference is that memory, errors, and nullability are visible in the types and signatures. Snippets target Zig 0.14.</p>
+    <p style="margin: 0; color: #422006; font-size: 1rem; line-height: 1.65;">Most JavaScript constructs have a direct Zig counterpart. TypeScript <code>number</code> becomes a sized type such as <code>i32</code>, <code>usize</code> or <code>f64</code>, <code>string</code> becomes the byte slice <code>[]const u8</code>, <code>boolean</code> becomes <code>bool</code>, and <code>null</code> becomes an optional <code>?T</code>. <code>Array</code> becomes a slice <code>[]T</code> or <code>std.ArrayList(T)</code>, <code>Map</code> becomes <code>std.StringHashMap</code> (string keys) or <code>std.AutoHashMap</code> (integer keys), <code>Set</code> becomes either map with <code>void</code> values, <code>throw</code> becomes <code>return error.Name</code>, <code>try/catch</code> becomes <code>try</code> and <code>catch |err|</code>, and <code>finally</code> becomes <code>defer</code>. Where V8 allocates and garbage-collects for you, Zig asks an allocator: <code>allocator.create(T)</code> replaces <code>new</code>, and you free it yourself. Snippets target Zig 0.14.</p>
   </aside>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">How Do JavaScript Variables and Types Map to Zig?</h2>
-  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Declarations and primitive types</h3>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+  <h2>How Do TypeScript Types Map to Zig Types?</h2>
+  <p class="section-answer">Every TypeScript primitive has a Zig type, but Zig types state their size: pick an integer width (<code>u8</code>, <code>i32</code>, <code>usize</code>) or a float (<code>f64</code>) instead of one <code>number</code>, use <code>[]const u8</code> for strings, and wrap a type in <code>?T</code> when it can be absent.</p>
+  <h3>Declarations and primitive types</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>TypeScript declarations and primitive types mapped to Zig</caption>
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">JavaScript / TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Equivalent</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Key Difference</th>
+        <tr>
+          <th scope="col">JavaScript / TypeScript</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const x = 10;</code> / <code>let y = 20;</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const x: i32 = 10;</code> / <code>var y: i32 = 20;</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Explicit integer bit widths (<code>u8</code>, <code>i32</code>, <code>usize</code>). A <code>var</code> that is never mutated is a compile error.</td>
+          <td><code>const x = 10;</code> / <code>let y = 20;</code></td>
+          <td><code>const x: i32 = 10;</code> / <code>var y: i32 = 20;</code></td>
+          <td>Explicit integer bit widths (<code>u8</code>, <code>i32</code>, <code>usize</code>). A <code>var</code> that is never mutated is a compile error.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>number</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>i32</code>, <code>u64</code>, <code>f64</code>, ...</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">You choose signedness and width; there is no single double-precision <code>number</code>.</td>
+          <td><code>number</code></td>
+          <td><code>i32</code> / <code>i64</code> / <code>usize</code> / <code>f64</code></td>
+          <td>You choose signedness and width; there is no single double-precision <code>number</code>. Use <code>usize</code> for lengths and indexes, <code>f64</code> for JavaScript-style floating point. Integer overflow panics in Debug and ReleaseSafe.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>BigInt</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>u128</code> / <code>i128</code>, or <code>std.math.big.int</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Fixed wide integers cover many cases; arbitrary precision needs an allocator.</td>
+          <td><code>string</code></td>
+          <td><code>[]const u8</code></td>
+          <td>A slice of UTF-8 bytes (pointer plus length), not a string object. A literal like <code>"hi"</code> has type <code>*const [2:0]u8</code> and coerces to <code>[]const u8</code>.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>typeof x</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>@TypeOf(x)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Resolved at compile time, not at runtime.</td>
+          <td><code>boolean</code></td>
+          <td><code>bool</code></td>
+          <td>No truthiness: <code>if (count)</code> does not compile for an integer, write <code>if (count != 0)</code>.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>a === b</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>a == b</code> / <code>std.mem.eql(u8, a, b)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>==</code> works on numbers; compare strings and slices by content with <code>std.mem.eql</code>.</td>
+          <td><code>null</code> / <code>undefined</code></td>
+          <td><code>?T</code> set to <code>null</code></td>
+          <td>Absence is <code>null</code> in an optional type. Zig's <code>undefined</code> means uninitialized memory, not a value.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>null</code> / <code>undefined</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">an optional <code>?T</code> set to <code>null</code> / <code>undefined</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Absence is <code>null</code> in an optional type. Zig's <code>undefined</code> means uninitialized memory, not a value.</td>
+          <td><code>any</code></td>
+          <td><code>anytype</code> parameter, or <code>*anyopaque</code> pointer</td>
+          <td>Neither turns type checking off. <code>anytype</code> makes a function generic and is checked per call at compile time; <code>*anyopaque</code> is a type-erased pointer you cast back with <code>@ptrCast</code> and <code>@alignCast</code>.</td>
+        </tr>
+        <tr>
+          <td><code>BigInt</code></td>
+          <td><code>u128</code> / <code>i128</code>, or <code>std.math.big.int</code></td>
+          <td>Fixed wide integers cover many cases; arbitrary precision needs an allocator.</td>
+        </tr>
+        <tr>
+          <td><code>type Point = { x: number; y: number }</code></td>
+          <td><code>const Point = struct { x: f64, y: f64 };</code></td>
+          <td>A type is a compile-time value bound with <code>const</code>; fields have a fixed memory layout.</td>
+        </tr>
+        <tr>
+          <td><code>type Shape = Circle | Square</code> (discriminated union)</td>
+          <td><code>const Shape = union(enum) { circle: Circle, square: Square };</code></td>
+          <td>A tagged union; <code>switch</code> on it must handle every tag.</td>
+        </tr>
+        <tr>
+          <td><code>typeof x</code></td>
+          <td><code>@TypeOf(x)</code></td>
+          <td>Resolved at compile time, not at runtime.</td>
+        </tr>
+        <tr>
+          <td><code>a === b</code></td>
+          <td><code>a == b</code> / <code>std.mem.eql(u8, a, b)</code></td>
+          <td><code>==</code> works on numbers; compare strings and slices by content with <code>std.mem.eql</code>.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">How Do Functions and Control Flow Map to Zig?</h2>
-  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Functions, loops, and branching</h3>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+  <h2>How Do Functions and Control Flow Map to Zig?</h2>
+  <p class="section-answer">Zig control flow reads like JavaScript with fewer operators: <code>if</code> and <code>switch</code> are expressions, <code>for</code> captures items between pipes, and there is no <code>async</code>/<code>await</code>, so I/O is synchronous or moved onto threads.</p>
+  <h3>Functions, loops, and branching</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>JavaScript functions and control flow mapped to Zig</caption>
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">JavaScript / TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Equivalent</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Key Difference</th>
+        <tr>
+          <th scope="col">JavaScript / TypeScript</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>function add(a, b) { return a + b; }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>fn add(a: i32, b: i32) i32 { return a + b; }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Parameter and return types are required; parameters are immutable.</td>
+          <td><code>function add(a, b) { return a + b; }</code></td>
+          <td><code>fn add(a: i32, b: i32) i32 { return a + b; }</code></td>
+          <td>Parameter and return types are required; parameters are immutable.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Closures / arrow functions</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A struct holding the context plus a method, or a function pointer plus an explicit context argument</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig has no capturing closures; captured state is passed explicitly.</td>
+          <td>Closures / arrow functions</td>
+          <td>A struct holding the context plus a method, or a function pointer plus an explicit context argument</td>
+          <td>Zig has no capturing closures; captured state is passed explicitly.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Default parameters, <code>{ a, b }</code> options object</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">An options struct with field defaults: <code>fn run(opts: Options)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">No default arguments; struct field defaults fill the same role.</td>
+          <td>Default parameters, <code>{ a, b }</code> options object</td>
+          <td>An options struct with field defaults: <code>fn run(opts: Options)</code></td>
+          <td>No default arguments; struct field defaults fill the same role.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>cond ? a : b</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>if (cond) a else b</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>if</code> is an expression; there is no <code>?:</code> operator.</td>
+          <td><code>cond ? a : b</code></td>
+          <td><code>if (cond) a else b</code></td>
+          <td><code>if</code> is an expression; there is no <code>?:</code> operator.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>for (const item of items)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>for (items) |item| { ... }</code> / <code>for (items, 0..) |item, i|</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">The capture goes between pipes; the index range is an explicit second operand.</td>
+          <td><code>for (const item of items)</code></td>
+          <td><code>for (items) |item| { ... }</code> / <code>for (items, 0..) |item, i|</code></td>
+          <td>The capture goes between pipes; the index range is an explicit second operand.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>switch (x) { case 1: ... default: ... }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>switch (x) { 1 =&gt; ..., else =&gt; ... }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">An expression with no fall-through that must cover every value.</td>
+          <td><code>while (i &lt; n) { i++; }</code></td>
+          <td><code>while (i &lt; n) : (i += 1) { ... }</code></td>
+          <td>The continue expression after <code>:</code> runs on every iteration; there is no <code>++</code> operator.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>async</code> / <code>await</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.Thread</code>, <code>std.Thread.Pool</code>, or an event-loop library</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig 0.14 does not support <code>async</code>/<code>await</code>, and there is no built-in event loop.</td>
+          <td><code>switch (x) { case 1: ... default: ... }</code></td>
+          <td><code>switch (x) { 1 =&gt; ..., else =&gt; ... }</code></td>
+          <td>An expression with no fall-through that must cover every value.</td>
+        </tr>
+        <tr>
+          <td><code>async</code> / <code>await</code></td>
+          <td>A plain blocking call, or <code>std.Thread.spawn</code> / <code>std.Thread.Pool</code></td>
+          <td>Zig 0.14 has no <code>async</code>/<code>await</code> and no built-in event loop. Calls block until done; run work in parallel on threads and <code>join()</code> them.</td>
+        </tr>
+        <tr>
+          <td><code>Promise.all([a(), b()])</code></td>
+          <td><code>const t = try std.Thread.spawn(.{}, a, .{});</code> then <code>b();</code> and <code>t.join();</code></td>
+          <td>Real OS threads sharing memory, so shared state needs <code>std.Thread.Mutex</code> or atomics. The thread function can only return <code>void</code>, <code>!void</code>, <code>u8</code>, or <code>noreturn</code>, and <code>join()</code> hands nothing back, so pass a result pointer in the args tuple to get a value back.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">How Do Errors and Optionals Map to Zig?</h2>
-  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Exceptions become error unions, null checks become optionals</h3>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+  <h2>How Do Errors and Optionals Map to Zig?</h2>
+  <p class="section-answer">Zig has no exceptions. A function that can fail returns an error union <code>!T</code>; <code>try</code> passes the error to the caller (like re-throwing), <code>catch |err|</code> handles it in place, and <code>defer</code> does the job of <code>finally</code>.</p>
+  <h3>Exceptions become error unions, null checks become optionals</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>JavaScript exceptions and null handling mapped to Zig</caption>
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">JavaScript / TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Equivalent</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Key Difference</th>
+        <tr>
+          <th scope="col">JavaScript / TypeScript</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>throw new Error("msg")</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>return error.InvalidInput;</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">An error is a named value from an error set, returned inside an error union <code>!T</code>. It carries no message; safe builds record an error return trace separately.</td>
+          <td><code>throw new Error("msg")</code></td>
+          <td><code>return error.InvalidInput;</code></td>
+          <td>An error is a named value from an error set, returned inside an error union <code>!T</code>. It carries no message; Debug builds record an error return trace separately.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>try { ... } catch (e) { ... }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>val catch |err| fallback;</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Handles the error value inline as an expression; nothing unwinds the stack.</td>
+          <td><code>try { ... } catch (e) { ... }</code></td>
+          <td><code>val catch |err| fallback;</code></td>
+          <td>Handles the error value inline as an expression; nothing unwinds the stack.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Re-throwing to the caller</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const v = try mayFail();</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>try</code> returns the error to the caller, so the caller's return type must include an error set.</td>
+          <td><code>catch (e) { if (e instanceof NotFound) ... }</code></td>
+          <td><code>catch |err| switch (err) { error.NotFound =&gt; ..., else =&gt; return err }</code></td>
+          <td>Error sets are known at compile time, so <code>switch</code> can check that every error is handled.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>val ?? defaultValue</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>maybe_val orelse defaultValue</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Unwraps an optional <code>?T</code> or supplies the default.</td>
+          <td>Re-throwing to the caller</td>
+          <td><code>const v = try mayFail();</code></td>
+          <td><code>try</code> returns the error to the caller, so the caller's return type must include an error set.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>a?.b</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>if (a) |v| v.b else null</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">No <code>?.</code> operator; unwrap with an <code>if</code> capture.</td>
+          <td><code>finally { cleanup(); }</code></td>
+          <td><code>defer cleanup();</code></td>
+          <td>Declared right next to resource acquisition and run when the scope exits. <code>errdefer</code> runs only on error returns.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>value!</code> (TS non-null assertion)</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>maybe_val.?</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Asserts non-null; on <code>null</code> it panics in safe build modes instead of silently continuing.</td>
+          <td><code>val ?? defaultValue</code></td>
+          <td><code>maybe_val orelse defaultValue</code></td>
+          <td>Unwraps an optional <code>?T</code> or supplies the default.</td>
+        </tr>
+        <tr>
+          <td><code>a?.b</code></td>
+          <td><code>if (a) |v| v.b else null</code></td>
+          <td>No <code>?.</code> operator; unwrap with an <code>if</code> capture.</td>
+        </tr>
+        <tr>
+          <td><code>value!</code> (TS non-null assertion)</td>
+          <td><code>maybe_val.?</code></td>
+          <td>Asserts non-null; on <code>null</code> it panics in safe build modes instead of silently continuing.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">How Do Collections and Strings Map to Zig?</h2>
-  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Arrays, maps, and objects</h3>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+  <h2>How Do Collections and Strings Map to Zig?</h2>
+  <p class="section-answer">Fixed data lives in arrays and is passed around as slices (<code>[]T</code>). Anything that grows, like <code>Array.push</code>, <code>Map</code> or <code>Set</code>, is a standard-library container that takes an allocator and must be freed with <code>deinit()</code>.</p>
+  <h3>Arrays, maps, sets, and objects</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>JavaScript arrays, maps, sets, and objects mapped to Zig</caption>
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">JavaScript / TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Equivalent</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Key Difference</th>
+        <tr>
+          <th scope="col">JavaScript / TypeScript</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>[1, 2, 3]</code> (fixed)</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const a = [_]i32{ 1, 2, 3 };</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">An array has a compile-time length; pass it around as a slice <code>[]const i32</code>.</td>
+          <td><code>Array&lt;T&gt;</code> / <code>T[]</code></td>
+          <td><code>[]T</code> / <code>[]const T</code> slice, or <code>std.ArrayList(T)</code> when it grows</td>
+          <td>A slice is a view (pointer plus length) over memory someone else owns; an <code>ArrayList</code> owns a growable buffer.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>arr.length</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>arr.len</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Out-of-bounds indexing panics in Debug and ReleaseSafe.</td>
+          <td><code>[1, 2, 3]</code> (fixed)</td>
+          <td><code>const a = [_]i32{ 1, 2, 3 };</code></td>
+          <td>An array has a compile-time length; pass it around as a slice <code>[]const i32</code>.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const list = []</code> / <code>list.push(item)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>var list = std.ArrayList(i32).init(allocator);</code> / <code>try list.append(item);</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Needs an allocator and <code>defer list.deinit()</code>; <code>append</code> may return <code>error.OutOfMemory</code>. Zig 0.15 makes the unmanaged form the default.</td>
+          <td><code>arr.length</code></td>
+          <td><code>arr.len</code></td>
+          <td>Out-of-bounds indexing panics in Debug and ReleaseSafe.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>new Map()</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.StringHashMap(V).init(allocator)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Explicit allocator and <code>deinit()</code>. Use <code>AutoHashMap(K, V)</code> for non-string keys. <code>map.get(k)</code> returns <code>?V</code>.</td>
+          <td><code>const list = []</code> / <code>list.push(item)</code></td>
+          <td><code>var list = std.ArrayList(i32).init(allocator);</code> / <code>try list.append(item);</code></td>
+          <td>Needs an allocator and <code>defer list.deinit()</code>; <code>append</code> may return <code>error.OutOfMemory</code>. Zig 0.15 makes the unmanaged form the default.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>{ name: "a", age: 3 }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const p = Person{ .name = "a", .age = 3 };</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">A struct with fixed, typed fields declared up front; no adding fields at runtime.</td>
+          <td><code>arr.slice(1, 3)</code></td>
+          <td><code>arr[1..3]</code></td>
+          <td>Slicing copies nothing: the result points into the same memory.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>JSON.parse(text)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.json.parseFromSlice(T, allocator, text, .{})</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Parses into a typed struct <code>T</code>; call <code>.deinit()</code> on the returned result.</td>
+          <td><code>new Map()</code></td>
+          <td><code>std.StringHashMap(V).init(allocator)</code></td>
+          <td>Explicit allocator and <code>deinit()</code>. The map does not copy string keys, so keep them alive. <code>map.get(k)</code> returns <code>?V</code>.</td>
+        </tr>
+        <tr>
+          <td><code>Map&lt;K, V&gt;</code> with integer keys</td>
+          <td><code>std.AutoHashMap(K, V)</code></td>
+          <td>Hashes integer, enum, and pointer keys, and structs made of them. Slice and float keys are a compile error: use <code>StringHashMap</code> for <code>[]const u8</code> keys.</td>
+        </tr>
+        <tr>
+          <td><code>Set&lt;T&gt;</code></td>
+          <td><code>std.AutoHashMap(T, void)</code></td>
+          <td>A map with a zero-size <code>void</code> value: <code>try set.put(x, {})</code> and <code>set.contains(x)</code>. Use <code>std.StringHashMap(void)</code> for strings.</td>
+        </tr>
+        <tr>
+          <td><code>{ name: "a", age: 3 }</code></td>
+          <td><code>const p = Person{ .name = "a", .age = 3 };</code></td>
+          <td>A struct with fixed, typed fields declared up front; no adding fields at runtime.</td>
+        </tr>
+        <tr>
+          <td><code>JSON.parse(text)</code></td>
+          <td><code>try std.json.parseFromSlice(T, allocator, text, .{})</code></td>
+          <td>Parses into a typed struct <code>T</code>; call <code>.deinit()</code> on the returned result.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Strings and output</h3>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+  <h3>Strings and output</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>JavaScript string methods and console output mapped to Zig</caption>
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">JavaScript / TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Equivalent</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Key Difference</th>
+        <tr>
+          <th scope="col">JavaScript / TypeScript</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>str.length</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>str.len</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Counts UTF-8 bytes, not UTF-16 code units or characters.</td>
+          <td><code>str.length</code></td>
+          <td><code>str.len</code></td>
+          <td>Counts UTF-8 bytes, not UTF-16 code units or characters.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>console.log(`x=${x}`)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.debug.print("x={d}\n", .{x});</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Format string plus an argument tuple, checked at compile time. <code>print</code> writes to stderr.</td>
+          <td><code>console.log(`x=${x}`)</code></td>
+          <td><code>std.debug.print("x={d}\n", .{x});</code></td>
+          <td>Format string plus an argument tuple, checked at compile time. <code>print</code> writes to stderr.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Template string that builds a value</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>try std.fmt.allocPrint(allocator, "x={d}", .{x})</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Allocates the result, so you must free it.</td>
+          <td>Template string that builds a value</td>
+          <td><code>try std.fmt.allocPrint(allocator, "x={d}", .{x})</code></td>
+          <td>Allocates the result, so you must free it.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>s.split(",")</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.mem.splitScalar(u8, s, ',')</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Returns a lazy iterator (call <code>.next()</code>), not an array. Use <code>splitSequence</code> for multi-byte separators; the old unsuffixed <code>std.mem.split</code> was removed.</td>
+          <td><code>s.split(",")</code></td>
+          <td><code>std.mem.splitScalar(u8, s, ',')</code></td>
+          <td>Returns a lazy iterator (call <code>.next()</code>), not an array. Use <code>splitSequence</code> for multi-byte separators; the old unsuffixed <code>std.mem.split</code> is deprecated in 0.13 and a compile error in 0.14.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>s.includes("ab")</code> / <code>s.startsWith("ab")</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.mem.indexOf(u8, s, "ab") != null</code> / <code>std.mem.startsWith(u8, s, "ab")</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Free functions over byte slices rather than methods on a string object.</td>
+          <td><code>s.includes("ab")</code> / <code>s.startsWith("ab")</code></td>
+          <td><code>std.mem.indexOf(u8, s, "ab") != null</code> / <code>std.mem.startsWith(u8, s, "ab")</code></td>
+          <td>Free functions over byte slices rather than methods on a string object.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>s.trim()</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.mem.trim(u8, s, " \t\r\n")</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">You list the bytes to trim; the result is a view into the same memory, not a copy.</td>
+          <td><code>s.trim()</code></td>
+          <td><code>std.mem.trim(u8, s, " \t\r\n")</code></td>
+          <td>You list the bytes to trim; the result is a view into the same memory, not a copy.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>parseInt(s, 10)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>try std.fmt.parseInt(i32, s, 10)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Returns an error on bad input instead of <code>NaN</code>.</td>
+          <td><code>parseInt(s, 10)</code></td>
+          <td><code>try std.fmt.parseInt(i32, s, 10)</code></td>
+          <td>Returns an error on bad input instead of <code>NaN</code>.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">How Do Cleanup, Modules, and Tooling Map to Zig?</h2>
-  <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Resources, imports, and npm-style commands</h3>
-  <div class="table-responsive-wrapper" style="overflow-x: auto; max-width: 100%; margin: 1.25rem 0;">
-    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; border: 1px solid #e2e8f0;">
+  <h2>How Does V8 Memory Compare to Zig Allocators?</h2>
+  <p class="section-answer">In V8, <code>new</code> allocates on a garbage-collected heap and the collector frees it later. In Zig, you ask an <code>std.mem.Allocator</code> for memory (<code>allocator.create(T)</code> for one value, <code>allocator.alloc(T, n)</code> for many) and free it yourself, usually with <code>defer</code> on the next line.</p>
+  <h3>Allocation, ownership, and cleanup</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>V8 heap allocation and garbage collection mapped to Zig allocators</caption>
       <thead>
-        <tr style="background: #f1f5f9; text-align: left;">
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">JavaScript / TypeScript</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Zig Equivalent</th>
-          <th style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Key Difference</th>
+        <tr>
+          <th scope="col">JavaScript / V8</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>finally { cleanup(); }</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>defer cleanup();</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Declared right next to resource acquisition and run when the scope exits. <code>errdefer</code> runs only on error returns.</td>
+          <td><code>new Foo()</code> / <code>new Object()</code></td>
+          <td><code>const p = try allocator.create(Foo);</code> + <code>defer allocator.destroy(p);</code></td>
+          <td>Returns a <code>*Foo</code> whose fields are uninitialized until you set them, for example <code>p.* = .{ ... }</code>. Nothing frees it for you.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>import { x } from "./m.js"</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>const m = @import("m.zig");</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Imports a whole file as a struct; <code>pub</code> marks what is exported.</td>
+          <td><code>new Array(n)</code> / <code>Buffer.alloc(n)</code></td>
+          <td><code>const buf = try allocator.alloc(T, n);</code> + <code>defer allocator.free(buf);</code></td>
+          <td>Returns a slice <code>[]T</code> with undefined contents; unlike <code>Buffer.alloc</code> it is not zero-filled, so <code>@memset(buf, 0)</code> if you need zeros.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>console.assert(cond)</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>std.debug.assert(cond);</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Unreachable (undefined behavior) when false in ReleaseFast, so use it for invariants, not input validation.</td>
+          <td><code>[...arr]</code></td>
+          <td><code>try allocator.dupe(T, items)</code></td>
+          <td>A shallow copy of a slice into new memory that the caller now owns and must free. Pointers inside the items are shared, not cloned.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>node file.js</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>zig run file.zig</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Compiles then runs; there is no interpreter.</td>
+          <td>Garbage collection</td>
+          <td>Explicit <code>free</code> / <code>destroy</code>, scheduled with <code>defer</code> and <code>errdefer</code></td>
+          <td>No collector and no pauses; the cost is that ownership is your job. Functions that allocate take an <code>Allocator</code> parameter, so the cost shows in the signature.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>npm test</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>zig test file.zig</code> / <code>zig build test</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>test "name" { ... }</code> blocks live next to the code.</td>
+          <td>Short-lived objects per request (V8 young generation)</td>
+          <td><code>std.heap.ArenaAllocator</code></td>
+          <td>Allocate freely while handling the request, then <code>arena.deinit()</code> frees everything at once.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>npm run build</code> / <code>package.json</code> scripts</td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>zig build</code> with <code>build.zig</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">The build graph is Zig code. <code>-Doptimize=ReleaseSafe</code> and <code>-Dtarget=...</code> are the common flags.</td>
+          <td>Local variables</td>
+          <td>Stack values: <code>var buf: [256]u8 = undefined;</code>, optionally wrapped in <code>std.heap.FixedBufferAllocator</code></td>
+          <td>Stack memory dies with the function, so returning a pointer or slice to it is a dangling-pointer bug.</td>
         </tr>
         <tr>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>npm install pkg</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;"><code>zig fetch --save &lt;url&gt;</code></td>
-          <td style="padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top;">Dependencies are URLs with content hashes in <code>build.zig.zon</code>; there is no central registry.</td>
+          <td>Heap snapshots / <code>--inspect</code> leak hunting</td>
+          <td><code>std.heap.DebugAllocator</code> (<code>GeneralPurposeAllocator</code> in Zig 0.13), or <code>std.testing.allocator</code> in tests</td>
+          <td>Reports leaked allocations with stack traces when it is deinitialized, and catches double frees.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>How Do Modules and Tooling Map to Zig?</h2>
+  <p class="section-answer">The <code>zig</code> binary replaces <code>node</code>, <code>npm</code>, and your bundler: <code>zig run</code> compiles and runs a file, <code>zig build</code> runs a <code>build.zig</code> script, and <code>zig fetch --save</code> adds a dependency.</p>
+  <h3>Imports and npm-style commands</h3>
+  <div class="table-responsive-wrapper">
+    <table>
+      <caption>JavaScript modules and npm commands mapped to Zig tooling</caption>
+      <thead>
+        <tr>
+          <th scope="col">JavaScript / TypeScript</th>
+          <th scope="col">Zig Equivalent</th>
+          <th scope="col">Key Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>import { x } from "./m.js"</code></td>
+          <td><code>const m = @import("m.zig");</code></td>
+          <td>Imports a whole file as a struct; <code>pub</code> marks what is exported.</td>
+        </tr>
+        <tr>
+          <td><code>console.assert(cond)</code></td>
+          <td><code>std.debug.assert(cond);</code></td>
+          <td>Unreachable (undefined behavior) when false in ReleaseFast, so use it for invariants, not input validation.</td>
+        </tr>
+        <tr>
+          <td><code>node file.js</code></td>
+          <td><code>zig run file.zig</code></td>
+          <td>Compiles then runs; there is no interpreter.</td>
+        </tr>
+        <tr>
+          <td><code>npm test</code></td>
+          <td><code>zig test file.zig</code> / <code>zig build test</code></td>
+          <td><code>test "name" { ... }</code> blocks live next to the code.</td>
+        </tr>
+        <tr>
+          <td><code>npm run build</code> / <code>package.json</code> scripts</td>
+          <td><code>zig build</code> with <code>build.zig</code></td>
+          <td>The build graph is Zig code. <code>-Doptimize=ReleaseSafe</code> and <code>-Dtarget=...</code> are the common flags.</td>
+        </tr>
+        <tr>
+          <td><code>npm install pkg</code></td>
+          <td><code>zig fetch --save &lt;url&gt;</code></td>
+          <td>Dependencies are URLs with content hashes in <code>build.zig.zon</code>; there is no central registry.</td>
         </tr>
       </tbody>
     </table>

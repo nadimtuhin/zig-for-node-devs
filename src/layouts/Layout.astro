@@ -10,6 +10,7 @@ import {
 } from '../lib/structuredData';
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH, OG_TAGLINE, ogImagePathFor } from '../lib/ogCards';
 import { stripInlineMarkdown } from '../lib/inlineMarkdown';
+import SearchPalette from '../components/SearchPalette.astro';
 
 interface Props {
   title?: string;
@@ -166,5 +167,6 @@ const structuredData = serializeJsonLd(buildPageSchema({
   <body>
   <a href="#main-content" class="skip-to-content">Skip to main content</a>
     <slot />
+    <SearchPalette />
   </body>
 </html>

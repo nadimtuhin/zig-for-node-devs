@@ -1,0 +1,334 @@
+---
+const SUGGESTED_QUERIES = ['allocator', 'comptime', 'c-interop', 'error', 'slice'];
+---
+<button type="button" id="searchPaletteTrigger" class="search-palette-trigger" aria-haspopup="dialog" aria-keyshortcuts="Meta+K Control+K">
+  <span aria-hidden="true">🔍</span> Search <kbd class="search-palette-shortcut">⌘K</kbd>
+</button>
+
+<dialog id="searchPalette" class="search-palette" aria-label="Search lessons and guides">
+  <div class="search-palette-field">
+    <input
+      id="searchPaletteInput"
+      type="text"
+      role="combobox"
+      aria-label="Search lessons and guides"
+      aria-expanded="false"
+      aria-controls="searchPaletteResults"
+      aria-autocomplete="list"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Search 56 lessons and 13 guides..."
+    />
+    <kbd class="search-palette-esc">Esc</kbd>
+  </div>
+
+  <ul id="searchPaletteResults" role="listbox" aria-label="Search results" class="search-palette-results"></ul>
+
+  <div id="searchPaletteEmpty" class="search-palette-empty">
+    <p id="searchPaletteNoMatch" role="status" aria-live="polite"></p>
+    <div role="group" aria-label="Suggested searches" class="search-palette-suggestions">
+      <span>Try:</span>
+      {SUGGESTED_QUERIES.map((query) => <button type="button" data-query={query}>{query}</button>)}
+    </div>
+  </div>
+
+  <p class="search-palette-hint" aria-hidden="true"><kbd>↑</kbd><kbd>↓</kbd> to move, <kbd>Enter</kbd> to open</p>
+</dialog>
+
+<script>
+  import { searchEntries, type SearchEntry } from '../lib/siteSearch';
+
+  const dialog = document.getElementById('searchPalette') as HTMLDialogElement;
+  const input = document.getElementById('searchPaletteInput') as HTMLInputElement;
+  const results = document.getElementById('searchPaletteResults') as HTMLUListElement;
+  const emptyState = document.getElementById('searchPaletteEmpty') as HTMLDivElement;
+  const noMatch = document.getElementById('searchPaletteNoMatch') as HTMLParagraphElement;
+
+  let indexRequest: Promise<SearchEntry[]> | null = null;
+  let activeIndex = 0;
+
+  function loadIndex(): Promise<SearchEntry[]> {
+    indexRequest ??= fetch('/search-index.json')
+      .then((response) => response.json())
+      .catch(() => {
+        indexRequest = null;
+        return [];
+      });
+    return indexRequest;
+  }
+
+  function options(): HTMLLIElement[] {
+    return Array.from(results.querySelectorAll<HTMLLIElement>('[role="option"]'));
+  }
+
+  function setActive(index: number, scrollIntoView = true) {
+    const all = options();
+    if (all.length === 0) {
+      input.removeAttribute('aria-activedescendant');
+      return;
+    }
+    activeIndex = (index + all.length) % all.length;
+    all.forEach((option, i) => option.setAttribute('aria-selected', String(i === activeIndex)));
+    input.setAttribute('aria-activedescendant', all[activeIndex].id);
+    if (scrollIntoView) all[activeIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  function renderOption(entry: SearchEntry, i: number): HTMLLIElement {
+    const option = document.createElement('li');
+    option.id = `search-option-${i}`;
+    option.setAttribute('role', 'option');
+    option.className = `search-palette-option is-${entry.kind}`;
+    option.addEventListener('mousemove', () => setActive(i, false));
+
+    const link = document.createElement('a');
+    link.href = entry.href;
+    link.tabIndex = -1;
+
+    const badge = document.createElement('span');
+    badge.className = 'search-palette-badge';
+    badge.textContent = entry.label;
+    const title = document.createElement('span');
+    title.className = 'search-palette-title';
+    title.textContent = entry.title;
+    const summary = document.createElement('span');
+    summary.className = 'search-palette-summary';
+    summary.textContent = entry.summary;
+
+    link.append(badge, title, summary);
+    option.append(link);
+    return option;
+  }
+
+  async function runSearch() {
+    const query = input.value;
+    const matches = searchEntries(await loadIndex(), query);
+    if (input.value !== query) return;
+
+    results.replaceChildren(...matches.map(renderOption));
+    input.setAttribute('aria-expanded', String(matches.length > 0));
+    emptyState.hidden = matches.length > 0;
+    noMatch.textContent = query.trim() && matches.length === 0 ? `No lessons or guides match "${query.trim()}".` : '';
+    setActive(0);
+  }
+
+  function openPalette() {
+    if (!dialog.open) dialog.showModal();
+    input.focus();
+    input.select();
+    loadIndex();
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      openPalette();
+    }
+  });
+
+  document.getElementById('searchPaletteTrigger')?.addEventListener('click', openPalette);
+
+  input.addEventListener('input', runSearch);
+  input.addEventListener('keydown', (event) => {
+    // Lesson pages listen on document for Alt/Cmd+Arrow and Cmd+Enter; those keys edit text here.
+    event.stopPropagation();
+    if (event.isComposing) return;
+
+    if (event.key === 'Escape') {
+      dialog.close();
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActive(activeIndex + (event.key === 'ArrowDown' ? 1 : -1));
+    } else if (event.key === 'Enter') {
+      const link = options()[activeIndex]?.querySelector('a');
+      if (link) {
+        event.preventDefault();
+        window.location.assign(link.href);
+      }
+    }
+  });
+
+  emptyState.querySelectorAll<HTMLButtonElement>('[data-query]').forEach((button) => {
+    button.addEventListener('click', () => {
+      input.value = button.dataset.query ?? '';
+      input.focus();
+      runSearch();
+    });
+  });
+
+  // A click on the backdrop lands on the dialog element itself. Checking where the press
+  // started too keeps a text selection dragged out of the input from closing the palette.
+  let pressStartedOnBackdrop = false;
+  dialog.addEventListener('pointerdown', (event) => {
+    pressStartedOnBackdrop = event.target === dialog;
+  });
+  dialog.addEventListener('click', (event) => {
+    if (pressStartedOnBackdrop && event.target === dialog) dialog.close();
+  });
+
+  if (!/Mac|iPhone|iPad/.test(navigator.userAgent)) {
+    document.querySelectorAll('.search-palette-shortcut').forEach((kbd) => (kbd.textContent = 'Ctrl K'));
+  }
+</script>
+
+<style>
+  .search-palette-trigger {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    /* Below the mobile sidebar drawer (z 200) and its backdrop (z 150). */
+    z-index: 140;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--border-dark);
+    border-radius: 9999px;
+    background: var(--panel);
+    color: var(--text);
+    font: 600 0.85rem var(--font-ui, sans-serif);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+    cursor: pointer;
+  }
+  .search-palette-trigger kbd,
+  .search-palette kbd {
+    padding: 0.05rem 0.35rem;
+    border: 1px solid var(--border-dark);
+    border-radius: 4px;
+    background: var(--border-subtle);
+    font: 0.75rem ui-monospace, monospace;
+    color: var(--text-body);
+  }
+  .search-palette {
+    width: min(640px, calc(100vw - 2rem));
+    max-height: min(560px, calc(100vh - 4rem));
+    margin: 10vh auto auto;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel);
+    color: var(--text);
+    font-family: var(--font-ui, sans-serif);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+  }
+  .search-palette[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .search-palette::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+  }
+  .search-palette-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-palette-field input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .search-palette-field input:focus {
+    outline: none;
+  }
+  .search-palette:focus-within .search-palette-field {
+    box-shadow: inset 0 -2px 0 var(--focus-ring);
+  }
+  .search-palette-results {
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem;
+    overflow-y: auto;
+  }
+  .search-palette-results:empty {
+    display: none;
+  }
+  .search-palette-option a {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+    color: inherit;
+    text-decoration: none;
+  }
+  .search-palette-option[aria-selected='true'] a {
+    background: var(--zig-light-amber);
+    box-shadow: inset 3px 0 0 var(--zig-amber);
+  }
+  .search-palette-badge {
+    grid-row: span 2;
+    align-self: start;
+    min-width: 2.6rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    background: var(--border-subtle);
+    color: var(--text-body);
+    font: 700 0.75rem ui-monospace, monospace;
+    text-align: center;
+  }
+  .is-guide .search-palette-badge {
+    background: #e0f2fe;
+    color: #075985;
+  }
+  .search-palette-title {
+    font-weight: 700;
+  }
+  .search-palette-summary {
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .search-palette-empty {
+    padding: 1rem;
+  }
+  .search-palette-empty[hidden] {
+    display: none;
+  }
+  .search-palette-empty p:empty {
+    display: none;
+  }
+  .search-palette-empty p {
+    margin: 0 0 0.75rem;
+    color: var(--text-body);
+  }
+  .search-palette-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .search-palette-suggestions button {
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--border-dark);
+    border-radius: 9999px;
+    background: var(--panel);
+    color: var(--text);
+    font: 0.85rem ui-monospace, monospace;
+    cursor: pointer;
+  }
+  .search-palette-suggestions button:hover,
+  .search-palette-suggestions button:focus-visible {
+    border-color: var(--zig-amber);
+    background: var(--zig-light-amber);
+  }
+  .search-palette-hint {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+  @media print {
+    .search-palette-trigger {
+      display: none;
+    }
+  }
+</style>

@@ -460,14 +460,6 @@ const chapterFaq = [
         e.preventDefault();
         executeZigCode();
       }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        const searchInput = document.getElementById('lessonSearchInput');
-        if (searchInput) {
-          searchInput.focus();
-          searchInput.select();
-        }
-      }
 
       // Alt + Left/Right Arrow for Chapter Navigation
       if ((e.altKey || e.metaKey) && e.key === 'ArrowLeft') {
