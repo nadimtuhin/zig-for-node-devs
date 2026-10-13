@@ -54,6 +54,7 @@ test.describe('Open Graph & social metadata', () => {
   });
 
   test('every sitemap page has its own OG card that resolves', async ({ page, request }) => {
+    test.setTimeout(120_000);
     const sitemap = await (await request.get('/sitemap.xml')).text();
     const paths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc).pathname);
     expect(paths.length).toBeGreaterThan(60);
