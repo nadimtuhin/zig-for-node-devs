@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  zig-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Chapter code targets the playground's compiler (Godbolt z0130).
+          - target: chapters
+            zig: 0.13.0
+          # The guide pages (/comptime, /memory, ...) are written for Zig 0.14.
+          - target: views
+            zig: 0.14.1
+    name: zig-examples (${{ matrix.target }}, Zig ${{ matrix.zig }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ matrix.zig }}
+      - run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+      - run: node --experimental-strip-types scripts/check-zig-examples.mjs ${{ matrix.target }}

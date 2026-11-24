@@ -238,11 +238,11 @@
 }
 
 <span class="tok-keyword">pub</span> <span class="tok-keyword">fn</span> <span class="tok-func">route</span>(path: []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span>) []<span class="tok-keyword">const</span> <span class="tok-builtin">u8</span> {
-    <span class="tok-comment">// The comptime prong items are evaluated by the compiler, not at runtime</span>
+    <span class="tok-comment">// Switch prong items are always comptime-known, so the compiler evaluates these hashString calls</span>
     <span class="tok-keyword">switch</span> (<span class="tok-func">hashString</span>(path)) {
-        <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/health"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Healthy"</span>,
-        <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/users"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Users List"</span>,
-        <span class="tok-keyword">comptime</span> <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/orders"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Orders List"</span>,
+        <span class="tok-func">hashString</span>(<span class="tok-string">"/health"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Healthy"</span>,
+        <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/users"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Users List"</span>,
+        <span class="tok-func">hashString</span>(<span class="tok-string">"/api/v1/orders"</span>) =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"200 OK: Orders List"</span>,
         <span class="tok-keyword">else</span> =&gt; <span class="tok-keyword">return</span> <span class="tok-string">"404 Not Found"</span>,
     }
 }

@@ -38,7 +38,7 @@ Built with **Astro 5** for lightning-fast zero-JS static generation, modular com
 - **🐳 Production Docker Recipes:** Ready-to-deploy multi-stage Dockerfiles producing ultra-minimal (< 5MB) static binaries in Docker `scratch` containers with zero CVE vulnerabilities.
 - **🧪 Built-In Testing & Memory Leak Verification:** Write tests directly in source files with `test "..."` and leverage `std.testing.allocator` to catch memory leaks in CI/CD.
 - **🎯 Senior Systems Interview Q&A:** High-frequency interview questions covering memory layout, undefined memory safety, comptime execution limits, and C ABI compatibility.
-- **🧘 The Zen of Zig:** The 18 guiding principles of Zig, and why Zig deliberately left out operator overloading and hidden control flow.
+- **🧘 The Zen of Zig:** The 13 guiding principles printed by `zig zen`, and why Zig deliberately left out operator overloading and hidden control flow.
 - **📖 Rosetta Stone Cheatsheet:** Quick lookup table mapping JavaScript/TypeScript constructs directly to idiomatic Zig.
 
 ---
