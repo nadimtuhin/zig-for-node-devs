@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "test:e2e": "astro build && playwright test",
-    "astro": "astro"
+    "astro": "astro",
+    "check:zig": "node --experimental-strip-types scripts/check-zig-examples.mjs chapters",
+    "check:zig:views": "node --experimental-strip-types scripts/check-zig-examples.mjs views"
   },
   "dependencies": {
     "astro": "^5.4.2"
